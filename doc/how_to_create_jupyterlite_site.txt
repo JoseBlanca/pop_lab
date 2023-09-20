@@ -1,0 +1,19 @@
+
+# Initial site creation
+
+To build an empty site (just the JupyterLite static assets):
+
+$ jupyter lite build --contents contents --output-dir output_site 
+
+# serve the site
+
+$ jupyter lite serve --output-dir output_site 
+
+# Help
+
+https://jupyterlite.readthedocs.io/en/latest/reference/config.html
+https://jupyterlite.readthedocs.io/en/latest/reference/schema-v0.html#jupyterlite-configuration
+https://jupyterlite.readthedocs.io/en/latest/reference/demo.html
+https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html
+
+https://jupyterlite.readthedocs.io/en/latest/reference/cli.html#the-lite-dir

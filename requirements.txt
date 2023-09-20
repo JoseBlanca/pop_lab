@@ -1,0 +1,11 @@
+jupyterlite-core
+jupyterlab
+
+ipywidgets
+
+# add the Pyodide kernel
+jupyterlite-pyodide-kernel
+
+# optional dependencies
+libarchive-c
+tornado
