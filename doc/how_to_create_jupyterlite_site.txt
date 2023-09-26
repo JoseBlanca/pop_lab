@@ -17,3 +17,46 @@ https://jupyterlite.readthedocs.io/en/latest/reference/demo.html
 https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html
 
 https://jupyterlite.readthedocs.io/en/latest/reference/cli.html#the-lite-dir
+
+# Importing a package
+
+It should be a pure python package with a wheel in pypi.
+
+import micropip
+await micropip.install('demesdraw', keep_going=False)
+
+# Compiling wheels
+
+https://pyodide.org/en/stable/development/new-packages.html
+https://pyodide.org/en/stable/development/building-and-testing-packages.html#building-and-testing-packages-out-of-tree
+
+## Set up Emscripten
+
+You need to download the Emscripten developer toolkit:
+
+$ git clone https://github.com/emscripten-core/emsdk.git
+$ cd emsdk
+
+$ PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+$ ./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
+$ ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
+
+## Build the WASM/Emscripten wheel
+
+Activate Emscripten. 
+
+$ source emsdk_env.sh
+
+## Build msprime
+
+It is not necessary to build it because it is already included with pyodide
+
+$ cd ../msprime
+$ sudo apt-get install libgsl0-dev
+$ cd git-submodules
+$ rm -r tskit
+$ git clone https://github.com/tskit-dev/tskit.git
+$ cd ..
+$ pyodide build
+
+https://github.com/pyodide/pyodide/discussions/4173
