@@ -3,9 +3,15 @@ jupyterlab
 
 ipywidgets
 
+numpy
+pandas
+
 # add the Pyodide kernel
 jupyterlite-pyodide-kernel
 
 # optional dependencies
 libarchive-c
 tornado
+
+# testing
+pytest
