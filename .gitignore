@@ -4,3 +4,4 @@ output_site
 src/pop_lab.egg-info/
 src/pop_lab/__pycache__/
 .vscode/settings.json
+tests/__pycache__/
