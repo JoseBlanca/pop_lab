@@ -37,7 +37,7 @@ class GenotypicFreqs:
         if freq_AA < 0:
             raise ValueError("freq AA can not be lower than 0")
         if freq_Aa < 0:
-            raise ValueError("freq A0 can not be lower than 0")
+            raise ValueError("freq Aa can not be lower than 0")
         if freq_AA + freq_Aa > 1:
             raise ValueError("AA + Aa freqs cannot be greater than 1")
 
