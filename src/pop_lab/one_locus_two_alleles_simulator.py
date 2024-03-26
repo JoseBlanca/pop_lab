@@ -28,17 +28,25 @@ MENDELIAN_SEGREGATIONS = {
 
 
 class GenotypicFreqs:
-    def __init__(self, freq_AA: float, freq_Aa: float, freq_aa: float = None):
+    def __init__(self, freq_AA: float, freq_Aa: float, freq_aa: float | None = None):
         freq_AA = float(freq_AA)
         freq_Aa = float(freq_Aa)
 
+        if freq_AA > 1:
+            raise ValueError("freq AA can not be larger than 1")
+        if freq_AA < 0:
+            raise ValueError("freq AA can not be lower than 0")
+        if freq_Aa < 0:
+            raise ValueError("freq A0 can not be lower than 0")
         if freq_AA + freq_Aa > 1:
             raise ValueError("AA + Aa freqs cannot be greater than 1")
 
-        self.AA = freq_AA
-        self.Aa = freq_Aa
-        expected_freq_aa = 1 - freq_AA - freq_Aa
+        self._AA = freq_AA
+        self._Aa = freq_Aa
+        expected_freq_aa = 1 - self._AA - self._Aa
         if freq_aa is not None:
+            if freq_aa < 0:
+                raise ValueError("freq A0 can not be lower than 0")
             if not math.isclose(expected_freq_aa, freq_aa, abs_tol=0.01):
                 raise ValueError(
                     f"freq_aa ({freq_aa}) should be 1 - freq_AA - freq_Aa ({expected_freq_aa})"
@@ -47,11 +55,27 @@ class GenotypicFreqs:
 
         if not math.isclose(freq_aa + freq_AA + freq_Aa, 1):
             raise ValueError("Genotypic freqs should sum 1")
-        self.aa = freq_aa
+        self._aa = freq_aa
 
     @property
     def freqs(self):
         return (self.AA, self.Aa, self.aa)
+
+    @property
+    def A(self):
+        return self._AA + self._Aa * 0.5
+
+    @property
+    def AA(self):
+        return self._AA
+
+    @property
+    def Aa(self):
+        return self._Aa
+
+    @property
+    def aa(self):
+        return self._aa
 
     def __str__(self):
         return f"{self.__class__.__name__}({self.AA}, {self.Aa}, {self.aa})"
