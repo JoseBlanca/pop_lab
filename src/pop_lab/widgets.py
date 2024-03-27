@@ -164,7 +164,7 @@ class GenoFreqsWidget(widgets.Box):
         )
         self.freqs_slider.layout = Layout(width="auto", flex="1 1 auto")
 
-        self.text_A = widgets.FloatText(
+        self.text_A = widgets.BoundedFloatText(
             value=round(self.geno_freqs.A, 2),
             description=FREQ_A_LABEL,
             disabled=False,
@@ -172,7 +172,7 @@ class GenoFreqsWidget(widgets.Box):
             max=1.0,
             step=0.01,
         )
-        self.text_obs_het = widgets.FloatText(
+        self.text_obs_het = widgets.BoundedFloatText(
             value=round(self.geno_freqs.Aa, 2),
             description=OBS_HET_LABEL,
             disabled=False,
