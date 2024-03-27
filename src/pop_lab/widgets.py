@@ -35,7 +35,7 @@ class GenoFreqsWidget(widgets.Box):
 
         self._set_up_children()
 
-        self.ongoing_change = None
+        self._ongoing_change = None
 
         super().__init__(children=[self.freqs_box], *args, **kwargs)
 
@@ -153,8 +153,8 @@ class GenoFreqsWidget(widgets.Box):
         elif isinstance(change["new"], tuple):
             required_change = "geno_freqs_slider"
 
-        if self.ongoing_change is None:
-            self.ongoing_change = required_change
+        if self._ongoing_change is None:
+            self._ongoing_change = required_change
         else:
             return
 
@@ -181,4 +181,4 @@ class GenoFreqsWidget(widgets.Box):
             new_geno_freqs.AA, 2
         ) + round(new_geno_freqs.Aa, 2)
 
-        self.ongoing_change = None
+        self._ongoing_change = None
