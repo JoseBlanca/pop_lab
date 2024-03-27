@@ -1,3 +1,5 @@
+import math
+
 from ipywidgets import VBox, HBox, Layout
 import ipywidgets as widgets
 
@@ -18,7 +20,70 @@ def _calculate_A_range_from_Aa(desired_Aa):
 
 FREQ_A_LABEL = "Freq A:"
 OBS_HET_LABEL = "Obs het:"
-HW_LABEL = "HW freqs."
+HW_LABEL = "HW freqs"
+POP_INF_LABEL = "Pop is inf"
+
+
+class PopSizeWidget(widgets.Box):
+    def __init__(
+        self,
+        default_size: int,
+        max_size: int,
+        min_size: int = 1,
+        *args,
+        **kwargs,
+    ):
+        self._max_size = int(max_size)
+        self._min_size = int(min_size)
+
+        self._set_up_children(default_size)
+
+        super().__init__(children=[self.main_box], *args, **kwargs)
+
+    def _set_up_children(self, size):
+        self.text_size = widgets.IntText(
+            value=size,
+            description="Pop size:",
+            disabled=False,
+            min=self._min_size,
+            max=self._max_size,
+        )
+        self.check_inf = widgets.Checkbox(value=False, description=POP_INF_LABEL)
+
+        self.text_size.observe(self._update_widget, names="value")
+        self.check_inf.observe(self._update_widget, names="value")
+
+        self.main_box = VBox(
+            [
+                HBox([self.text_size, self.check_inf]),
+            ]
+        )
+
+    def _update_widget(self, change):
+        required_size = int(self.text_size.value)
+        is_inf = self.check_inf.value
+
+        if required_size < self._min_size:
+            size = self._min_size
+        elif required_size > self._max_size:
+            size = self._max_size
+        else:
+            size = required_size
+
+        if is_inf:
+            self.text_size.disabled = True
+        else:
+            self.text_size.disabled = False
+
+        self.text_size.value = size
+
+    @property
+    def size(self):
+        if self.check_inf.value:
+            size = math.inf
+        else:
+            size = int(self.text_size.value)
+        return size
 
 
 class GenoFreqsWidget(widgets.Box):
