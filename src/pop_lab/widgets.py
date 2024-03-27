@@ -24,6 +24,47 @@ HW_LABEL = "HW freqs"
 POP_INF_LABEL = "Pop is inf"
 
 
+class NumGenerationsWidget(widgets.Box):
+    def __init__(
+        self,
+        default_num: int,
+        max_num: int,
+        min_num: int = 1,
+        *args,
+        **kwargs,
+    ):
+        self._max_num = int(max_num)
+        self._min_num = int(min_num)
+
+        self._set_up_children(default_num)
+
+        super().__init__(children=[self.main_box], *args, **kwargs)
+
+    def _set_up_children(self, num_gen):
+        self.slider_num = widgets.IntSlider(
+            value=num_gen,
+            description="Num generations:",
+            disabled=False,
+            min=self._min_num,
+            max=self._max_num,
+        )
+
+        self.slider_num.observe(self._update_widget, names="value")
+
+        self.main_box = VBox(
+            [
+                HBox([self.slider_num]),
+            ]
+        )
+
+    def _update_widget(self, change):
+        pass
+
+    @property
+    def num_generations(self):
+        return int(self.slider_num.value)
+
+
 class PopSizeWidget(widgets.Box):
     def __init__(
         self,
