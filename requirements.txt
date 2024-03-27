@@ -5,6 +5,7 @@ ipywidgets
 
 numpy
 pandas
+matplotlib
 
 # add the Pyodide kernel
 jupyterlite-pyodide-kernel
