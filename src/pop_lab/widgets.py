@@ -29,7 +29,7 @@ class GenoFreqsWidget(widgets.Box):
         freq_Aa: float,
         freq_aa: float | None = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         self.geno_freqs = GenotypicFreqs(freq_AA, freq_Aa, freq_aa)
 
@@ -128,11 +128,10 @@ class GenoFreqsWidget(widgets.Box):
         return GenotypicFreqs(AA, desired_Aa)
 
     def _update_from_hw(self, hw_freqs):
-
+        A = float(self.text_A.value)
         if hw_freqs:
             self.text_obs_het.disabled = True
             self.freqs_slider.disabled = True
-            A = self.geno_freqs.A
             AA = A**2
             Aa = 2 * A * (1 - A)
         else:
@@ -148,10 +147,11 @@ class GenoFreqsWidget(widgets.Box):
             required_change = "freq_A"
         elif change["owner"].description == OBS_HET_LABEL:
             required_change = "obs_het"
-        elif change["owner"].description == HW_LABEL:
-            required_change = "hw"
         elif isinstance(change["new"], tuple):
             required_change = "geno_freqs_slider"
+
+        if self.hw_freqs_checkbox.value or change["owner"].description == HW_LABEL:
+            required_change = "hw"
 
         if self._ongoing_change is None:
             self._ongoing_change = required_change
