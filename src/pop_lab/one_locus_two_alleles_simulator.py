@@ -517,3 +517,106 @@ class OneLocusTwoAlleleSimulation:
             values = logger.values_per_generation
             results[param] = values
         return results
+
+
+def simulate(
+    pops: list[Population],
+    num_generations: int,
+    loggers: list[Callable],
+    demographic_events: list[dict] | None = None,
+    random_seed: int | None = None,
+):
+    if random_seed is not None:
+        numpy.random.seed(random_seed)
+        random.seed(random_seed)
+
+    for logger in loggers:
+        logger(pops, num_generation=1)
+
+    if demographic_events is None:
+        demographic_events = []
+    active_migrations = {}
+    _update_events(demographic_events, 1, active_migrations)
+
+    for num_generation in range(2, num_generations + 1):
+        _update_events(demographic_events, num_generation, active_migrations)
+
+        for pop in pops:
+            migration_origin_pops = defaultdict(list)
+            for migration in active_migrations.values():
+                if migration["to_pop"].id == pop.id:
+                    migration_origin_pops[pop.id].append(
+                        {
+                            "from_pop": migration["from_pop"],
+                            "inmigrant_rate": migration["inmigrant_rate"],
+                        }
+                    )
+            pop.evolve_to_next_generation(migration_origin_pops[pop.id])
+
+        for logger in loggers:
+            logger(pops, num_generation)
+
+
+def simulate_one_locus_two_alleles_one_pop(
+    freq_AA,
+    freq_Aa,
+    freq_aa,
+    pop_size=INF,
+    num_generations=100,
+    w11=1,
+    w12=1,
+    w22=1,
+    A2a=0,
+    a2A=0,
+    selfing_rate=0,
+    num_populations=1,
+):
+
+    if (w11, w12, w22) == (1, 1, 1):
+        fitness = None
+    else:
+        fitness = Fitness(w11=w11, w12=w12, w22=w22)
+
+    if A2a == 0 and a2A == 0:
+        mut_rates = None
+    else:
+        mut_rates = MutRates(A2a, a2A)
+
+    loggers = {
+        "genotypic_freqs_logger": [],
+        "allelic_freqs_logger": [],
+        "exp_het_logger": [],
+    }
+    for idx in range(num_populations):
+        genotypic_freqs = GenotypicFreqs(
+            freq_AA=freq_AA, freq_Aa=freq_Aa, freq_aa=freq_aa
+        )
+        pop = Population(
+            id=f"pop{idx}",
+            size=pop_size,
+            genotypic_freqs=genotypic_freqs,
+            fitness=fitness,
+            mut_rates=mut_rates,
+            selfing_rate=selfing_rate,
+        )
+
+        allelic_freqs_logger = AllelicFreqLogger()
+        genotypic_freqs_logger = GenotypicFreqsLogger()
+        exp_het_logger = ExpHetLogger()
+        simulate(
+            pops=[pop],
+            num_generations=num_generations,
+            demographic_events=None,
+            random_seed=None,
+            loggers=[allelic_freqs_logger, genotypic_freqs_logger, exp_het_logger],
+        )
+        loggers["genotypic_freqs_logger"].append(genotypic_freqs_logger)
+        loggers["allelic_freqs_logger"].append(allelic_freqs_logger)
+        loggers["exp_het_logger"].append(exp_het_logger)
+
+    loggers = {
+        key: logger_list[0].__class__.from_loggers(logger_list)
+        for key, logger_list in loggers.items()
+    }
+
+    return loggers
