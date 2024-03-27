@@ -41,7 +41,7 @@ class PopSizeWidget(widgets.Box):
         super().__init__(children=[self.main_box], *args, **kwargs)
 
     def _set_up_children(self, size):
-        self.text_size = widgets.IntText(
+        self.slider_size = widgets.IntSlider(
             value=size,
             description="Pop size:",
             disabled=False,
@@ -50,17 +50,17 @@ class PopSizeWidget(widgets.Box):
         )
         self.check_inf = widgets.Checkbox(value=False, description=POP_INF_LABEL)
 
-        self.text_size.observe(self._update_widget, names="value")
+        self.slider_size.observe(self._update_widget, names="value")
         self.check_inf.observe(self._update_widget, names="value")
 
         self.main_box = VBox(
             [
-                HBox([self.text_size, self.check_inf]),
+                HBox([self.slider_size, self.check_inf]),
             ]
         )
 
     def _update_widget(self, change):
-        required_size = int(self.text_size.value)
+        required_size = int(self.slider_size.value)
         is_inf = self.check_inf.value
 
         if required_size < self._min_size:
@@ -71,18 +71,18 @@ class PopSizeWidget(widgets.Box):
             size = required_size
 
         if is_inf:
-            self.text_size.disabled = True
+            self.slider_size.disabled = True
         else:
-            self.text_size.disabled = False
+            self.slider_size.disabled = False
 
-        self.text_size.value = size
+        self.slider_size.value = size
 
     @property
     def size(self):
         if self.check_inf.value:
             size = math.inf
         else:
-            size = int(self.text_size.value)
+            size = int(self.slider_size.value)
         return size
 
 
