@@ -75,3 +75,5 @@ class ResultPlotter:
             self._plot_genotypic_freqs(axes)
 
         axess[-1].set_xlabel("generation")
+
+        plt.show()
