@@ -1,9 +1,12 @@
 
 # Initial site creation
 
+https://jupyterlite.readthedocs.io/en/stable/quickstart/standalone.html
+
 To build an empty site (just the JupyterLite static assets):
 
 $ jupyter lite build --contents contents --output-dir output_site 
+$ jupyter lite build --contents src/pop_lab --output-dir output_site
 
 # serve the site
 
@@ -17,6 +20,57 @@ https://jupyterlite.readthedocs.io/en/latest/reference/demo.html
 https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html
 
 https://jupyterlite.readthedocs.io/en/latest/reference/cli.html#the-lite-dir
+
+# Adding a kernel
+
+In the case of Python there are currently two options:
+
+- jupyterlite-pyodide-kernel:
+
+    - a Python kernel based on Pyodide.
+    - Provides a way to dynamically install packages with piplite (e.g. await piplite.install("ipywidgets"))
+    - Does not support pre-installing packages
+
+- jupyterlite-xeus:
+
+    - JupyterLite loader for Xeus kernels (https://github.com/jupyterlite/xeus).
+    - Does not provide (yet) a way to dynamically install packages. 
+    - Supports pre-installing packages from emscripten-forge and conda-forge (https://jupyterlite.readthedocs.io/en/stable/howto/xeus-python/preinstalled_packages.html)
+
+To include a kernel in a JupyterLite website, you need to install the corresponding Python package in the environment used to build the website.
+
+requirements.txt
+# add the Pyodide kernel
+jupyterlite-pyodide-kernel
+
+Then rebuild the website with jupyter lite build.
+
+# Addding contents
+
+When you run jupyter lite build:
+
+Any contents found in:
+
+    {lite-dir}/files/
+
+    any content roots added via:
+
+        the CLI flag --contents
+
+        the #/LiteBuildConfig/contents in jupyter_lite_config.json
+
+Will be:
+
+    copied to the built site under {output-dir}/files/
+
+        may have timestamps changed if --source-date-epoch is provided.
+
+    indexed to provide {output-dir}/api/contents/{subdir?}/all.json
+
+By default, all of a user’s contents on the same domain will be available to all JupyterLite instances hosted there. To create separate content stores, change the jupyter-lite.json#jupyter-config-data/contentsStorageName from the default of JupyterLite Storage.
+
+
+
 
 # Importing a package
 
