@@ -1,5 +1,3 @@
-import setup
-
 from IPython.display import display
 import ipywidgets
 
