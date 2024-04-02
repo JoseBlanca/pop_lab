@@ -21,12 +21,12 @@ class OneLocusSimApp:
             [self.geno_freqs_widget, self.pop_size_widget, self.num_gen_widget]
         )
 
-        self.output_widget = ipywidgets.Output()
-        children_widgets.append(self.output_widget)
-
         self.run_button = ipywidgets.Button(description="Run")
         self.run_button.on_click(self.update_output)
         children_widgets.append(self.run_button)
+
+        self.output_widget = ipywidgets.Output()
+        children_widgets.append(self.output_widget)
 
         return ipywidgets.VBox(children_widgets)
 
