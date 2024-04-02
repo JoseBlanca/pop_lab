@@ -114,3 +114,8 @@ $ cd ..
 $ pyodide build
 
 https://github.com/pyodide/pyodide/discussions/4173
+
+# Autorun cell
+
+https://discourse.jupyter.org/t/autorun-some-code-cells-jupyterlab3/8737
+https://github.com/LinearLogic/jupyterlab-autorun-cells
