@@ -1,0 +1,14 @@
+$ pip install shinylive
+
+Create app.
+
+$ shiny create pop_lab
+
+Next, create the distribution with shinylive:
+
+$ shinylive export pop_lab pop_lab_site
+
+You can preview the application by serving the files in the site directory:
+
+$ python3 -m http.server --directory pop_lab_site --bind localhost 8008
+$ python3 -m http.server --directory pop_lab_site 8008

@@ -5,3 +5,5 @@ src/pop_lab.egg-info/
 src/pop_lab/__pycache__/
 .vscode/settings.json
 tests/__pycache__/
+pop_lab_site/
+pop_lab/

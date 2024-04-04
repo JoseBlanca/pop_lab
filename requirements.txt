@@ -1,3 +1,5 @@
+shinylive
+
 jupyterlite-core
 jupyterlab
 
