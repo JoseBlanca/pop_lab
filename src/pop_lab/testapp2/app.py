@@ -30,6 +30,9 @@ DEF_GENO_FREQS = (0.25, 0.75)
 DEF_FREQ_Aa = DEF_GENO_FREQS[1] - DEF_GENO_FREQS[0]
 DEF_FREQ_A = DEF_GENO_FREQS[0] + DEF_FREQ_Aa * 0.5
 
+GENOMIC_FREQS_TAB_ID = "genomic_freqs"
+ALLELIC_FREQS_TAB_ID = "allelic_freqs"
+
 pop_size_widget = ui.row(
     ui.layout_columns(
         ui.panel_conditional(
@@ -57,7 +60,7 @@ freq_A_Aa_widget = ui.row(
     ),
 )
 
-geno_freqs_widget = ui.row(
+geno_freqs_slider = ui.row(
     ui.input_slider(
         "geno_freqs_slider",
         label="",
@@ -66,7 +69,20 @@ geno_freqs_widget = ui.row(
         value=DEF_GENO_FREQS,
         width="100%",
     ),
-    freq_A_Aa_widget,
+)
+
+panels = [
+    ui.nav_panel("Genomic freqs.", geno_freqs_slider, value=GENOMIC_FREQS_TAB_ID),
+    ui.nav_panel("Allelic freqs.", freq_A_Aa_widget, value=ALLELIC_FREQS_TAB_ID),
+]
+
+freqs_tab = ui.navset_tab(
+    *panels,
+    id="freqs_tabs",
+)
+
+geno_freqs_widget = ui.row(
+    freqs_tab,
     ui.row(
         ui.layout_columns(
             ui.value_box(
@@ -122,19 +138,39 @@ def server(input, output, session):
 
     @reactive.calc
     def get_freq_AA():
-        return input.geno_freqs_slider()[0]
+        if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
+            freq_AA = input.geno_freqs_slider()[0]
+        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
+            freq_Aa = input.freq_Aa_input()
+            freq_A = input.freq_A_input()
+            freq_AA = freq_A - (freq_Aa / 2)
+        return freq_AA
 
     @reactive.calc
     def get_freq_aa():
-        return 1 - input.geno_freqs_slider()[1]
+        if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
+            freq_aa = 1 - input.geno_freqs_slider()[1]
+        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
+            freq_Aa = input.freq_Aa_input()
+            freq_A = input.freq_A_input()
+            freq_aa = (1 - freq_A) - (freq_Aa / 2)
+        return freq_aa
 
     @reactive.calc
     def get_freq_Aa():
-        return 1 - get_freq_AA() - get_freq_aa()
+        if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
+            freq_Aa = input.geno_freqs_slider()[1] - input.geno_freqs_slider()[0]
+        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
+            freq_Aa = input.freq_Aa_input()
+        return freq_Aa
 
     @reactive.calc
     def get_freq_A():
-        return get_freq_AA() + get_freq_Aa() * 0.5
+        if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
+            freq_A = get_freq_AA() + get_freq_Aa() * 0.5
+        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
+            freq_A = input.freq_A_input()
+        return freq_A
 
     @render.text
     def freq_AA_output():
@@ -147,28 +183,6 @@ def server(input, output, session):
     @render.text
     def freq_aa_output():
         return f"{get_freq_aa():.2f}"
-
-    @reactive.effect
-    @reactive.event(input.geno_freqs_slider)
-    def _():
-        ui.update_numeric(
-            "freq_A_input",
-            value=round(get_freq_A(), 2),
-        )
-        ui.update_numeric(
-            "freq_Aa_input",
-            value=round(get_freq_Aa(), 2),
-        )
-
-    @reactive.effect
-    @reactive.event(input.freq_A_input)
-    def _():
-        freq_AA = 0.1  # get_freq_AA()
-        value2 = 0.2  # freq_AA + get_freq_Aa()
-        ui.update_slider(
-            "geno_freqs_slider",
-            value=(freq_AA, value2),
-        )
 
 
 app = App(app_ui, server)
