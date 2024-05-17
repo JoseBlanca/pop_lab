@@ -29,6 +29,9 @@ DEF_POP_SIZE = 100
 DEF_GENO_FREQS = (0.25, 0.75)
 DEF_FREQ_Aa = DEF_GENO_FREQS[1] - DEF_GENO_FREQS[0]
 DEF_FREQ_A = DEF_GENO_FREQS[0] + DEF_FREQ_Aa * 0.5
+MIN_NUM_GEN = 10
+MAX_NUM_GEN = 500
+DEF_NUM_GEN = 100
 
 GENOMIC_FREQS_TAB_ID = "genomic_freqs"
 ALLELIC_FREQS_TAB_ID = "allelic_freqs"
@@ -101,10 +104,20 @@ geno_freqs_widget = ui.row(
     ),
 )
 
+num_gen_widget = ui.row(
+    ui.input_slider(
+        "num_gen_slider",
+        label="Num. generations",
+        min=MIN_NUM_GEN,
+        max=MAX_NUM_GEN,
+        value=DEF_NUM_GEN,
+        width="100%",
+    ),
+)
 
 app_ui = ui.page_fixed(
     ui.h1("Foward in time simulation"),
-    ui.card(pop_size_widget, geno_freqs_widget),
+    ui.card(pop_size_widget, geno_freqs_widget, num_gen_widget),
     ui.output_code("greeting"),
     ui.card(ui.output_code("pop_size_output")),
 )
