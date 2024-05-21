@@ -35,9 +35,11 @@ MIN_NUM_GEN = 10
 MAX_NUM_GEN = 500
 DEF_NUM_GEN = 100
 
-GENOMIC_FREQS_TAB_ID = "genomic_freqs"
+GENOMIC_FREQS_TAB_ID = "genotypic_freqs"
 ALLELIC_FREQS_TAB_ID = "allelic_freqs"
 GENO_FREQS_PLOT_ID = "geno_freqs_plot"
+FREQ_A_PLOT_ID = "freq_A_plot"
+EXP_HET_PLOT_ID = "exp_het_plot"
 
 pop_size_widget = ui.row(
     ui.layout_columns(
@@ -121,14 +123,30 @@ num_gen_widget = ui.row(
 run_button = ui.input_action_button("run_button", "Run simulation")
 
 input_card = ui.card(
-    ui.h1("Foward in time simulation"),
+    ui.h1("One locus foward in time simulation"),
     ui.card(pop_size_widget, geno_freqs_widget, num_gen_widget),
     run_button,
 )
 
+output_panels = (
+    ui.nav_panel(
+        "Genotypic freqs.",
+        ui.output_plot(GENO_FREQS_PLOT_ID),
+    ),
+    ui.nav_panel(
+        "Freq A.",
+        ui.output_plot(FREQ_A_PLOT_ID),
+    ),
+    ui.nav_panel(
+        "Exp. Het.",
+        ui.output_plot(EXP_HET_PLOT_ID),
+    ),
+)
 
 output_card = ui.card(
-    ui.output_plot(GENO_FREQS_PLOT_ID),
+    ui.navset_tab(
+        *output_panels,
+    )
 )
 
 
@@ -226,9 +244,9 @@ def server(input, output, session):
     def freq_aa_output():
         return f"{get_freq_aa():.2f}"
 
-    @render.plot(alt="Genotypic freqs.")
+    @reactive.calc
     @reactive.event(input.run_button)
-    def geno_freqs_plot():
+    def do_simulation():
         sim_params = {
             "pops": {
                 "pop1": {
@@ -245,6 +263,11 @@ def server(input, output, session):
         }
 
         sim = OneLocusTwoAlleleSimulation(sim_params)
+        return sim
+
+    @render.plot(alt="Genotypic freqs.")
+    def geno_freqs_plot():
+        sim = do_simulation()
 
         fig, axes = plt.subplots()
         axes.set_title("Genotypic freqs.")
@@ -259,6 +282,34 @@ def server(input, output, session):
                 geno_freqs_series.index, geno_freqs_series.values, label=geno_freq_label
             )
         axes.legend()
+        axes.set_ylim((0, 1))
+        return fig
+
+    @render.plot(alt="Freq. A")
+    def freq_A_plot():
+        sim = do_simulation()
+
+        fig, axes = plt.subplots()
+        axes.set_title("Freq. A")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("freq")
+
+        freqs_series = sim.results["allelic_freqs"]
+        axes.plot(freqs_series.index, freqs_series.values, label="Freq. A")
+        axes.set_ylim((0, 1))
+        return fig
+
+    @render.plot(alt="Exp. Het.")
+    def exp_het_plot():
+        sim = do_simulation()
+
+        fig, axes = plt.subplots()
+        axes.set_title("Expected Het.")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("Exp. Het.")
+
+        freqs_series = sim.results["expected_hets"]
+        axes.plot(freqs_series.index, freqs_series.values, label="Exp. Het.")
         axes.set_ylim((0, 1))
         return fig
 
