@@ -3,6 +3,8 @@ import math
 
 from shiny import App, reactive, render, ui
 
+import one_locus_two_alleles_simulator
+
 # The UI section consists of a single (potentially very long and deeply nested) expression,
 # stored as a variable named app_ui by convention. The object this produces is actually simply HTML,
 # which is sent to the browser when it first loads the app.
@@ -184,6 +186,30 @@ def server(input, output, session):
         elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
             freq_A = input.freq_A_input()
         return freq_A
+
+    @reactive.effect
+    @reactive.event(input.freq_Aa_input)
+    def _():
+        freq_Aa = input.freq_Aa_input()
+        min_ = round(freq_Aa, ndigits=2)
+        max_ = 1 - freq_Aa
+        current_value = input.freq_A_input()
+        if current_value < min_:
+            current_value = min_
+        elif current_value > max_:
+            current_value = max_
+        ui.update_numeric("freq_A_input", min=min_, max=max_, value=current_value)
+
+    @reactive.effect
+    @reactive.event(input.freq_A_input)
+    def _():
+        freq_A = input.freq_A_input()
+        freq_a = 1 - freq_A
+        max_ = round(min((freq_A, freq_a)), ndigits=2)
+        current_value = input.freq_Aa_input()
+        if current_value > max_:
+            current_value = max_
+        ui.update_numeric("freq_Aa_input", min=0, max=max_, value=current_value)
 
     @render.text
     def freq_AA_output():
