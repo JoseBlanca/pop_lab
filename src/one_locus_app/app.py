@@ -82,7 +82,7 @@ panels = [
     ui.nav_panel("Allelic freqs.", freq_A_Aa_widget, value=ALLELIC_FREQS_TAB_ID),
 ]
 
-freqs_tab = ui.navset_tab(
+freqs_tab = ui.navset_card_tab(
     *panels,
     id="freqs_tabs",
 )
@@ -122,7 +122,7 @@ run_button = ui.input_action_button("run_button", "Run simulation")
 
 input_card = ui.card(
     ui.h1("One locus foward in time simulation"),
-    ui.card(pop_size_widget, geno_freqs_widget, num_gen_widget),
+    ui.card(geno_freqs_widget, pop_size_widget, num_gen_widget),
     run_button,
 )
 
