@@ -1,4 +1,6 @@
 shinylive
+shiny
+htmltools
 
 jupyterlite-core
 jupyterlab

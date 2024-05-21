@@ -1,9 +1,9 @@
 from datetime import datetime
-import math
 
 from shiny import App, reactive, render, ui
+import matplotlib.pyplot as plt
 
-import one_locus_two_alleles_simulator
+from one_locus_two_alleles_simulator import OneLocusTwoAlleleSimulation, INF
 
 # The UI section consists of a single (potentially very long and deeply nested) expression,
 # stored as a variable named app_ui by convention. The object this produces is actually simply HTML,
@@ -37,6 +37,7 @@ DEF_NUM_GEN = 100
 
 GENOMIC_FREQS_TAB_ID = "genomic_freqs"
 ALLELIC_FREQS_TAB_ID = "allelic_freqs"
+GENO_FREQS_PLOT_ID = "geno_freqs_plot"
 
 pop_size_widget = ui.row(
     ui.layout_columns(
@@ -117,11 +118,23 @@ num_gen_widget = ui.row(
     ),
 )
 
-app_ui = ui.page_fixed(
+run_button = ui.input_action_button("run_button", "Run simulation")
+
+input_card = ui.card(
     ui.h1("Foward in time simulation"),
     ui.card(pop_size_widget, geno_freqs_widget, num_gen_widget),
-    ui.output_code("greeting"),
-    ui.card(ui.output_code("pop_size_output")),
+    run_button,
+)
+
+
+output_card = ui.card(
+    ui.output_plot(GENO_FREQS_PLOT_ID),
+)
+
+
+app_ui = ui.page_fixed(
+    input_card,
+    output_card,
 )
 
 # The server section is a function, named server by convention,
@@ -131,24 +144,10 @@ app_ui = ui.page_fixed(
 
 
 def server(input, output, session):
-    @reactive.calc
-    def time():
-        reactive.invalidate_later(1)
-        return datetime.now()
-
-    # The name of this rendering function should match the placeholder name in ui
-    @render.code
-    def greeting():
-        return f"Hello, world!\nIt's currently {time()}."
-
-    @render.code
-    def pop_size_output():
-        return f"Pop size is: {get_pop_size()}"
-
     def get_pop_size():
         pop_size = int(input.pop_size_slider())
         if input.pop_is_inf_checkbox():
-            pop_size = math.inf
+            pop_size = INF
         return pop_size
 
     @reactive.calc
@@ -178,6 +177,10 @@ def server(input, output, session):
         elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
             freq_Aa = input.freq_Aa_input()
         return freq_Aa
+
+    @reactive.calc
+    def get_num_generations():
+        return input.num_gen_slider()
 
     @reactive.calc
     def get_freq_A():
@@ -222,6 +225,42 @@ def server(input, output, session):
     @render.text
     def freq_aa_output():
         return f"{get_freq_aa():.2f}"
+
+    @render.plot(alt="Genotypic freqs.")
+    @reactive.event(input.run_button)
+    def geno_freqs_plot():
+        sim_params = {
+            "pops": {
+                "pop1": {
+                    "genotypic_freqs": (get_freq_AA(), get_freq_Aa(), get_freq_aa()),
+                    "size": get_pop_size(),
+                },
+            },
+            "num_generations": get_num_generations(),
+            "loggers": [
+                "allelic_freqs_logger",
+                "genotypic_freqs_logger",
+                "exp_het_logger",
+            ],
+        }
+
+        sim = OneLocusTwoAlleleSimulation(sim_params)
+
+        fig, axes = plt.subplots()
+        axes.set_title("Genotypic freqs.")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("freq")
+
+        genotypic_freqs = sim.results["genotypic_freqs"]
+        geno_freqs_labels = sorted(genotypic_freqs.keys())
+        for geno_freq_label in geno_freqs_labels:
+            geno_freqs_series = genotypic_freqs[geno_freq_label]
+            axes.plot(
+                geno_freqs_series.index, geno_freqs_series.values, label=geno_freq_label
+            )
+        axes.legend()
+        axes.set_ylim((0, 1))
+        return fig
 
 
 app = App(app_ui, server)
