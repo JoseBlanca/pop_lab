@@ -481,7 +481,7 @@ class OneLocusTwoAlleleSimulation:
             kwargs = {}
             kwargs["genotypic_freqs"] = GenotypicFreqs(*pop_def["genotypic_freqs"])
             if "size" in pop_def:
-                kwargs["size"] = int(pop_def["size"])
+                kwargs["size"] = pop_def["size"]
             if "fitness" in pop_def:
                 kwargs["fitness"] = Fitness(*pop_def["fitness"])
             if "mut_rates" in pop_def:
