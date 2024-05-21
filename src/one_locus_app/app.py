@@ -1,7 +1,14 @@
+import math
+
 from shiny import App, reactive, render, ui
 import matplotlib.pyplot as plt
 
-from one_locus_two_alleles_simulator import OneLocusTwoAlleleSimulation, INF
+from one_locus_two_alleles_simulator import (
+    OneLocusTwoAlleleSimulation,
+    INF,
+    MutRates,
+    Fitness,
+)
 
 # The UI section consists of a single (potentially very long and deeply nested) expression,
 # stored as a variable named app_ui by convention. The object this produces is actually simply HTML,
@@ -118,11 +125,29 @@ num_gen_widget = ui.row(
     ),
 )
 
+fitness_panel = (
+    ui.input_slider("wAA_slider", label="wAA", min=0, max=1, value=1),
+    ui.input_slider("wAa_slider", label="wAa", min=0, max=1, value=1),
+    ui.input_slider("waa_slider", label="waa", min=0, max=1, value=1),
+)
+
+mutation_panel = (
+    ui.input_slider("A2a_slider", label="A2a", min=0, max=0.1, value=0),
+    ui.input_slider("a2A_slider", label="a2A", min=0, max=0.1, value=0),
+)
+
+extra_inputs_panel = ui.accordion(
+    ui.accordion_panel("Selection", fitness_panel),
+    ui.accordion_panel("Mutation", mutation_panel),
+    id="extra_inputs",
+    open=False,
+)
+
 run_button = ui.input_action_button("run_button", "Run simulation")
 
 input_card = ui.card(
     ui.h1("One locus foward in time simulation"),
-    ui.card(geno_freqs_widget, pop_size_widget, num_gen_widget),
+    ui.card(geno_freqs_widget, extra_inputs_panel, pop_size_widget, num_gen_widget),
     run_button,
 )
 
@@ -259,6 +284,21 @@ def server(input, output, session):
                 "exp_het_logger",
             ],
         }
+
+        wAA = input.wAA_slider()
+        wAa = input.wAa_slider()
+        waa = input.waa_slider()
+        if (
+            not math.isclose(wAA, 1)
+            or not math.isclose(wAa, 1)
+            or not math.isclose(waa, 1)
+        ):
+            sim_params["pops"]["pop1"]["fitness"] = Fitness(0.5, 0.5, 1)
+
+        A2a = input.A2a_slider()
+        a2A = input.a2A_slider()
+        if not math.isclose(A2a, 0) or not math.isclose(a2A, 0):
+            sim_params["pops"]["pop1"]["mut_rates"] = MutRates(A2a, a2A)
 
         sim = OneLocusTwoAlleleSimulation(sim_params)
         return sim
