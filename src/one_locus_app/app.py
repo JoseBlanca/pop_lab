@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from shiny import App, reactive, render, ui
 import matplotlib.pyplot as plt
 
