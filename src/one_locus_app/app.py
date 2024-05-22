@@ -46,6 +46,7 @@ GENO_FREQS_PLOT_ID = "geno_freqs_plot"
 FREQ_A_PLOT_ID = "freq_A_plot"
 EXP_HET_PLOT_ID = "exp_het_plot"
 
+
 pop_size_widget = ui.row(
     ui.layout_columns(
         ui.panel_conditional(
@@ -135,10 +136,14 @@ mutation_panel = (
     ui.input_slider("A2a_slider", label="A2a", min=0, max=0.1, value=0),
     ui.input_slider("a2A_slider", label="a2A", min=0, max=0.1, value=0),
 )
+selfing_panel = (
+    ui.input_slider("selfing_slider", label="Selfing rate", min=0, max=1, value=0),
+)
 
 extra_inputs_panel = ui.accordion(
     ui.accordion_panel("Selection", fitness_panel),
     ui.accordion_panel("Mutation", mutation_panel),
+    ui.accordion_panel("Selfing", selfing_panel),
     id="extra_inputs",
     open=False,
 )
@@ -275,6 +280,7 @@ def server(input, output, session):
                 "pop1": {
                     "genotypic_freqs": (get_freq_AA(), get_freq_Aa(), get_freq_aa()),
                     "size": get_pop_size(),
+                    "selfing_rate": input.selfing_slider(),
                 },
             },
             "num_generations": get_num_generations(),
