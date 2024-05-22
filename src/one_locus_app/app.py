@@ -298,7 +298,7 @@ def server(input, output, session):
             or not math.isclose(wAa, 1)
             or not math.isclose(waa, 1)
         ):
-            sim_params["pops"]["pop1"]["fitness"] = Fitness(0.5, 0.5, 1)
+            sim_params["pops"]["pop1"]["fitness"] = (wAA, wAa, waa)
 
         A2a = input.A2a_slider()
         a2A = input.a2A_slider()
