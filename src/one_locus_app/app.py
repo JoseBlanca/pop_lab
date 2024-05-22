@@ -47,24 +47,6 @@ FREQ_A_PLOT_ID = "freq_A_plot"
 EXP_HET_PLOT_ID = "exp_het_plot"
 
 
-pop_size_widget = ui.row(
-    ui.layout_columns(
-        ui.panel_conditional(
-            "!input.pop_is_inf_checkbox",
-            ui.input_slider(
-                "pop_size_slider",
-                label="Pop. size:",
-                min=MIN_POP_SIZE,
-                max=MAX_POP_SIZE,
-                value=DEF_POP_SIZE,
-                width="100%",
-            ),
-        ),
-        ui.input_checkbox("pop_is_inf_checkbox", label="Pop. is inf.", value=False),
-        col_widths=(10, 2),
-    ),
-)
-
 freq_A_Aa_widget = ui.row(
     ui.input_numeric(
         "freq_A_input", "Freq. A", DEF_FREQ_A, min=0.0, max=1.0, step=0.01
@@ -95,36 +77,35 @@ freqs_tab = ui.navset_card_tab(
     id="freqs_tabs",
 )
 
-geno_freqs_widget = ui.row(
-    freqs_tab,
-    ui.row(
-        ui.layout_columns(
-            ui.value_box(
-                title="Freq. AA",
-                value=ui.output_ui("freq_AA_output"),
+pop_size_panel = (
+    ui.layout_columns(
+        ui.panel_conditional(
+            "!input.pop_is_inf_checkbox",
+            ui.input_slider(
+                "pop_size_slider",
+                label="",
+                min=MIN_POP_SIZE,
+                max=MAX_POP_SIZE,
+                value=DEF_POP_SIZE,
+                width="100%",
             ),
-            ui.value_box(
-                title="Freq. Aa",
-                value=ui.output_ui("freq_Aa_output"),
-            ),
-            ui.value_box(
-                title="Freq. aa",
-                value=ui.output_ui("freq_aa_output"),
-            ),
-        )
+        ),
+        ui.input_checkbox("pop_is_inf_checkbox", label="Pop. is inf.", value=False),
+        col_widths=(10, 2),
     ),
 )
 
-num_gen_widget = ui.row(
+num_gen_panel = (
     ui.input_slider(
         "num_gen_slider",
-        label="Num. generations",
+        label="",
         min=MIN_NUM_GEN,
         max=MAX_NUM_GEN,
         value=DEF_NUM_GEN,
         width="100%",
     ),
 )
+
 
 fitness_panel = (
     ui.input_slider("wAA_slider", label="wAA", min=0, max=1, value=1),
@@ -140,19 +121,37 @@ selfing_panel = (
     ui.input_slider("selfing_slider", label="Selfing rate", min=0, max=1, value=0),
 )
 
-extra_inputs_panel = ui.accordion(
+inputs_panel = ui.accordion(
+    ui.accordion_panel("Initial freqs.", freqs_tab),
+    ui.accordion_panel("Pop. size", pop_size_panel),
+    ui.accordion_panel("Num. generations", num_gen_panel),
     ui.accordion_panel("Selection", fitness_panel),
     ui.accordion_panel("Mutation", mutation_panel),
     ui.accordion_panel("Selfing", selfing_panel),
-    id="extra_inputs",
-    open=False,
+    id="inputs_panel",
+    open=["Initial freqs.", "Pop. size", "Num. generations"],
+)
+
+sim_params_widget = ui.layout_columns(
+    ui.value_box(
+        title="Freq. AA",
+        value=ui.output_ui("freq_AA_output"),
+    ),
+    ui.value_box(
+        title="Freq. Aa",
+        value=ui.output_ui("freq_Aa_output"),
+    ),
+    ui.value_box(
+        title="Freq. aa",
+        value=ui.output_ui("freq_aa_output"),
+    ),
 )
 
 run_button = ui.input_action_button("run_button", "Run simulation")
 
 input_card = ui.card(
     ui.h1("One locus foward in time simulation"),
-    ui.card(geno_freqs_widget, extra_inputs_panel, pop_size_widget, num_gen_widget),
+    ui.card(inputs_panel, sim_params_widget),
     run_button,
 )
 
