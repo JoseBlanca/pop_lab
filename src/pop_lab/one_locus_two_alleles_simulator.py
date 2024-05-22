@@ -93,7 +93,14 @@ class AllelicFreqs:
         return f"A: {self.A}, a: {self.a}"
 
 
-Fitness = namedtuple("Fitness", ("w11", "w12", "w22"))
+class Fitness:
+    def __init__(self, w11, w12, w22):
+        if numpy.allclose([w11, w12, w22], [0, 0, 0]):
+            raise ValueError("Some of the fitness values should be non zero")
+        self.w11 = w11
+        self.w12 = w12
+        self.w22 = w22
+
 
 MutRates = namedtuple("MutRates", ("A2a", "a2A"))
 
@@ -112,17 +119,6 @@ def calc_hwe_genotypic_freqs(allelic_freqs: AllelicFreqs):
     return GenotypicFreqs(freq_AA, freq_Aa)
 
 
-def _calc_w_avg(genotypic_freqs, fitness):
-    if fitness is None:
-        raise ValueError("fitness is None")
-    w_avg = (
-        genotypic_freqs.AA * fitness.w11
-        + genotypic_freqs.Aa * fitness.w12
-        + genotypic_freqs.aa * fitness.w22
-    )
-    return w_avg
-
-
 class Population:
     def __init__(
         self,
@@ -138,11 +134,6 @@ class Population:
         self.genotypic_freqs = genotypic_freqs
         self.selfing_rate = selfing_rate
 
-        if fitness is not None:
-            w_avg = _calc_w_avg(genotypic_freqs, fitness)
-            if math.isclose(w_avg, 0):
-                msg = "fitness is 0 because the remaining genotypes have a zero fitness, population would die"
-                raise ValueError(msg)
         self.fitness = fitness
 
         self.mut_rates = mut_rates
@@ -200,16 +191,14 @@ class Population:
         # selection
         fitness = self.fitness
         if fitness is not None:
-            w_avg = _calc_w_avg(genotypic_freqs, fitness)
-            if math.isclose(w_avg, 0):
-                msg = "fitness is 0 because the remaining genotypes have a zero fitness, population would die"
-                raise RuntimeError(msg)
-
-            freq_AA = freq_AA * fitness.w11 / w_avg
-            freq_Aa = freq_Aa * fitness.w12 / w_avg
-        else:
-            freq_AA = freq_AA
-            freq_Aa = freq_Aa
+            freq_AA = freq_AA * fitness.w11
+            freq_Aa = freq_Aa * fitness.w12
+            freq_aa = freq_aa * fitness.w22
+            sum_freqs = freq_AA + freq_Aa + freq_aa
+            freq_AA = freq_AA / sum_freqs
+            freq_Aa = freq_Aa / sum_freqs
+            freq_aa = freq_aa / sum_freqs
+            assert math.isclose(freq_AA + freq_Aa + freq_aa, 1)
 
         # mutation
         if self.mut_rates:

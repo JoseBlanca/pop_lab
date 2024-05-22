@@ -9,7 +9,7 @@ from pop_lab.one_locus_two_alleles_simulator import (
     GenotypicFreqs,
     GenotypicFreqsLogger,
 )
-from pop_lab import OneLocusTwoAlleleSimulation
+from pop_lab import OneLocusTwoAlleleSimulation, Fitness
 
 
 def test_genotypic_freqs():
@@ -77,3 +77,34 @@ def test_simulator():
     }
     sim = OneLocusTwoAlleleSimulation(sim)
     assert numpy.allclose(sim.results["allelic_freqs"]["pop1"], [0.5, 0.48])
+
+
+def test_selection():
+    pop = Population(
+        "pop1", GenotypicFreqs(0.99, 0.01, 0), fitness=Fitness(0.01, 0.01, 1)
+    )
+    pop.evolve_to_next_generation()
+    assert math.isclose(pop.allelic_freqs.A, 0.9949999999999992)
+
+    pop = Population(
+        "pop1", GenotypicFreqs(0.99, 0.01, 0), fitness=Fitness(0.99, 0.99, 1)
+    )
+    pop.evolve_to_next_generation()
+    assert math.isclose(pop.allelic_freqs.A, 0.995)
+
+    pop = Population(
+        "pop1", GenotypicFreqs(0.5, 0, 0.5), fitness=Fitness(0.01, 0.01, 1)
+    )
+    pop.evolve_to_next_generation()
+    assert math.isclose(pop.allelic_freqs.A, 0.009900990099009901)
+
+    pop = Population(
+        "pop1", GenotypicFreqs(0.5, 0, 0.5), fitness=Fitness(0.99, 0.99, 1)
+    )
+    pop.evolve_to_next_generation()
+    assert math.isclose(pop.allelic_freqs.A, 0.4974874371859296)
+    pop = Population(
+        "pop1", GenotypicFreqs(0.99, 0, 0.01), fitness=Fitness(0.99, 0.99, 1)
+    )
+    pop.evolve_to_next_generation()
+    assert math.isclose(pop.allelic_freqs.A, 0.9899000100999898)
