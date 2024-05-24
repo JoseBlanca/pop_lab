@@ -176,10 +176,11 @@ output_card = ui.card(
     )
 )
 
-
 app_ui = ui.page_fixed(
     input_card,
     output_card,
+    title="Pop Lab",
+    lang="en",
 )
 
 # The server section is a function, named server by convention,
