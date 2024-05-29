@@ -7,7 +7,6 @@ from one_locus_two_alleles_simulator import (
     OneLocusTwoAlleleSimulation,
     INF,
     MutRates,
-    Fitness,
 )
 
 # The UI section consists of a single (potentially very long and deeply nested) expression,
