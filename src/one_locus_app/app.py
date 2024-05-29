@@ -2,6 +2,7 @@ import math
 
 from shiny import App, reactive, render, ui
 import matplotlib.pyplot as plt
+import pandas
 
 from one_locus_two_alleles_simulator import (
     OneLocusTwoAlleleSimulation,
@@ -44,7 +45,8 @@ ALLELIC_FREQS_TAB_ID = "allelic_freqs"
 GENO_FREQS_PLOT_ID = "geno_freqs_plot"
 FREQ_A_PLOT_ID = "freq_A_plot"
 EXP_HET_PLOT_ID = "exp_het_plot"
-
+SUMMARY_TABLE_ID = "summary_table"
+RESULT_TABLE_ID = "result_table"
 
 freq_A_Aa_widget = ui.row(
     ui.input_numeric(
@@ -154,6 +156,18 @@ input_card = ui.card(
     run_button,
 )
 
+summary = ui.navset_tab(
+    ui.nav_panel(
+        "Parameters",
+        ui.output_data_frame(SUMMARY_TABLE_ID),
+    ),
+    ui.nav_panel(
+        "Results",
+        ui.output_data_frame(RESULT_TABLE_ID),
+    ),
+    selected="Results",
+)
+
 output_panels = (
     ui.nav_panel(
         "Genotypic freqs.",
@@ -167,6 +181,7 @@ output_panels = (
         "Exp. Het.",
         ui.output_plot(EXP_HET_PLOT_ID),
     ),
+    ui.nav_panel("Summary", summary),
 )
 
 output_card = ui.card(
@@ -355,6 +370,73 @@ def server(input, output, session):
         axes.plot(freqs_series.index, freqs_series.values, label="Exp. Het.")
         axes.set_ylim((0, 1))
         return fig
+
+    @render.data_frame
+    def summary_table():
+        parameters = []
+        values = []
+        parameters.append("Freq. AA (init)")
+        values.append(get_freq_AA())
+        parameters.append("Freq. Aa (init)")
+        values.append(get_freq_Aa())
+        parameters.append("Freq. aa (init)")
+        values.append(get_freq_aa())
+
+        wAA = input.wAA_slider()
+        wAa = input.wAa_slider()
+        waa = input.waa_slider()
+        if (
+            not math.isclose(wAA, 1)
+            or not math.isclose(wAa, 1)
+            or not math.isclose(waa, 1)
+        ):
+            parameters.append("wAA")
+            values.append(wAA)
+            parameters.append("wAa")
+            values.append(wAa)
+            parameters.append("waa")
+            values.append(waa)
+
+        mutA2a = input.A2a_slider()
+        muta2A = input.a2A_slider()
+        if not math.isclose(mutA2a, 0) or not math.isclose(muta2A, 0):
+            parameters.append("mut. A -> a")
+            values.append(mutA2a)
+            parameters.append("mut. a -> A")
+            values.append(muta2A)
+
+        if not math.isclose(input.selfing_slider(), 0):
+            parameters.append("Selfing rate")
+            values.append(input.selfing_slider())
+
+        parameters.append("Pop. size")
+        values.append(get_pop_size())
+
+        parameters.append("Num. generations")
+        values.append(get_num_generations())
+
+        df = pandas.DataFrame({"Parameter": parameters, "Value": values})
+        return render.DataGrid(df)
+
+    @render.data_frame
+    def result_table():
+        parameters = []
+        values = []
+
+        sim = do_simulation()
+        genotypic_freqs = sim.results["genotypic_freqs"]
+        parameters.append("Freq. AA (final)")
+        values.append(genotypic_freqs["freqs_AA"].iloc[-1])
+        parameters.append("Freq. Aa (final)")
+        values.append(genotypic_freqs["freqs_Aa"].iloc[-1])
+        parameters.append("Freq. aa (final)")
+        values.append(genotypic_freqs["freqs_aa"].iloc[-1])
+
+        parameters.append("Exp. het. (final)")
+        values.append(sim.results["expected_hets"].iloc[-1])
+
+        df = pandas.DataFrame({"Parameter": parameters, "Value": values})
+        return render.DataGrid(df)
 
 
 app = App(app_ui, server)
