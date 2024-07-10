@@ -1,0 +1,56 @@
+https://shiny.posit.co/py/docs/shinylive.html#without-quarto
+
+Create shiny app without Quarto
+
+$ pip install shinylive
+
+$ shiny create testapp
+
+$ shinylive export testapp shiny_site
+
+$ python3 -m http.server --directory shiny_site --bind localhost 8008
+
+This will serve the files in the site directory on port 8008. Then point your browser at http://localhost:8008/. You can also see the application with an online editor by pointing your browser at http://localhost:8008/edit/. (Note that any changes to the files there are ephemeral—they won’t be saved to disk.)
+
+How to serve a new development version, all together:
+
+$ rm -r shiny_site/; shinylive export src/bottleneck_app/ shiny_site ; python3 -m http.server --directory shiny_site --bind localhost 8008
+
+If you have multiple applications, you may want to export them in subdirectories of the site, so that they can all share the same Shinylive assets. You can do this with the --subdir option:
+
+$ shinylive export myapp1 site --subdir app1
+$ shinylive export myapp2 site --subdir app2
+
+In order to include extra packages:
+Add a requirements.txt file to an application which lists the extra packages.
+
+The Shinylive distribution is under rapid development, and the files in the distribution will change. The shinylive export command automatically downloads and caches a a copy of the Shinylive distribution on your computer. To make sure you are up to date, run:
+
+$ pip install shinylive --upgrade
+$ shinylive assets remove   # Remove old cached shinylive files
+
+Packages in shiny
+https://shiny.posit.co/py/docs/shinylive.html#installed-packages
+Packages built in Pyodide
+https://pyodide.org/en/0.25.1/usage/packages-in-pyodide.html
+
+It is possible to install packages using Pyodide’s micropip package. To do that, simply visit the Shinylive examples page and run the following in the Python console:
+import micropip
+await micropip.install("mypackage")
+import mypackage
+
+The micropip.install command will install the package from PyPI by default. However, you can provide a URL that points directly to your package, like https://example.com/mypackage-1.0-py3-none-any.whl.
+
+
+To use extra packages as part of your application, you can add a requirements.txt file to your application, as demonstrated in the extra packages example. The format of the requirements.txt file is similar to a “normal” requirements.txt file.
+Each time someone runs your Shiny application, their web browser will fetch those packages from PyPI. It will then install the packages to a virtual file system (VFS); when the user closes the page or navigates away from it, the VFS is discarded. If the user goes back and runs the application again, those files can be fetched from the browser cache instead of from PyPI.
+
+
+
+the most common form of reactivity: changes in input causing relevant render functions to re-execute (aka invalidate)
+More generally, Shiny knows to re-execute reactive functions (e.g., render functions) when their reactive dependencies (e.g., input) change. 
+https://shiny.posit.co/py/docs/reactive-foundations.html#calculations
+https://shiny.posit.co/py/docs/reactive-foundations.html#effects
+Reactive values with reactive.value
+
+https://mastering-shiny.org/reactive-graph.html
