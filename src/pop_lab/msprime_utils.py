@@ -23,28 +23,24 @@ class SimulationResult:
         node_idxss = []
         pops = []
         indi_namess = []
-        sampling_names = []
         for sampling in samplings:
             node_idxs_for_these_samples = sampling["sampling_node_ids"]
             pops_for_this_sample = [
-                sampling["sample_name"]
+                sampling["sampling_name"]
             ] * node_idxs_for_these_samples.size
             node_idxss.append(node_idxs_for_these_samples)
             pops.extend(pops_for_this_sample)
-            sampling_name = "-".join(sampling["sample_name"])
-            sampling_names.append(sampling_name)
             num_indis_in_sampling = node_idxs_for_these_samples.size // ploidy
             assert num_indis_in_sampling * ploidy == node_idxs_for_these_samples.size
             indi_names_for_this_sampling = [
-                f"{sampling_name}-indi_{idx}" for idx in range(num_indis_in_sampling)
+                f"{sampling['sampling_name']}-indi_{idx}"
+                for idx in range(num_indis_in_sampling)
             ]
             indi_namess.append(indi_names_for_this_sampling)
 
         genotypes = self.tree_seqs.genotype_matrix()
         gts_per_sampling = {}
-        for node_idxs, indi_names, sampling_name in zip(
-            node_idxss, indi_namess, sampling_names
-        ):
+        for node_idxs, indi_names, sampling in zip(node_idxss, indi_namess, samplings):
             # haplotype_array
             # the first dimension corresponds to the variants genotyped,
             # the second dimension corresponds to the haplotypes.
@@ -56,7 +52,11 @@ class SimulationResult:
             new_shape = (haplotype_array.shape[0], -1, self.ploidy)
             gt_array = haplotype_array.reshape(new_shape)
             gts = pynei.genotypes.Genotypes(gt_array, indi_names)
-            gts_per_sampling[sampling_name] = {"gts": gts}
+            gts_per_sampling[sampling["sampling_name"]] = {
+                "gts": gts,
+                "sampling_time": sampling["sampling_time"],
+                "pop_name": sampling["pop_name"],
+            }
         return gts_per_sampling
 
     def _get_samplings(self, sampling_times=None, pop_names=None, sampling_info=None):
@@ -144,7 +144,7 @@ class SimulationResult:
                 ),
                 "sampling_time": sampling_time,
                 "pop_name": pop_name,
-                "sample_name": pop_name,
+                "sampling_name": pop_name,
             }
             if sampling["sampling_node_ids"].size == 0:
                 continue
@@ -179,9 +179,9 @@ class SimulationResult:
                 ),
                 "sampling_time": sampling_time,
                 "pop_name": pop_name,
-                "sample_name": f"{pop_name}_{sampling_time}",
+                "sampling_name": f"{pop_name}_{sampling_time}",
             }
-            if sample["sample_node_ids"].size == 0:
+            if sample["sampling_node_ids"].size == 0:
                 continue
             samplings.append(sample)
         return samplings
