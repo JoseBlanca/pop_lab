@@ -2,21 +2,9 @@ shinylive
 shiny
 htmltools
 
-jupyterlite-core
-jupyterlab
-
-ipywidgets
-
 numpy
 pandas
 matplotlib
-
-# add the Pyodide kernel
-jupyterlite-pyodide-kernel
-
-# optional dependencies
-libarchive-c
-tornado
 
 # testing
 pytest
