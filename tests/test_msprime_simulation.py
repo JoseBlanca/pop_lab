@@ -26,11 +26,9 @@ def test_msprime_simulation():
         create_msprime_sampling(num_samples=num_samples, ploidy=2, pop_name=pop, time=0)
         for pop in pop_names
     ]
-    print("doing simulation")
     sim_res = simulate(
         samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
     )
-    print("done")
 
     gts_per_sampling = sim_res.get_genotypes()
     assert list(gts_per_sampling.values())[0]["gts"].gt_array.shape[1:] == (
