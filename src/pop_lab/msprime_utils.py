@@ -137,7 +137,7 @@ class SimulationResult:
 
         samplings = []
         for pop_id in pop_ids:
-            pop_name = (pop_names_by_pop_id_in_tseq[pop_id],)
+            pop_name = pop_names_by_pop_id_in_tseq[pop_id]
             sampling = {
                 "sampling_node_ids": tree_seqs.samples(
                     population=pop_id, time=sampling_time

@@ -10,7 +10,7 @@ from pop_lab.msprime_utils import (
 def create_simple_demography(num_pops=1, pop_size=10000):
     demography = msprime.Demography()
     for idx in range(num_pops):
-        pop_name = f"pop_{idx}"
+        pop_name = f"pop_{idx + 1}"
         demography.add_population(
             name=pop_name, initial_size=pop_size, initially_active=True
         )
@@ -31,7 +31,9 @@ def test_msprime_simulation():
     )
 
     gts_per_sampling = sim_res.get_genotypes()
-    assert list(gts_per_sampling.values())[0]["gts"].gt_array.shape[1:] == (
+    gts_for_sampling = list(gts_per_sampling.values())[0]
+    assert gts_for_sampling["pop_name"] == "pop_1"
+    assert gts_for_sampling["gts"].gt_array.shape[1:] == (
         num_samples,
         2,
     )
