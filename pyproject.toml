@@ -6,7 +6,8 @@ dependencies = [
     "pandas",
     "numpy",
     "matplotlib",
-    "pytest"
+    "pytest",
+    "pynei"
 ]
 
 [build-system]
