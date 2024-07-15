@@ -4,6 +4,9 @@ import pandas
 import ruamel.yaml
 import msprime
 
+import msprime_utils
+
+
 recomb_panel = (
     ui.input_slider(
         "recomb_slider", label="Recombination rate", min=0, max=1e-6, value=1e-8
@@ -78,9 +81,12 @@ inputs_panel = ui.accordion(
     open=[],
 )
 
+run_button = ui.input_action_button("run_button", "Run simulation")
+
 input_card = ui.card(
     ui.h1("Bottleneck"),
     ui.card(inputs_panel),
+    run_button,
 )
 
 summary = ui.navset_tab(
@@ -103,7 +109,6 @@ output_card = ui.card(
     )
 )
 
-
 app_ui = ui.page_fixed(
     input_card,
     output_card,
@@ -115,11 +120,47 @@ app_ui = ui.page_fixed(
 def server(input, output, session):
     @render.code
     def greeting():
-        return "Hola"
+        return "Caracola"
 
     @render.data_frame
     def summary_table():
         df = pandas.DataFrame({"Parameter": [], "Value": []})
+        return render.DataGrid(df)
+
+    @reactive.calc
+    @reactive.event(input.run_button)
+    def do_simulation():
+        demography = msprime.Demography()
+        pop_name = "pop"
+        demography.add_population(
+            name=pop_name, initial_size=10000, initially_active=True
+        )
+        num_samples = 20
+        samplings = [
+            msprime_utils.create_msprime_sampling(
+                num_samples=num_samples, ploidy=2, pop_name=pop_name, time=0
+            )
+        ]
+        sim_res = msprime_utils.simulate(
+            samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
+        )
+        return sim_res
+
+    @render.data_frame
+    def summary_table():
+        parameters = ["hola"]
+        values = ["caracola"]
+        df = pandas.DataFrame({"Parameter": parameters, "Value": values})
+        return render.DataGrid(df)
+
+    @render.data_frame
+    def results_table():
+        sim_res = do_simulation()
+        exp_hets = sim_res.calc_unbiased_exp_het()
+
+        parameters = [str(exp_hets.index)]
+        values = [exp_hets.values[0]]
+        df = pandas.DataFrame({"Parameter": parameters, "Value": values})
         return render.DataGrid(df)
 
 

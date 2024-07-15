@@ -8,3 +8,5 @@ tests/__pycache__/
 pop_lab_site/
 shiny_site/
 src/pop_lab/pynei
+src/bottleneck_app/pynei/
+src/bottleneck_app/msprime_utils.py

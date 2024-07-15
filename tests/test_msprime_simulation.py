@@ -1,3 +1,4 @@
+import numpy
 import msprime
 
 from pop_lab.msprime_utils import (
@@ -37,3 +38,19 @@ def test_msprime_simulation():
         num_samples,
         2,
     )
+
+
+def test_exp_het():
+    demography = create_simple_demography(num_pops=1)
+    pop_names = get_pop_names_from_demography(demography)
+
+    num_samples = 20
+    samplings = [
+        create_msprime_sampling(num_samples=num_samples, ploidy=2, pop_name=pop, time=0)
+        for pop in pop_names
+    ]
+    sim_res = simulate(
+        samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
+    )
+    exp_hets = sim_res.calc_unbiased_exp_het()
+    assert numpy.allclose(exp_hets.values, [0.345759])

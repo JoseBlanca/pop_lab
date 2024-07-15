@@ -1,4 +1,6 @@
+import pandas
 import msprime
+
 import pynei
 
 
@@ -197,6 +199,15 @@ class SimulationResult:
             pop_ids_by_pop_name_in_tseq[pop_name] = pop_id
             pop_names_by_pop_id_in_tseq[pop_id] = pop_name
         return pop_ids_by_pop_name_in_tseq, pop_names_by_pop_id_in_tseq
+
+    def calc_unbiased_exp_het(self):
+        gts_per_sampling = self.get_genotypes()
+        exp_hets = {}
+        for sampling_name, gt_info in gts_per_sampling.items():
+            gts = gt_info["gts"]
+            exp_hets[sampling_name] = pynei.calc_exp_het(gts).values[0]
+        exp_hets = pandas.Series(exp_hets)
+        return exp_hets
 
 
 def create_msprime_sampling(num_samples: int, ploidy: int, pop_name: str, time: int):
