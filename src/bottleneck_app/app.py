@@ -74,9 +74,11 @@ mut_panel = (
 
 
 inputs_panel = ui.accordion(
-    ui.accordion_panel("Sample size", sample_size_panel),
-    ui.accordion_panel("Recombination", recomb_panel),
-    ui.accordion_panel("Mutation", mut_panel),
+    ui.accordion_panel("Sample size (num. individuals to sample)", sample_size_panel),
+    ui.accordion_panel(
+        "Recombination rate (per base pair and generation)", recomb_panel
+    ),
+    ui.accordion_panel("Mutation rate (per base pair and generation)", mut_panel),
     id="inputs_panel",
     open=[],
 )
