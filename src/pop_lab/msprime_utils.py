@@ -9,18 +9,16 @@ def get_pop_names_from_demography(demography):
 
 
 class SimulationResult:
-    def __init__(self, tree_seqs, sampling_times, demography, ploidy):
+    def __init__(
+        self, tree_seqs, samplings: list[msprime.SampleSet], demography, ploidy
+    ):
         self.tree_seqs = tree_seqs
-        self.sampling_times = sampling_times
+        self._sampling_list = samplings
         self.demography = demography
         self.ploidy = ploidy
 
-    def get_genotypes(self, sampling_times=None, pop_names=None, sampling_info=None):
-        samplings = self._get_samplings(
-            sampling_times=sampling_times,
-            pop_names=pop_names,
-            sampling_info=sampling_info,
-        )
+    def get_genotypes(self):
+        samplings = self._get_sampling_info()
         ploidy = self.ploidy
         node_idxss = []
         pops = []
@@ -62,8 +60,8 @@ class SimulationResult:
         return gts_per_sampling
 
     @property
-    def samplings(self):
-        samplings = self._get_samplings()
+    def sampling_info(self) -> dict:
+        samplings = self._get_sampling_info()
         sampling_dict = {}
         for sampling in samplings:
             sampling = {
@@ -74,43 +72,13 @@ class SimulationResult:
             sampling_dict[sampling["sampling_name"]] = sampling
         return sampling_dict
 
-    def _get_samplings(self, sampling_times=None, pop_names=None, sampling_info=None):
-
-        if sampling_info is not None:
-            if sampling_times is not None or pop_names is not None:
-                msg = (
-                    "if samples are given, sampling_times and pop_names should be None"
-                )
-                raise ValueError(msg)
-            return self._get_samplings_from_sampling_info(sampling_info)
-
-        if sampling_times is None:
-            sampling_times = [None]
-        elif isinstance(sampling_times, (int, float)):
-            sampling_times = [sampling_times]
-        if pop_names is not None:
-            pop_names = list(pop_names)
-
-        if len(sampling_times) == 1:
-            return self._get_samplings_for_pops(
-                sampling_time=sampling_times[0], pop_names=pop_names
-            )
-        elif pop_names is None or len(pop_names) == 1:
-            if pop_names is None:
-                pop_name = pop_names
-            else:
-                pop_name = pop_names[0]
-            return self._get_samplings_for_times(
-                sampling_times=sampling_times, pop_name=pop_name
-            )
-        else:
-            raise NotImplementedError("Fixme")
-
-    def _get_samples_from_sampling_info(self, sampling_info):
+    def _get_sampling_info(self):
         samplings = []
         tree_seqs = self.tree_seqs
         pop_ids_by_pop_name_in_tseq, _ = self._get_pop_ids_and_names()
-        for pop_name, sampling_time in sampling_info:
+        for sampling in self._sampling_list:
+            pop_name = sampling.population
+            sampling_time = sampling.time
             pop_id = pop_ids_by_pop_name_in_tseq[pop_name]
             sampling = {
                 "sampling_node_ids": tree_seqs.samples(
@@ -123,82 +91,6 @@ class SimulationResult:
             if sampling["sampling_node_ids"].size == 0:
                 continue
             samplings.append(sampling)
-        return samplings
-
-    def _get_samplings_for_pops(self, sampling_time=None, pop_names=None):
-
-        res = self._get_pop_ids_and_names()
-        pop_ids_by_pop_name_in_tseq, pop_names_by_pop_id_in_tseq = res
-
-        if pop_names is None:
-            pop_names = list(sorted(pop_ids_by_pop_name_in_tseq.keys()))
-
-        if sampling_time is None:
-            if len(self.sampling_times) == 1:
-                sampling_time = self.sampling_times[0]
-            else:
-                msg = "You have samplings at different times, so you have to set one sample time"
-                raise ValueError(msg)
-        if sampling_time not in self.sampling_times:
-            msg = f"Sampling time ({sampling_time}) not in available sampling times ({self.sampling_times})"
-            raise ValueError(msg)
-
-        if pop_names:
-            pop_ids = [pop_ids_by_pop_name_in_tseq[pop_name] for pop_name in pop_names]
-        else:
-            pop_ids = sorted(pop_ids_by_pop_name_in_tseq.values())
-
-        tree_seqs = self.tree_seqs
-
-        samplings = []
-        for pop_id in pop_ids:
-            pop_name = pop_names_by_pop_id_in_tseq[pop_id]
-            sampling = {
-                "sampling_node_ids": tree_seqs.samples(
-                    population=pop_id, time=sampling_time
-                ),
-                "sampling_time": sampling_time,
-                "pop_name": pop_name,
-                "sampling_name": pop_name,
-            }
-            if sampling["sampling_node_ids"].size == 0:
-                continue
-            samplings.append(sampling)
-        return samplings
-
-    def _get_samplings_for_times(self, sampling_times, pop_name=None):
-        res = self._get_pop_ids_and_names()
-        pop_ids_by_pop_name_in_tseq, _ = res
-
-        if pop_name is None:
-            if len(pop_ids_by_pop_name_in_tseq) == 1:
-                pop_id = list(pop_ids_by_pop_name_in_tseq.values())[0]
-            else:
-                msg = "You have more than one pop, so you have to set one pop"
-                raise ValueError(msg)
-        else:
-            pop_id = pop_ids_by_pop_name_in_tseq[pop_name]
-
-        for sampling_time in sampling_times:
-            if sampling_time not in self.sampling_times:
-                msg = f"Sampling time ({sampling_time}) not in available sampling times ({self.sampling_times})"
-                raise ValueError(msg)
-
-        tree_seqs = self.tree_seqs
-
-        samplings = []
-        for sampling_time in sampling_times:
-            sample = {
-                "sampling_node_ids": tree_seqs.sample(
-                    population=pop_id, time=sampling_time
-                ),
-                "sampling_time": sampling_time,
-                "pop_name": pop_name,
-                "sampling_name": f"{pop_name}_{sampling_time}",
-            }
-            if sample["sampling_node_ids"].size == 0:
-                continue
-            samplings.append(sample)
         return samplings
 
     def _get_pop_ids_and_names(self):
@@ -252,11 +144,9 @@ def simulate(
             tree_seqs, rate=mutation_rate, random_seed=random_seed
         )
 
-    sampling_times = sorted({sampling.time for sampling in samplings})
-
     return SimulationResult(
         tree_seqs=tree_seqs,
-        sampling_times=sampling_times,
+        samplings=samplings,
         demography=demography,
         ploidy=ploidy,
     )

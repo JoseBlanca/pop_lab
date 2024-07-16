@@ -1,4 +1,4 @@
-import math
+import numpy
 
 import msprime
 
@@ -46,16 +46,18 @@ def test_exp_het():
     pop_names = get_pop_names_from_demography(demography)
 
     num_samples = 20
+    times = [10, 20]
     samplings = [
-        create_msprime_sampling(num_samples=num_samples, ploidy=2, pop_name=pop, time=0)
-        for pop in pop_names
+        create_msprime_sampling(
+            num_samples=num_samples, ploidy=2, pop_name=pop_names[0], time=time
+        )
+        for time in times
     ]
     sim_res = simulate(
         samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
     )
     exp_hets = sim_res.calc_unbiased_exp_het()
-    sampling_name = list(sim_res.samplings.keys())[0]
-    assert math.isclose(exp_hets.loc[sampling_name], 0.3457593688362918)
+    assert numpy.allclose(exp_hets.values, [0.29444444, 0.2707265])
 
 
 def test_samplings():
@@ -70,5 +72,5 @@ def test_samplings():
     sim_res = simulate(
         samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
     )
-    samplings = sim_res.samplings
-    assert samplings["pop_1"]["pop_name"] == "pop_1"
+    samplings = sim_res.sampling_info
+    assert samplings["pop_1_0"]["pop_name"] == "pop_1"
