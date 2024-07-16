@@ -112,20 +112,11 @@ output_card = ui.card(
 app_ui = ui.page_fixed(
     input_card,
     output_card,
-    ui.output_code("greeting"),
     lang="en",
 )
 
 
 def server(input, output, session):
-    @render.code
-    def greeting():
-        return "Caracola"
-
-    @render.data_frame
-    def summary_table():
-        df = pandas.DataFrame({"Parameter": [], "Value": []})
-        return render.DataGrid(df)
 
     @reactive.calc
     @reactive.event(input.run_button)
