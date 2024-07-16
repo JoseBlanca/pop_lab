@@ -156,12 +156,34 @@ def server(input, output, session):
     @render.data_frame
     def results_table():
         sim_res = do_simulation()
-        exp_hets = sim_res.calc_unbiased_exp_het()
 
-        parameters = [str(exp_hets.index)]
-        values = [exp_hets.values[0]]
-        df = pandas.DataFrame({"Parameter": parameters, "Value": values})
-        return render.DataGrid(df)
+        exp_hets = sim_res.calc_unbiased_exp_het()
+        results_table = Table.from_series(
+            exp_hets, index_name="Pop", col_name="Exp. Het."
+        )
+
+        return render.DataGrid(results_table.df)
+
+
+class Table:
+    def __init__(self, col_names: list[str]):
+        self.col_names = col_names
+        self._cols = {col: [] for col in col_names}
+
+    def add_row(self, row: dict):
+        for col_name, col in self._cols.items():
+            col.append(row[col_name])
+
+    @classmethod
+    def from_series(cls, series: pandas.Series, index_name: str, col_name: str):
+        table = cls([index_name, col_name])
+        for index, value in series.items():
+            table.add_row({index_name: index, col_name: value})
+        return table
+
+    @property
+    def df(self):
+        return pandas.DataFrame(self._cols)
 
 
 app = App(app_ui, server)
