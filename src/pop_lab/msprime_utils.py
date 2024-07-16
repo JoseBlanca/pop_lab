@@ -61,6 +61,19 @@ class SimulationResult:
             }
         return gts_per_sampling
 
+    @property
+    def samplings(self):
+        samplings = self._get_samplings()
+        sampling_dict = {}
+        for sampling in samplings:
+            sampling = {
+                key: value
+                for key, value in sampling.items()
+                if key != "sampling_node_ids"
+            }
+            sampling_dict[sampling["sampling_name"]] = sampling
+        return sampling_dict
+
     def _get_samplings(self, sampling_times=None, pop_names=None, sampling_info=None):
 
         if sampling_info is not None:
