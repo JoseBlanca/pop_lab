@@ -25,8 +25,59 @@ MIN_SAMPLE_SIZE = 20
 DEF_SAMPLE_SIZE = 50
 MAX_SAMPLE_SIZE = 100
 
+MIN_POP_SIZE = 10
+MAX_POP_SIZE = 100000
+DEF_POP_SIZE = 10000
+DEF_BOTTLENECK_SIZE = 100
+
+MIN_NUM_GENERATIONS_AGO = -1000
+MAX_NUM_GENERATIONS_AGO = -10
+DEF_NUM_GENERATIONS_AGO = [-100, -50]
+
 SUMMARY_TABLE_ID = "summary_table"
 RESULT_TABLE_ID = "results_table"
+
+pop_size_panel = (
+    (
+        ui.input_slider(
+            "pop_size_before_slider",
+            label="Before",
+            min=MIN_POP_SIZE,
+            max=MAX_POP_SIZE,
+            value=DEF_POP_SIZE,
+            width="100%",
+        ),
+        ui.input_slider(
+            "pop_size_during_slider",
+            label="During the bottleneck",
+            min=MIN_POP_SIZE,
+            max=MAX_POP_SIZE,
+            value=DEF_BOTTLENECK_SIZE,
+            width="100%",
+        ),
+        ui.input_slider(
+            "pop_size_after_slider",
+            label="After",
+            min=MIN_POP_SIZE,
+            max=MAX_POP_SIZE,
+            value=DEF_POP_SIZE,
+            width="100%",
+        ),
+    ),
+)
+
+bottleneck_duration_panel = (
+    (
+        ui.input_slider(
+            "bottleneck_duration",
+            label="Bottleneck duration (Num. generations ago)",
+            min=MIN_NUM_GENERATIONS_AGO,
+            max=MAX_NUM_GENERATIONS_AGO,
+            value=DEF_NUM_GENERATIONS_AGO,
+            width="100%",
+        ),
+    ),
+)
 
 sample_size_panel = (
     (
@@ -74,13 +125,15 @@ mut_panel = (
 
 
 inputs_panel = ui.accordion(
+    ui.accordion_panel("Bottleneck duration", bottleneck_duration_panel),
+    ui.accordion_panel("Population size", pop_size_panel),
     ui.accordion_panel("Sample size (num. individuals to sample)", sample_size_panel),
     ui.accordion_panel(
         "Recombination rate (per base pair and generation)", recomb_panel
     ),
     ui.accordion_panel("Mutation rate (per base pair and generation)", mut_panel),
     id="inputs_panel",
-    open=[],
+    open=["Bottleneck duration", "Population size"],
 )
 
 run_button = ui.input_action_button("run_button", "Run simulation")
@@ -125,19 +178,60 @@ def server(input, output, session):
         return input.sample_size_slider()
 
     @reactive.calc
+    def get_pop_size_before():
+        return input.pop_size_before_slider()
+
+    @reactive.calc
+    def get_pop_size_during():
+        return input.pop_size_during_slider()
+
+    @reactive.calc
+    def get_pop_size_after():
+        return input.pop_size_after_slider()
+
+    @reactive.calc
+    def get_bottleneck_start():
+        return -input.bottleneck_duration()[1]
+
+    @reactive.calc
+    def get_bottleneck_end():
+        return -input.bottleneck_duration()[0]
+
+    @reactive.calc
     @reactive.event(input.run_button)
     def do_simulation():
         demography = msprime.Demography()
         pop_name = "pop"
+        start_time = get_bottleneck_start()
+        end_time = get_bottleneck_end()
         demography.add_population(
-            name=pop_name, initial_size=10000, initially_active=True
+            name=pop_name, initial_size=get_pop_size_before(), initially_active=True
         )
-        num_samples = get_sample_size()
-        samplings = [
-            msprime_utils.create_msprime_sampling(
-                num_samples=num_samples, ploidy=2, pop_name=pop_name, time=0
-            )
+        demography.add_population_parameters_change(
+            time=start_time, initial_size=get_pop_size_during()
+        )
+        demography.add_population_parameters_change(
+            time=end_time, initial_size=get_pop_size_after()
+        )
+
+        sampling_times = [
+            start_time - 10,
+            start_time + 1,
+            start_time - 1,
+            int((end_time + start_time) / 2),
+            end_time + 1,
+            end_time - 1,
+            0,
         ]
+
+        num_indis_to_sample = get_sample_size()
+        samplings = []
+        for time in sampling_times:
+            sampling = msprime_utils.create_msprime_sampling(
+                num_samples=num_indis_to_sample, ploidy=2, pop_name=pop_name, time=time
+            )
+            samplings.append(sampling)
+
         sim_res = msprime_utils.simulate(
             samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
         )
@@ -150,13 +244,26 @@ def server(input, output, session):
         df = pandas.DataFrame({"Parameter": parameters, "Value": values})
         return render.DataGrid(df)
 
+    @reactive.calc
+    def get_exp_hets():
+        sim_res = do_simulation()
+        exp_hets = sim_res.calc_unbiased_exp_het()
+        samplings = sim_res.sampling_info
+        times = [
+            -samplings[sampling_name]["sampling_time"]
+            for sampling_name in exp_hets.index
+        ]
+        exp_hets.index = times
+        exp_hets.sort_index(inplace=True)
+
+        return exp_hets
+
     @render.data_frame
     def results_table():
-        sim_res = do_simulation()
 
-        exp_hets = sim_res.calc_unbiased_exp_het()
+        exp_hets = get_exp_hets()
         results_table = Table.from_series(
-            exp_hets, index_name="Pop", col_name="Exp. Het."
+            exp_hets, index_name="Generation", col_name="Exp. Het."
         )
 
         return render.DataGrid(results_table.df)
