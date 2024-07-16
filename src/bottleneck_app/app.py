@@ -1,6 +1,7 @@
 from shiny import App, reactive, render, ui
-import pandas
 
+import pandas
+import matplotlib.pyplot as plt
 import ruamel.yaml
 import msprime
 
@@ -36,6 +37,8 @@ DEF_NUM_GENERATIONS_AGO = [-100, -50]
 
 SUMMARY_TABLE_ID = "summary_table"
 RESULT_TABLE_ID = "results_table"
+EXP_HET_PLOT_ID = "exp_het_plot"
+EXP_HET_TABLE_ID = "exp_het_table"
 
 pop_size_panel = (
     (
@@ -144,19 +147,29 @@ input_card = ui.card(
     run_button,
 )
 
-summary = ui.navset_tab(
+summary = ui.output_data_frame(SUMMARY_TABLE_ID)
+
+exp_het_result = ui.navset_tab(
     ui.nav_panel(
-        "Parameters",
-        ui.output_data_frame(SUMMARY_TABLE_ID),
+        "Plot",
+        ui.output_plot(EXP_HET_PLOT_ID),
+        value="exp_het_plot",
     ),
     ui.nav_panel(
-        "Results",
-        ui.output_data_frame(RESULT_TABLE_ID),
+        "Table",
+        ui.output_data_frame(EXP_HET_TABLE_ID),
+        value="exp_het_table",
     ),
-    selected="Results",
+    selected="exp_het_plot",
 )
 
-output_panels = (ui.nav_panel("Summary", summary),)
+output_panels = (
+    ui.nav_panel("Parameters", summary),
+    ui.nav_panel(
+        "Exp. Het.",
+        exp_het_result,
+    ),
+)
 
 output_card = ui.card(
     ui.navset_tab(
@@ -258,9 +271,19 @@ def server(input, output, session):
 
         return exp_hets
 
-    @render.data_frame
-    def results_table():
+    @render.plot(alt="Expected heterozygosities")
+    def exp_het_plot():
+        exp_hets = get_exp_hets()
 
+        fig, axes = plt.subplots()
+        axes.set_title("Exp. het. over time")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("Exp. het.")
+        axes.plot(exp_hets.index, exp_hets.values)
+        return fig
+
+    @render.data_frame
+    def exp_het_table():
         exp_hets = get_exp_hets()
         results_table = Table.from_series(
             exp_hets, index_name="Generation", col_name="Exp. Het."
