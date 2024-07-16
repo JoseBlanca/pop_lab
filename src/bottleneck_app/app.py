@@ -119,6 +119,10 @@ app_ui = ui.page_fixed(
 def server(input, output, session):
 
     @reactive.calc
+    def get_sample_size():
+        return input.sample_size_slider()
+
+    @reactive.calc
     @reactive.event(input.run_button)
     def do_simulation():
         demography = msprime.Demography()
@@ -126,7 +130,7 @@ def server(input, output, session):
         demography.add_population(
             name=pop_name, initial_size=10000, initially_active=True
         )
-        num_samples = 20
+        num_samples = get_sample_size()
         samplings = [
             msprime_utils.create_msprime_sampling(
                 num_samples=num_samples, ploidy=2, pop_name=pop_name, time=0
