@@ -4,6 +4,8 @@ import pandas
 import matplotlib.pyplot as plt
 import ruamel.yaml
 import msprime
+import scipy
+import demesdraw
 
 import msprime_utils
 
@@ -39,6 +41,7 @@ SUMMARY_TABLE_ID = "summary_table"
 RESULT_TABLE_ID = "results_table"
 EXP_HET_PLOT_ID = "exp_het_plot"
 EXP_HET_TABLE_ID = "exp_het_table"
+DEMOGRAPHIC_PLOT_ID = "demographic_plot"
 
 pop_size_panel = (
     (
@@ -126,7 +129,6 @@ mut_panel = (
     ),
 )
 
-
 inputs_panel = ui.accordion(
     ui.accordion_panel("Bottleneck duration", bottleneck_duration_panel),
     ui.accordion_panel("Population size", pop_size_panel),
@@ -141,9 +143,13 @@ inputs_panel = ui.accordion(
 
 run_button = ui.input_action_button("run_button", "Run simulation")
 
+demographic_plot = ui.output_plot(DEMOGRAPHIC_PLOT_ID)
+demographic_card = ui.card(demographic_plot)
+
 input_card = ui.card(
     ui.h1("Bottleneck"),
     ui.card(inputs_panel),
+    demographic_card,
     run_button,
 )
 
@@ -162,6 +168,7 @@ exp_het_result = ui.navset_tab(
     ),
     selected="exp_het_plot",
 )
+
 
 output_panels = (
     ui.nav_panel("Parameters", summary),
@@ -210,22 +217,33 @@ def server(input, output, session):
     def get_bottleneck_end():
         return -input.bottleneck_duration()[0]
 
+    def get_pop_name():
+        return "pop"
+
     @reactive.calc
-    @reactive.event(input.run_button)
-    def do_simulation():
+    def get_demography():
         demography = msprime.Demography()
-        pop_name = "pop"
+        pop_name = get_pop_name()
         start_time = get_bottleneck_start()
         end_time = get_bottleneck_end()
         demography.add_population(
-            name=pop_name, initial_size=get_pop_size_before(), initially_active=True
+            name=pop_name, initial_size=get_pop_size_after(), initially_active=True
         )
         demography.add_population_parameters_change(
             time=start_time, initial_size=get_pop_size_during()
         )
         demography.add_population_parameters_change(
-            time=end_time, initial_size=get_pop_size_after()
+            time=end_time, initial_size=get_pop_size_before()
         )
+        return demography
+
+    @reactive.calc
+    @reactive.event(input.run_button)
+    def do_simulation():
+        demography = get_demography()
+        pop_name = get_pop_name()
+        start_time = get_bottleneck_start()
+        end_time = get_bottleneck_end()
 
         sampling_times = [
             start_time - 10,
@@ -290,6 +308,14 @@ def server(input, output, session):
         )
 
         return render.DataGrid(results_table.df)
+
+    @render.plot(alt="Demographic plot")
+    def demographic_plot():
+        demography = get_demography()
+        fig, axes = plt.subplots()
+        demesdraw.tubes(demography.to_demes(), ax=axes)
+
+        return fig
 
 
 class Table:
