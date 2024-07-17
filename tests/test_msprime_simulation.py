@@ -56,8 +56,8 @@ def test_exp_het():
     sim_res = simulate(
         samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
     )
-    exp_hets = sim_res.calc_unbiased_exp_het()
-    assert numpy.allclose(exp_hets.values, [0.29444444, 0.2707265])
+    res = sim_res.calc_unbiased_exp_het()
+    assert numpy.allclose(res["exp_het"].values, [0.2707265, 0.29444444])
 
 
 def test_samplings():

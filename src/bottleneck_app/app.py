@@ -42,6 +42,8 @@ RESULT_TABLE_ID = "results_table"
 EXP_HET_PLOT_ID = "exp_het_plot"
 EXP_HET_TABLE_ID = "exp_het_table"
 DEMOGRAPHIC_PLOT_ID = "demographic_plot"
+POLY_MARKERS_PLOT_ID = "poly_markers_plot"
+POLY_MARKERS_TABLE_ID = "poly_markers_table"
 
 pop_size_panel = (
     (
@@ -169,12 +171,30 @@ exp_het_result = ui.navset_tab(
     selected="exp_het_plot",
 )
 
+poly_markers_result = ui.navset_tab(
+    ui.nav_panel(
+        "Plot",
+        ui.output_plot(POLY_MARKERS_PLOT_ID),
+        value="poly_markers_plot",
+    ),
+    ui.nav_panel(
+        "Table",
+        ui.output_data_frame(POLY_MARKERS_TABLE_ID),
+        value="poly_markers_table",
+    ),
+    selected="poly_markers_plot",
+)
+
 
 output_panels = (
     ui.nav_panel("Parameters", summary),
     ui.nav_panel(
         "Exp. Het.",
         exp_het_result,
+    ),
+    ui.nav_panel(
+        "Polymorphic variants",
+        poly_markers_result,
     ),
 )
 
@@ -278,36 +298,45 @@ def server(input, output, session):
     @reactive.calc
     def get_exp_hets():
         sim_res = do_simulation()
-        exp_hets = sim_res.calc_unbiased_exp_het()
-        samplings = sim_res.sampling_info
-        times = [
-            -samplings[sampling_name]["sampling_time"]
-            for sampling_name in exp_hets.index
-        ]
-        exp_hets.index = times
-        exp_hets.sort_index(inplace=True)
+        return sim_res.calc_unbiased_exp_het()
 
-        return exp_hets
+    @reactive.calc
+    def get_num_markers():
+        sim_res = do_simulation()
+        num_markers = sim_res.calc_num_markers()
+        return num_markers
 
     @render.plot(alt="Expected heterozygosities")
     def exp_het_plot():
-        exp_hets = get_exp_hets()
+        fig, axes = plt.subplots()
+        res = get_exp_hets()
+
+        axes.set_title("Exp. het. over time")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("Exp. het.")
+        axes.plot(res["times"], res["exp_het"])
+        return fig
+
+    @render.data_frame
+    def exp_het_table():
+        res = get_exp_hets()
+        results_table = Table.from_dict(
+            {"Exp. het.": res["exp_het"], "Generation": res["times"]}
+        )
+        return render.DataGrid(results_table.df)
+
+    @render.plot(alt="Number of variants")
+    def poly_markers_plot():
+        # num_markers = get_num_markers()
 
         fig, axes = plt.subplots()
+        axes.plot([1, 2, 3], [1, 2, 3])
+        return fig
         axes.set_title("Exp. het. over time")
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. het.")
         axes.plot(exp_hets.index, exp_hets.values)
         return fig
-
-    @render.data_frame
-    def exp_het_table():
-        exp_hets = get_exp_hets()
-        results_table = Table.from_series(
-            exp_hets, index_name="Generation", col_name="Exp. Het."
-        )
-
-        return render.DataGrid(results_table.df)
 
     @render.plot(alt="Demographic plot")
     def demographic_plot():
@@ -332,6 +361,12 @@ class Table:
         table = cls([index_name, col_name])
         for index, value in series.items():
             table.add_row({index_name: index, col_name: value})
+        return table
+
+    @classmethod
+    def from_dict(cls, dict: [str, pandas.Series]):
+        table = cls([])
+        table._cols = dict.copy()
         return table
 
     @property
