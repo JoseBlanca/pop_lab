@@ -148,9 +148,9 @@ class SimulationResult:
             gts = gt_info["gts"]
             this_res = pynei.stats.calc_poly_vars_ratio(gts, poly_threshold=0.95)
             samplings.append(sampling_name)
-            poly_ratios.append(this_res["poly_ratio"]["all_indis"])
+            poly_ratios.append(this_res["poly_ratio_over_variables"]["all_indis"])
             num_variables.append(this_res["num_variable"]["all_indis"])
-            num_poly.append(this_res["poly_ratio_over_variables"]["all_indis"])
+            num_poly.append(this_res["num_poly"]["all_indis"])
         res = pandas.DataFrame(
             {
                 "Polymorphic ratio (95%)": poly_ratios,
@@ -163,6 +163,13 @@ class SimulationResult:
         res["Generation"] = times
         res.sort_values(by="Generation", inplace=True)
         return res
+
+    def calc_allele_freq_spectrum(self):
+        gts_per_sampling = self.get_genotypes()
+        for sampling_name, gt_info in gts_per_sampling.items():
+            gts = gt_info["gts"]
+            res = pynei.stats.calc_allele_freq_spectrum(gts)
+            print(res)
 
 
 def create_msprime_sampling(num_samples: int, ploidy: int, pop_name: str, time: int):
