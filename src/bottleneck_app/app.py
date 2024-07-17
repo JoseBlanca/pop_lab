@@ -16,6 +16,10 @@ recomb_panel = (
     ),
 )
 
+MIN_SEQ_LENGTH = 1e4
+MAX_SEQ_LENGTH = 10e4
+DEF_SEQ_LENGTH = 5e4
+
 MIN_RECOMB_RATE = -10
 DEF_RECOMB_RATE = -8
 MAX_RECOMB_RATE = -6
@@ -131,6 +135,19 @@ mut_panel = (
     ),
 )
 
+seq_len_panel = (
+    (
+        ui.input_slider(
+            "seq_len_slider",
+            label="",
+            min=MIN_SEQ_LENGTH,
+            max=MAX_SEQ_LENGTH,
+            value=DEF_SEQ_LENGTH,
+            width="100%",
+        ),
+    ),
+)
+
 inputs_panel = ui.accordion(
     ui.accordion_panel("Bottleneck duration", bottleneck_duration_panel),
     ui.accordion_panel("Population size", pop_size_panel),
@@ -139,6 +156,7 @@ inputs_panel = ui.accordion(
         "Recombination rate (per base pair and generation)", recomb_panel
     ),
     ui.accordion_panel("Mutation rate (per base pair and generation)", mut_panel),
+    ui.accordion_panel("Sequence length (in pb)", seq_len_panel),
     id="inputs_panel",
     open=["Bottleneck duration", "Population size"],
 )
@@ -284,7 +302,7 @@ def server(input, output, session):
             samplings.append(sampling)
 
         sim_res = msprime_utils.simulate(
-            samplings, demography=demography, seq_length_in_bp=1e4
+            samplings, demography=demography, seq_length_in_bp=input.seq_len_slider()
         )
         return sim_res
 
