@@ -312,10 +312,50 @@ def server(input, output, session):
 
     @render.data_frame
     def summary_table():
-        parameters = ["hola"]
-        values = ["caracola"]
-        df = pandas.DataFrame({"Parameter": parameters, "Value": values})
-        return render.DataGrid(df)
+        table = Table(["Parameter", "Value"])
+        table.add_row(
+            {"Parameter": "Pop. size before bottleneck", "Value": get_pop_size_before()}
+        )
+        table.add_row(
+            {"Parameter": "Pop. size during bottleneck", "Value": get_pop_size_during()}
+        )
+        table.add_row(
+            {"Parameter": "Pop. size after bottleneck", "Value": get_pop_size_after()}
+        )
+        table.add_row(
+            {
+                "Parameter": "Bottleneck start (generations ago)",
+                "Value": get_bottleneck_end(),
+            }
+        )
+        table.add_row(
+            {
+                "Parameter": "Bottleneck end (generations ago)",
+                "Value": get_bottleneck_start(),
+            }
+        )
+        table.add_row(
+            {
+                "Parameter": "Sample size (num. individuals sampled at each time)",
+                "Value": get_sample_size(),
+            }
+        )
+        table.add_row(
+            {
+                "Parameter": "Mutation rate (per base pair and generation)",
+                "Value": 10 ** input.mut_rate_slider(),
+            }
+        )
+        table.add_row(
+            {
+                "Parameter": "Recombination rate (per base pair and generation)",
+                "Value": 10 ** input.recomb_rate_slider(),
+            }
+        )
+        table.add_row(
+            {"Parameter": "Sequence length (in bp)", "Value": input.seq_len_slider()}
+        )
+        return render.DataGrid(table.df, width="100%")
 
     @reactive.calc
     def get_exp_hets():
