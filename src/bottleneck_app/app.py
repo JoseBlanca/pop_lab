@@ -376,7 +376,7 @@ class Table:
         return table
 
     @classmethod
-    def from_dict(cls, dict: [str, pandas.Series]):
+    def from_dict(cls, dict: list[str, pandas.Series]):
         table = cls([])
         table._cols = dict.copy()
         return table
