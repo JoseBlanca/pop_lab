@@ -48,6 +48,7 @@ EXP_HET_TABLE_ID = "exp_het_table"
 DEMOGRAPHIC_PLOT_ID = "demographic_plot"
 POLY_MARKERS_PLOT_ID = "poly_markers_plot"
 POLY_MARKERS_TABLE_ID = "poly_markers_table"
+AFS_PLOT_ID = "afs_plot"
 
 pop_size_panel = (
     (
@@ -203,6 +204,8 @@ poly_markers_result = ui.navset_tab(
     selected="poly_markers_plot",
 )
 
+afs_result = ui.output_plot(AFS_PLOT_ID)
+
 
 output_panels = (
     ui.nav_panel("Parameters", summary),
@@ -213,6 +216,10 @@ output_panels = (
     ui.nav_panel(
         "Polymorphic variants",
         poly_markers_result,
+    ),
+    ui.nav_panel(
+        "Allele frequency spectrum",
+        afs_result,
     ),
 )
 
@@ -418,6 +425,22 @@ def server(input, output, session):
         fig, axes = plt.subplots()
         demesdraw.tubes(demography.to_demes(), ax=axes)
 
+        return fig
+
+    @render.plot(alt="Allele frequency spectrum")
+    def afs_plot():
+        sim_res = do_simulation()
+        fig, axes = plt.subplots()
+        samplings = sim_res.sampling_info
+        res = sim_res.calc_allele_freq_spectrum()
+        bin_edges = res["bin_edges"]
+        x_poss = (bin_edges[1:] + bin_edges[:-1]) / 2
+        for sampling_name, counts in res["counts"].items():
+            generation = samplings[sampling_name]["sampling_time"]
+            axes.plot(x_poss, counts, label=generation)
+        axes.set_xlabel("Allele frequency")
+        axes.set_ylabel("Num. variants")
+        axes.legend()
         return fig
 
 

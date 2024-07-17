@@ -94,3 +94,7 @@ def test_num_vars():
     res = sim_res.calc_num_variants()
     assert numpy.allclose(res["Num. variables"].values, [12, 10])
     assert numpy.allclose(res["Num. polymorphic"].values, [9, 9])
+
+    res = sim_res.calc_allele_freq_spectrum()
+    expected = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 3, 1, 0, 2, 2]
+    assert numpy.all(numpy.equal(res["counts"]["pop_1_10"].values, expected))

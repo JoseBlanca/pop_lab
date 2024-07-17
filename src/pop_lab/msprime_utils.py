@@ -1,3 +1,4 @@
+import numpy
 import pandas
 import msprime
 
@@ -166,10 +167,18 @@ class SimulationResult:
 
     def calc_allele_freq_spectrum(self):
         gts_per_sampling = self.get_genotypes()
+        afs_per_sampling = {}
+        bin_edges = None
         for sampling_name, gt_info in gts_per_sampling.items():
             gts = gt_info["gts"]
             res = pynei.stats.calc_allele_freq_spectrum(gts)
-            print(res)
+            afs_per_sampling[sampling_name] = res["counts"]["all_indis"]
+            if bin_edges is None:
+                bin_edges = res["bin_edges"]
+            else:
+                assert numpy.allclose(bin_edges, res["bin_edges"])
+        afs = pandas.DataFrame(afs_per_sampling)
+        return {"counts": afs, "bin_edges": bin_edges}
 
 
 def create_msprime_sampling(num_samples: int, ploidy: int, pop_name: str, time: int):
