@@ -302,7 +302,11 @@ def server(input, output, session):
             samplings.append(sampling)
 
         sim_res = msprime_utils.simulate(
-            samplings, demography=demography, seq_length_in_bp=input.seq_len_slider()
+            samplings,
+            demography=demography,
+            seq_length_in_bp=input.seq_len_slider(),
+            mutation_rate=10 ** input.mut_rate_slider(),
+            recomb_rate=10 ** input.recomb_rate_slider(),
         )
         return sim_res
 
