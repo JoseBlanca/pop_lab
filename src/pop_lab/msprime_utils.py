@@ -120,6 +120,14 @@ class SimulationResult:
         df.sort_values("times", inplace=True)
         return df.to_dict(orient="series")
 
+    def _get_generation_times_for_samplings(self, sampling_names):
+        samplings = self.sampling_info
+        times = [
+            -samplings[sampling_name]["sampling_time"]
+            for sampling_name in sampling_names
+        ]
+        return times
+
     def calc_unbiased_exp_het(self):
         gts_per_sampling = self.get_genotypes()
         exp_hets = {}
@@ -129,6 +137,32 @@ class SimulationResult:
         exp_hets = pandas.Series(exp_hets)
         exp_hets.name = "exp_het"
         return self._sort_series_by_sampling_time(exp_hets)
+
+    def calc_num_variants(self):
+        gts_per_sampling = self.get_genotypes()
+        num_poly = []
+        num_variables = []
+        poly_ratios = []
+        samplings = []
+        for sampling_name, gt_info in gts_per_sampling.items():
+            gts = gt_info["gts"]
+            this_res = pynei.stats.calc_poly_vars_ratio(gts, poly_threshold=0.95)
+            samplings.append(sampling_name)
+            poly_ratios.append(this_res["poly_ratio"]["all_indis"])
+            num_variables.append(this_res["num_variable"]["all_indis"])
+            num_poly.append(this_res["poly_ratio_over_variables"]["all_indis"])
+        res = pandas.DataFrame(
+            {
+                "Polymorphic ratio (95%)": poly_ratios,
+                "Num. variables": num_variables,
+                "Num. polymorphic": num_poly,
+            },
+            index=samplings,
+        )
+        times = self._get_generation_times_for_samplings(samplings)
+        res["Generation"] = times
+        res.sort_values(by="Generation", inplace=True)
+        return res
 
 
 def create_msprime_sampling(num_samples: int, ploidy: int, pop_name: str, time: int):

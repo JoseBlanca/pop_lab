@@ -74,3 +74,23 @@ def test_samplings():
     )
     samplings = sim_res.sampling_info
     assert samplings["pop_1_0"]["pop_name"] == "pop_1"
+
+
+def test_num_vars():
+    demography = create_simple_demography(num_pops=1)
+    pop_names = get_pop_names_from_demography(demography)
+
+    num_samples = 20
+    times = [10, 20]
+    samplings = [
+        create_msprime_sampling(
+            num_samples=num_samples, ploidy=2, pop_name=pop_names[0], time=time
+        )
+        for time in times
+    ]
+    sim_res = simulate(
+        samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
+    )
+    res = sim_res.calc_num_variants()
+    assert numpy.allclose(res["Num. variables"].values, [12, 10])
+    assert numpy.allclose(res["Num. polymorphic"].values, [9, 9])

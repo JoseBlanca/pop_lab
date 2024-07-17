@@ -301,9 +301,9 @@ def server(input, output, session):
         return sim_res.calc_unbiased_exp_het()
 
     @reactive.calc
-    def get_num_markers():
+    def get_num_variants():
         sim_res = do_simulation()
-        num_markers = sim_res.calc_num_markers()
+        num_markers = sim_res.calc_num_variants()
         return num_markers
 
     @render.plot(alt="Expected heterozygosities")
@@ -327,16 +327,28 @@ def server(input, output, session):
 
     @render.plot(alt="Number of variants")
     def poly_markers_plot():
-        # num_markers = get_num_markers()
+        res = get_num_variants()
 
-        fig, axes = plt.subplots()
-        axes.plot([1, 2, 3], [1, 2, 3])
-        return fig
-        axes.set_title("Exp. het. over time")
+        fig, axess = plt.subplots(nrows=2)
+        axes = axess[0]
+        axes.set_title("Ratio poly. (95%) var over time")
         axes.set_xlabel("generation")
-        axes.set_ylabel("Exp. het.")
-        axes.plot(exp_hets.index, exp_hets.values)
+        axes.set_ylabel("Num. variants.")
+        axes.plot(res["Generation"], res["Polymorphic ratio (95%)"])
+        axes.set_ylim(0, 1)
+
+        axes = axess[1]
+        axes.set_xlabel("generation")
+        axes.set_ylabel("Num. variants.")
+        axes.plot(res["Generation"], res["Num. variables"], label="Num. variable")
+        axes.plot(res["Generation"], res["Num. polymorphic"], label="Num. poly.")
+        axes.legend()
         return fig
+
+    @render.data_frame
+    def poly_markers_table():
+        res = get_num_variants()
+        return render.DataGrid(res)
 
     @render.plot(alt="Demographic plot")
     def demographic_plot():
