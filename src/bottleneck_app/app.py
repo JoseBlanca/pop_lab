@@ -1,5 +1,6 @@
 from shiny import App, reactive, render, ui
 
+import numpy
 import pandas
 import matplotlib.pyplot as plt
 import ruamel.yaml
@@ -7,6 +8,7 @@ import msprime
 import scipy
 import demesdraw
 
+import pynei
 import msprime_utils
 
 
@@ -49,6 +51,7 @@ DEMOGRAPHIC_PLOT_ID = "demographic_plot"
 POLY_MARKERS_PLOT_ID = "poly_markers_plot"
 POLY_MARKERS_TABLE_ID = "poly_markers_table"
 AFS_PLOT_ID = "afs_plot"
+PCA_PLOT_ID = "pca_plot"
 
 pop_size_panel = (
     (
@@ -206,6 +209,9 @@ poly_markers_result = ui.navset_tab(
 
 afs_result = ui.output_plot(AFS_PLOT_ID)
 
+pca_result = ui.output_plot(PCA_PLOT_ID)
+
+debug_text = ui.output_text("debug_text")
 
 output_panels = (
     ui.nav_panel("Parameters", summary),
@@ -221,6 +227,11 @@ output_panels = (
         "Allele frequency spectrum",
         afs_result,
     ),
+    ui.nav_panel(
+        "PCA",
+        pca_result,
+    ),
+    ui.nav_panel("Debug", debug_text),
 )
 
 output_card = ui.card(
@@ -440,6 +451,38 @@ def server(input, output, session):
             axes.plot(x_poss, counts, label=generation)
         axes.set_xlabel("Allele frequency")
         axes.set_ylabel("Num. variants")
+        axes.legend()
+        return fig
+
+    @render.text
+    def debug_text():
+        return "Debugging text"
+
+    @render.plot(alt="Principal Component Analysis")
+    def pca_plot():
+        sim_res = do_simulation()
+        fig, axes = plt.subplots()
+        res = sim_res.get_gts()
+        samping_info = sim_res.sampling_info
+
+        gts = res["gts"].get_mat_012(transform_to_biallelic=True).T
+        sampling_names = res["sampling_names"]
+        pca_res = pynei.do_pca(pandas.DataFrame(gts))
+        projections = pca_res["projections"]
+        explained_variance = pca_res["explained_variance (%)"]
+
+        samplings = numpy.unique(sampling_names)
+        samplings = sorted(samplings, key=lambda x: samping_info[x]["sampling_time"])
+
+        x_values = projections.iloc[:, 0].values
+        y_values = projections.iloc[:, 1].values
+        for sampling_name in samplings:
+            mask = sampling_names == sampling_name
+            time = samping_info[sampling_name]["sampling_time"]
+            axes.scatter(x_values[mask], y_values[mask], label=f"Generation: {time}")
+
+        axes.set_xlabel(f"PC1 ({explained_variance[0]:.2f}%)")
+        axes.set_ylabel(f"PC2 ({explained_variance[1]:.2f}%)")
         axes.legend()
         return fig
 

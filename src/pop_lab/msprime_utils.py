@@ -18,8 +18,45 @@ class SimulationResult:
         self.demography = demography
         self.ploidy = ploidy
 
+    def _from_haplotype_array_to_gt_array(self, haplotype_array):
+        new_shape = (haplotype_array.shape[0], -1, self.ploidy)
+        gt_array = haplotype_array.reshape(new_shape)
+        return gt_array
+
+    def _get_indi_names(self):
+        samplings = self._get_sampling_info()
+        indi_names = {}
+        for sampling_info in samplings:
+            sampling_name = sampling_info["sampling_name"]
+            for node_id in sampling_info["sampling_node_ids"]:
+                indi_names[node_id] = f"{sampling_name}-indi_{node_id}"
+        return indi_names
+
+    def get_gts(self):
+        tree_seqs = self.tree_seqs
+        sampling_name_for_node_id = {}
+        samplings = self._get_sampling_info()
+        for sampling_info in samplings:
+            for sampling_id in sampling_info["sampling_node_ids"]:
+                sampling_name_for_node_id[sampling_id] = sampling_info["sampling_name"]
+
+        indi_names_by_node_id = self._get_indi_names()
+        sampling_names = []
+        indi_names = []
+        for sample_node_id in tree_seqs.samples():
+            indi_names.append(indi_names_by_node_id[sample_node_id])
+            sampling_names.append(sampling_name_for_node_id[sample_node_id])
+        indi_names = indi_names[:: self.ploidy]
+        sampling_names = sampling_names[:: self.ploidy]
+
+        haplotype_array = tree_seqs.genotype_matrix()
+        gt_array = self._from_haplotype_array_to_gt_array(haplotype_array)
+        gts = pynei.genotypes.Genotypes(gt_array, indi_names)
+        return {"gts": gts, "sampling_names": numpy.array(sampling_names)}
+
     def get_gts_by_sampling(self) -> dict:
         samplings = self._get_sampling_info()
+        indi_names_by_node_id = self._get_indi_names()
         ploidy = self.ploidy
         node_idxss = []
         pops = []
@@ -34,8 +71,8 @@ class SimulationResult:
             num_indis_in_sampling = node_idxs_for_these_samples.size // ploidy
             assert num_indis_in_sampling * ploidy == node_idxs_for_these_samples.size
             indi_names_for_this_sampling = [
-                f"{sampling['sampling_name']}-indi_{idx}"
-                for idx in range(num_indis_in_sampling)
+                indi_names_by_node_id[node_id]
+                for node_id in node_idxs_for_these_samples[::ploidy]
             ]
             indi_namess.append(indi_names_for_this_sampling)
 
@@ -50,8 +87,7 @@ class SimulationResult:
             # 2 is the second alternate allele, … and -1 is a missing allele call.
             # Adjacent haplotypes originate from the same sample
             haplotype_array = genotypes[:, node_idxs]
-            new_shape = (haplotype_array.shape[0], -1, self.ploidy)
-            gt_array = haplotype_array.reshape(new_shape)
+            gt_array = self._from_haplotype_array_to_gt_array(haplotype_array)
             gts = pynei.genotypes.Genotypes(gt_array, indi_names)
             gts_per_sampling[sampling["sampling_name"]] = {
                 "gts": gts,

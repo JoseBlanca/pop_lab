@@ -98,3 +98,24 @@ def test_num_vars():
     res = sim_res.calc_allele_freq_spectrum()
     expected = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 3, 1, 0, 2, 2]
     assert numpy.all(numpy.equal(res["counts"]["pop_1_10"].values, expected))
+
+
+def test_gt_df():
+    demography = create_simple_demography(num_pops=1)
+    pop_names = get_pop_names_from_demography(demography)
+
+    num_samples = 20
+    times = [10, 20]
+    samplings = [
+        create_msprime_sampling(
+            num_samples=num_samples, ploidy=2, pop_name=pop_names[0], time=time
+        )
+        for time in times
+    ]
+    sim_res = simulate(
+        samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
+    )
+    res = sim_res.get_gts()
+    assert res["gts"].num_indis == 40
+    assert sorted(set(res["sampling_names"])) == ["pop_1_10", "pop_1_20"]
+    assert res["sampling_names"].shape == (40,)
