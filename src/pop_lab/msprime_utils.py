@@ -18,7 +18,7 @@ class SimulationResult:
         self.demography = demography
         self.ploidy = ploidy
 
-    def get_genotypes(self):
+    def get_gts_by_sampling(self) -> dict:
         samplings = self._get_sampling_info()
         ploidy = self.ploidy
         node_idxss = []
@@ -130,7 +130,7 @@ class SimulationResult:
         return times
 
     def calc_unbiased_exp_het(self):
-        gts_per_sampling = self.get_genotypes()
+        gts_per_sampling = self.get_gts_by_sampling()
         exp_hets = {}
         for sampling_name, gt_info in gts_per_sampling.items():
             gts = gt_info["gts"]
@@ -140,7 +140,7 @@ class SimulationResult:
         return self._sort_series_by_sampling_time(exp_hets)
 
     def calc_num_variants(self):
-        gts_per_sampling = self.get_genotypes()
+        gts_per_sampling = self.get_gts_by_sampling()
         num_poly = []
         num_variables = []
         poly_ratios = []
@@ -166,7 +166,7 @@ class SimulationResult:
         return res
 
     def calc_allele_freq_spectrum(self):
-        gts_per_sampling = self.get_genotypes()
+        gts_per_sampling = self.get_gts_by_sampling()
         afs_per_sampling = {}
         bin_edges = None
         for sampling_name, gt_info in gts_per_sampling.items():

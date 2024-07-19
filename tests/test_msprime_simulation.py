@@ -32,7 +32,7 @@ def test_msprime_simulation():
         samplings, demography=demography, seq_length_in_bp=1e4, random_seed=42
     )
 
-    gts_per_sampling = sim_res.get_genotypes()
+    gts_per_sampling = sim_res.get_gts_by_sampling()
     gts_for_sampling = list(gts_per_sampling.values())[0]
     assert gts_for_sampling["pop_name"] == "pop_1"
     assert gts_for_sampling["gts"].gt_array.shape[1:] == (
