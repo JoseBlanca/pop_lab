@@ -14,7 +14,8 @@ This will serve the files in the site directory on port 8008. Then point your br
 
 How to serve a new development version, all together:
 
-$ rm -r shiny_site/; shinylive export src/bottleneck_app/ shiny_site ; python3 -m http.server --directory shiny_site --bind localhost 8008
+$ rm -r shiny_site/; uv run shinylive export src/one_locus_app/ shiny_site ; uv run python -m http.server --directory shiny_site --bind localhost 8008
+$ rm -r shiny_site/; uv run shinylive export src/bottleneck_app/ shiny_site ; uv run python3 -m http.server --directory shiny_site --bind localhost 8008
 
 If you have multiple applications, you may want to export them in subdirectories of the site, so that they can all share the same Shinylive assets. You can do this with the --subdir option:
 
