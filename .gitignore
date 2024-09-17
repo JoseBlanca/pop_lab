@@ -10,3 +10,4 @@ shiny_site/
 src/pop_lab/pynei
 src/bottleneck_app/pynei/
 src/bottleneck_app/msprime_utils.py
+pop_lab.code-workspace
