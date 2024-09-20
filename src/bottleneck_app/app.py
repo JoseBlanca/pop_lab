@@ -9,7 +9,7 @@ import scipy
 import demesdraw
 
 import pynei
-import msprime_utils
+import msprime_sim_utils
 
 
 recomb_panel = (
@@ -248,7 +248,6 @@ app_ui = ui.page_fixed(
 
 
 def server(input, output, session):
-
     @reactive.calc
     def get_sample_size():
         return input.sample_size_slider()
@@ -312,15 +311,15 @@ def server(input, output, session):
         ]
 
         num_indis_to_sample = get_sample_size()
-        samplings = []
+        sample_sets = []
         for time in sampling_times:
-            sampling = msprime_utils.create_msprime_sampling(
+            sample_set = msprime_sim_utils.create_msprime_sample_set(
                 num_samples=num_indis_to_sample, ploidy=2, pop_name=pop_name, time=time
             )
-            samplings.append(sampling)
+            sample_sets.append(sample_set)
 
-        sim_res = msprime_utils.simulate(
-            samplings,
+        sim_res = msprime_sim_utils.simulate(
+            sample_sets,
             demography=demography,
             seq_length_in_bp=input.seq_len_slider(),
             mutation_rate=10 ** input.mut_rate_slider(),
@@ -394,14 +393,17 @@ def server(input, output, session):
         axes.set_title("Exp. het. over time")
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. het.")
-        axes.plot(res["times"], res["exp_het"])
+        axes.plot(list(res["exp_het"].index), res["exp_het"].values)
         return fig
 
     @render.data_frame
     def exp_het_table():
         res = get_exp_hets()
         results_table = Table.from_dict(
-            {"Exp. het.": res["exp_het"], "Generation": res["times"]}
+            {
+                "Exp. het.": res["exp_het"].values,
+                "Generation": list(res["exp_het"].index),
+            }
         )
         return render.DataGrid(results_table.df)
 
@@ -414,21 +416,32 @@ def server(input, output, session):
         axes.set_title("Ratio poly. (95%) var over time")
         axes.set_xlabel("generation")
         axes.set_ylabel("Num. variants.")
-        axes.plot(res["Generation"], res["Polymorphic ratio (95%)"])
+        axes.plot(
+            list(res["Poly. ratio over variables"].index),
+            res["Poly. ratio over variables"].values,
+        )
         axes.set_ylim(0, 1)
 
         axes = axess[1]
         axes.set_xlabel("generation")
-        axes.set_ylabel("Num. variants.")
-        axes.plot(res["Generation"], res["Num. variables"], label="Num. variable")
-        axes.plot(res["Generation"], res["Num. polymorphic"], label="Num. poly.")
+        axes.set_ylabel("Num. variants")
+        axes.plot(
+            list(res["Num. variables"].index),
+            res["Num. variables"].values,
+            label="Num. variable",
+        )
+        axes.plot(
+            list(res["Num. polymorphic"].index),
+            res["Num. polymorphic"].values,
+            label="Num. poly.",
+        )
         axes.legend()
         return fig
 
     @render.data_frame
     def poly_markers_table():
         res = get_num_variants()
-        return render.DataGrid(res)
+        return render.DataGrid(Table.from_dict(res).df)
 
     @render.plot(alt="Demographic plot")
     def demographic_plot():
@@ -442,12 +455,13 @@ def server(input, output, session):
     def afs_plot():
         sim_res = do_simulation()
         fig, axes = plt.subplots()
-        samplings = sim_res.sampling_info
+        res = sim_res.get_vars_and_pop_samples()
+        pop_samples_info = res["pop_samples_info"]
         res = sim_res.calc_allele_freq_spectrum()
         bin_edges = res["bin_edges"]
         x_poss = (bin_edges[1:] + bin_edges[:-1]) / 2
-        for sampling_name, counts in res["counts"].items():
-            generation = samplings[sampling_name]["sampling_time"]
+        for pop_sample_name, counts in res["counts"].items():
+            generation = pop_samples_info[pop_sample_name]["sample_time"]
             axes.plot(x_poss, counts, label=generation)
         axes.set_xlabel("Allele frequency")
         axes.set_ylabel("Num. variants")
@@ -462,13 +476,14 @@ def server(input, output, session):
     def pca_plot():
         sim_res = do_simulation()
         fig, axes = plt.subplots()
-        res = sim_res.get_gts()
-        samping_info = sim_res.sampling_info
 
-        gts = res["gts"].get_mat_012(transform_to_biallelic=True).T
-        sampling_names = res["sampling_names"]
+        res = sim_res.get_vars_and_pop_samples()
+        vars = res["vars"]
+        pop_samples_info = res["pop_samples_info"]
+        indis_by_pop_sample = res["indis_by_pop_sample"]
+
         try:
-            pca_res = pynei.do_pca(pandas.DataFrame(gts))
+            pca_res = pynei.pca.do_pca_with_vars(vars, transform_to_biallelic=True)
         except Exception as error:
             if "DLASCL" in str(error):
                 raise RuntimeError(
@@ -479,14 +494,17 @@ def server(input, output, session):
         projections = pca_res["projections"]
         explained_variance = pca_res["explained_variance (%)"]
 
-        samplings = numpy.unique(sampling_names)
-        samplings = sorted(samplings, key=lambda x: samping_info[x]["sampling_time"])
+        pop_sample_names = sorted(
+            pop_samples_info.keys(),
+            key=lambda pop: pop_samples_info[pop]["sample_time"],
+        )
 
+        indi_names = projections.index.to_numpy()
         x_values = projections.iloc[:, 0].values
         y_values = projections.iloc[:, 1].values
-        for sampling_name in samplings:
-            mask = sampling_names == sampling_name
-            time = samping_info[sampling_name]["sampling_time"]
+        for pop_sample_name in pop_sample_names:
+            mask = numpy.isin(indi_names, indis_by_pop_sample[pop_sample_name])
+            time = pop_samples_info[pop_sample_name]["sample_time"]
             axes.scatter(x_values[mask], y_values[mask], label=f"Generation: {time}")
 
         axes.set_xlabel(f"PC1 ({explained_variance[0]:.2f}%)")
