@@ -467,7 +467,15 @@ def server(input, output, session):
 
         gts = res["gts"].get_mat_012(transform_to_biallelic=True).T
         sampling_names = res["sampling_names"]
-        pca_res = pynei.do_pca(pandas.DataFrame(gts))
+        try:
+            pca_res = pynei.do_pca(pandas.DataFrame(gts))
+        except Exception as error:
+            if "DLASCL" in str(error):
+                raise RuntimeError(
+                    f" PCA calculation failed, please rerun the simulation\n(This is a bug in OpenBLAS: On entry to DLASCL parameter number 4 had an illegal value)"
+                )
+            else:
+                raise error
         projections = pca_res["projections"]
         explained_variance = pca_res["explained_variance (%)"]
 
