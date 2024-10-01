@@ -13,3 +13,6 @@ src/bottleneck_app/msprime_utils.py
 pop_lab.code-workspace
 src/bottleneck_app/pynei_old/
 src/bottleneck_app/__pycache__/
+src/example_msprime_sim_app/shiny_modules_general_msprime.py
+src/example_msprime_sim_app/__pycache__/
+src/example_msprime_sim_app/msprime_sim_utils.py

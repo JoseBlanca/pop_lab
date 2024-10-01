@@ -9,7 +9,6 @@ OUTPUT_SITE = PROJECT_DIR / "shiny_site"
 SRC_DIR = Path(__file__).parent
 ONE_LOCUS_OUTPUT_SITE = OUTPUT_SITE / "one_locus"
 ONE_LOCUS_APP_SRC = SRC_DIR / "one_locus_app"
-BOTTLENECK_APP_SRC = SRC_DIR / "bottleneck_app"
 PYNEI_DIR = PROJECT_DIR / ".." / "pynei" / "src" / "pynei"
 
 SHINY_BASE_CMD = ("uv", "run", "shinylive", "export")
@@ -46,8 +45,10 @@ def export_bottleneck_site(app_src_dir, output_site_dir, pynei_dir):
 
 clean_dir(OUTPUT_SITE)
 
-BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "bottleneck"
 export_one_locus_site(ONE_LOCUS_APP_SRC, ONE_LOCUS_OUTPUT_SITE)
+
+BOTTLENECK_APP_SRC = SRC_DIR / "bottleneck_app"
+BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "bottleneck"
 export_bottleneck_site(BOTTLENECK_APP_SRC, BOTTLENECK_OUTPUT_SITE, PYNEI_DIR)
 
 SERVE_CMD = (
