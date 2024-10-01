@@ -9,7 +9,6 @@ OUTPUT_SITE = PROJECT_DIR / "shiny_site"
 SRC_DIR = Path(__file__).parent
 ONE_LOCUS_OUTPUT_SITE = OUTPUT_SITE / "one_locus"
 ONE_LOCUS_APP_SRC = SRC_DIR / "one_locus_app"
-BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "bottleneck"
 BOTTLENECK_APP_SRC = SRC_DIR / "bottleneck_app"
 PYNEI_DIR = PROJECT_DIR / ".." / "pynei" / "src" / "pynei"
 
@@ -25,8 +24,9 @@ def clean_dir(dir):
 def export_shiny_site(app_src_dir, output_site_dir):
     output_site_dir.mkdir()
     cmd = list(SHINY_BASE_CMD)
-    cmd.append(app_src_dir)
-    cmd.append(output_site_dir)
+    cmd.append(str(app_src_dir))
+    cmd.append(str(output_site_dir))
+    print(cmd)
     run(cmd, check=True)
 
 
@@ -35,15 +35,18 @@ def export_one_locus_site(app_src_dir, output_site_dir):
 
 
 def export_bottleneck_site(app_src_dir, output_site_dir, pynei_dir):
-    app_pynei_dir = app_src_dir / "pynei"
-    if app_pynei_dir.exists():
-        shutil.rmtree(app_pynei_dir)
-    shutil.copytree(pynei_dir, app_pynei_dir)
+    if pynei_dir:
+        app_pynei_dir = app_src_dir / "pynei"
+        if app_pynei_dir.exists():
+            shutil.rmtree(app_pynei_dir)
+        shutil.copytree(pynei_dir, app_pynei_dir)
 
     export_shiny_site(app_src_dir, output_site_dir)
 
 
 clean_dir(OUTPUT_SITE)
+
+BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "bottleneck"
 export_one_locus_site(ONE_LOCUS_APP_SRC, ONE_LOCUS_OUTPUT_SITE)
 export_bottleneck_site(BOTTLENECK_APP_SRC, BOTTLENECK_OUTPUT_SITE, PYNEI_DIR)
 

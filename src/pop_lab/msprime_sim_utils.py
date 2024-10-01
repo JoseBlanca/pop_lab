@@ -1,5 +1,4 @@
 import msprime
-
 import pynei
 
 

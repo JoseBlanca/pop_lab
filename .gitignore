@@ -12,3 +12,4 @@ src/bottleneck_app/pynei/
 src/bottleneck_app/msprime_utils.py
 pop_lab.code-workspace
 src/bottleneck_app/pynei_old/
+src/bottleneck_app/__pycache__/
