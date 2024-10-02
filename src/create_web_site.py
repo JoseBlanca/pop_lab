@@ -33,7 +33,7 @@ def export_one_locus_site(app_src_dir, output_site_dir):
     export_shiny_site(app_src_dir, output_site_dir)
 
 
-def export_bottleneck_site(app_src_dir, output_site_dir, pynei_dir):
+def export_msprime_site(app_src_dir, output_site_dir, pynei_dir):
     if pynei_dir:
         app_pynei_dir = app_src_dir / "pynei"
         if app_pynei_dir.exists():
@@ -49,7 +49,12 @@ export_one_locus_site(ONE_LOCUS_APP_SRC, ONE_LOCUS_OUTPUT_SITE)
 
 BOTTLENECK_APP_SRC = SRC_DIR / "bottleneck_app"
 BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "bottleneck"
-export_bottleneck_site(BOTTLENECK_APP_SRC, BOTTLENECK_OUTPUT_SITE, PYNEI_DIR)
+export_msprime_site(BOTTLENECK_APP_SRC, BOTTLENECK_OUTPUT_SITE, PYNEI_DIR)
+
+BOTTLENECK_APP_SRC = SRC_DIR / "drifting_pops_app"
+BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "drifting_pops"
+export_msprime_site(BOTTLENECK_APP_SRC, BOTTLENECK_OUTPUT_SITE, PYNEI_DIR)
+
 
 SERVE_CMD = (
     f"uv run python -m http.server --directory {OUTPUT_SITE} --bind localhost 8008"
