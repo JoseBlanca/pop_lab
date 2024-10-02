@@ -1,4 +1,6 @@
+import pandas
 import msprime
+
 import pynei
 
 
@@ -92,14 +94,53 @@ class SimulationResult:
             ],
         )
 
+    def _create_series_per_pop_and_dframe(
+        self, series_indexed_by_pop_sample, param, pop_samples_info
+    ):
+        pops = []
+        for pop_sample_name in series_indexed_by_pop_sample.index:
+            pops.append(pop_samples_info[pop_sample_name]["pop_name"])
+        dframe = pandas.DataFrame(
+            {
+                param: series_indexed_by_pop_sample,
+                "pop": pops,
+            }
+        )
+        series_for_pops = {}
+        for pop, group in dframe.groupby("pop"):
+            values_for_pop = group[param]
+            values_for_pop.index = [
+                pop_samples_info[pop_sample_name]["sample_time"]
+                for pop_sample_name in values_for_pop.index
+            ]
+            values_for_pop = values_for_pop.sort_index()
+            series_for_pops[pop] = values_for_pop
+        dframes = []
+        for pop, series in series_for_pops.items():
+            dframe = pandas.DataFrame(
+                {
+                    param: series.values,
+                    "pop": [pop] * series.size,
+                    "generation": list(series.index),
+                }
+            )
+            dframes.append(dframe)
+        dframe = pandas.concat(dframes)
+
+        return {f"{param}_by_pop": series_for_pops, f"{param}_dframe": dframe}
+
     def calc_unbiased_exp_het(self):
         res = self.get_vars_and_pop_samples()
         pop_samples_info = res["pop_samples_info"]
         res = pynei.calc_exp_het_stats_per_var(
             res["vars"], pops=res["indis_by_pop_sample"], unbiased=True
         )
-        exp_het = self._sort_series_by_sampling_time(res["mean"], pop_samples_info)
-        return {"exp_het": exp_het}
+        exp_het = res["mean"]
+        series_indexed_by_pop_sample = exp_het
+        param = "exp_het"
+        return self._create_series_per_pop_and_dframe(
+            series_indexed_by_pop_sample, param, pop_samples_info
+        )
 
     def calc_num_variants(self):
         res = self.get_vars_and_pop_samples()
@@ -108,17 +149,13 @@ class SimulationResult:
             res["vars"], pops=res["indis_by_pop_sample"]
         )
 
-        new_param_names = {
-            "num_poly": "Num. polymorphic",
-            "num_variable": "Num. variables",
-            "poly_ratio_over_variables": "Poly. ratio over variables",
-        }
         sorted_res = {}
         for param in ["num_poly", "num_variable", "poly_ratio_over_variables"]:
-            new_key = new_param_names[param]
-            sorted_res[new_key] = self._sort_series_by_sampling_time(
-                res[param], pop_samples_info
+            series_indexed_by_pop_sample = res[param]
+            sorted_res[param] = self._create_series_per_pop_and_dframe(
+                series_indexed_by_pop_sample, param, pop_samples_info
             )
+
         return sorted_res
 
     def calc_allele_freq_spectrum(self):

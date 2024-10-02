@@ -1,3 +1,5 @@
+import itertools
+
 from shiny import ui, module, reactive, render
 
 import numpy
@@ -224,18 +226,44 @@ def run_simulation_ui():
         selected="exp_het_plot",
     )
 
-    poly_markers_result = ui.navset_tab(
+    poly_ratio_result = ui.navset_tab(
         ui.nav_panel(
             "Plot",
-            ui.output_plot(POLY_MARKERS_PLOT_ID),
-            value="poly_markers_plot",
+            ui.output_plot("poly_ratio_over_variables_plot"),
+            value="poly_ratio_over_variables_plot",
         ),
         ui.nav_panel(
             "Table",
-            ui.output_data_frame(POLY_MARKERS_TABLE_ID),
-            value="poly_markers_table",
+            ui.output_data_frame("poly_ratio_over_variables_table"),
+            value="poly_ratio_over_variables_table",
         ),
-        selected="poly_markers_plot",
+        selected="poly_ratio_over_variables_plot",
+    )
+    num_poly_result = ui.navset_tab(
+        ui.nav_panel(
+            "Plot",
+            ui.output_plot("num_poly_plot"),
+            value="num_poly_plot",
+        ),
+        ui.nav_panel(
+            "Table",
+            ui.output_data_frame("num_poly_table"),
+            value="num_poly_table",
+        ),
+        selected="num_poly_plot",
+    )
+    num_variable_result = ui.navset_tab(
+        ui.nav_panel(
+            "Plot",
+            ui.output_plot("num_variable_plot"),
+            value="num_variable_plot",
+        ),
+        ui.nav_panel(
+            "Table",
+            ui.output_data_frame("num_variable_table"),
+            value="num_variable_table",
+        ),
+        selected="num_variable_plot",
     )
 
     afs_result = ui.output_plot(AFS_PLOT_ID)
@@ -248,8 +276,16 @@ def run_simulation_ui():
             exp_het_result,
         ),
         ui.nav_panel(
-            "Polymorphic variants",
-            poly_markers_result,
+            "Polymorphic (95%) ratio over variable",
+            poly_ratio_result,
+        ),
+        ui.nav_panel(
+            "Num. polymorphic (95%) variants",
+            num_poly_result,
+        ),
+        ui.nav_panel(
+            "Num. variable variants",
+            num_variable_result,
         ),
         ui.nav_panel(
             "Allele frequency spectrum",
@@ -303,55 +339,84 @@ def run_simulation_server(
         axes.set_title("Exp. het. over time")
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. het.")
-        axes.plot(list(res["exp_het"].index), res["exp_het"].values)
+        for pop, exp_het in res["exp_het_by_pop"].items():
+            axes.plot(list(exp_het.index), exp_het.values, label=pop)
+        axes.legend()
         return fig
 
     @render.data_frame
     def exp_het_table():
         res = get_exp_hets()
-        results_table = Table.from_dict(
-            {
-                "Exp. het.": res["exp_het"].values,
-                "Generation": list(res["exp_het"].index),
-            }
-        )
-        return render.DataGrid(results_table.df)
+        return render.DataGrid(res["exp_het_dframe"])
 
-    @render.plot(alt="Number of variants")
-    def poly_markers_plot():
+    @render.plot(alt="Polymorphic (95%) ratio over variable")
+    def poly_ratio_over_variables_plot():
         res = get_num_variants()
+        param = "poly_ratio_over_variables"
+        res = res[param]
 
-        fig, axess = plt.subplots(nrows=2)
-        axes = axess[0]
-        axes.set_title("Ratio poly. (95%) var over time")
+        fig, axes = plt.subplots()
+        axes.set_title("Polymorphic (95%) ratio over variable over time")
         axes.set_xlabel("generation")
-        axes.set_ylabel("Num. variants.")
-        axes.plot(
-            list(res["Poly. ratio over variables"].index),
-            res["Poly. ratio over variables"].values,
-        )
-        axes.set_ylim(0, 1)
-
-        axes = axess[1]
-        axes.set_xlabel("generation")
-        axes.set_ylabel("Num. variants")
-        axes.plot(
-            list(res["Num. variables"].index),
-            res["Num. variables"].values,
-            label="Num. variable",
-        )
-        axes.plot(
-            list(res["Num. polymorphic"].index),
-            res["Num. polymorphic"].values,
-            label="Num. poly.",
-        )
+        axes.set_ylabel("Polymorphic (95%) ratio over variable")
+        for pop, series in res[f"{param}_by_pop"].items():
+            axes.plot(list(series.index), series.values, label=pop)
         axes.legend()
         return fig
 
     @render.data_frame
-    def poly_markers_table():
+    def poly_ratio_over_variables_table():
         res = get_num_variants()
-        return render.DataGrid(Table.from_dict(res).df)
+        param = "poly_ratio_over_variables"
+        res = res[param]
+
+        return render.DataGrid(res[f"{param}_dframe"])
+
+    @render.plot(alt="Num. polymorphic (95%) variants")
+    def num_poly_plot():
+        res = get_num_variants()
+        param = "num_poly"
+        res = res[param]
+
+        fig, axes = plt.subplots()
+        axes.set_title("Num. polymorphic (95%) variants over time")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("Num. polymorphic (95%) variants")
+        for pop, series in res[f"{param}_by_pop"].items():
+            axes.plot(list(series.index), series.values, label=pop)
+        axes.legend()
+        return fig
+
+    @render.data_frame
+    def num_poly_table():
+        res = get_num_variants()
+        param = "num_poly"
+        res = res[param]
+
+        return render.DataGrid(res[f"{param}_dframe"])
+
+    @render.plot(alt="Num. variants")
+    def num_variable_plot():
+        res = get_num_variants()
+        param = "num_variable"
+        res = res[param]
+
+        fig, axes = plt.subplots()
+        axes.set_title("Num. variable variants over time")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("Num. variants")
+        for pop, series in res[f"{param}_by_pop"].items():
+            axes.plot(list(series.index), series.values, label=pop)
+        axes.legend()
+        return fig
+
+    @render.data_frame
+    def num_variable_table():
+        res = get_num_variants()
+        param = "num_variable"
+        res = res[param]
+
+        return render.DataGrid(res[f"{param}_dframe"])
 
     @render.plot(alt="Allele frequency spectrum")
     def afs_plot():
@@ -363,8 +428,10 @@ def run_simulation_server(
         bin_edges = res["bin_edges"]
         x_poss = (bin_edges[1:] + bin_edges[:-1]) / 2
         for pop_sample_name, counts in res["counts"].items():
-            generation = pop_samples_info[pop_sample_name]["sample_time"]
-            axes.plot(x_poss, counts, label=generation)
+            pop_sample_info = pop_samples_info[pop_sample_name]
+            generation = pop_sample_info["sample_time"]
+            pop = pop_sample_info["pop_name"]
+            axes.plot(x_poss, counts, label=f"{pop}-{generation}")
         axes.set_xlabel("Allele frequency")
         axes.set_ylabel("Num. variants")
         axes.legend()
@@ -397,13 +464,39 @@ def run_simulation_server(
             key=lambda pop: pop_samples_info[pop]["sample_time"],
         )
 
+        color_cycle = itertools.cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        markers = ["o", "s", "v", "^", "<", ">", "p", "*", "h", "H", "D", "d"]
+        marker_cycle = itertools.cycle(markers)
+
         indi_names = projections.index.to_numpy()
         x_values = projections.iloc[:, 0].values
         y_values = projections.iloc[:, 1].values
+        colors = {}
+        markers = {}
         for pop_sample_name in pop_sample_names:
             mask = numpy.isin(indi_names, indis_by_pop_sample[pop_sample_name])
-            time = pop_samples_info[pop_sample_name]["sample_time"]
-            axes.scatter(x_values[mask], y_values[mask], label=f"Generation: {time}")
+            pop_sample_info = pop_samples_info[pop_sample_name]
+
+            time = pop_sample_info["sample_time"]
+            if time in markers:
+                marker = markers[time]
+            else:
+                marker = next(marker_cycle)
+                markers[time] = marker
+
+            pop = pop_sample_info["pop_name"]
+            if pop in colors:
+                color = colors[pop]
+            else:
+                color = next(color_cycle)
+                colors[pop] = color
+            axes.scatter(
+                x_values[mask],
+                y_values[mask],
+                label=f"{pop}-{time}",
+                color=color,
+                marker=marker,
+            )
 
         axes.set_xlabel(f"PC1 ({explained_variance[0]:.2f}%)")
         axes.set_ylabel(f"PC2 ({explained_variance[1]:.2f}%)")
