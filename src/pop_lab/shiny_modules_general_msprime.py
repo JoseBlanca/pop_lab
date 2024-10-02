@@ -340,7 +340,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. het.")
         for pop, exp_het in res["exp_het_by_pop"].items():
-            axes.plot(list(exp_het.index), exp_het.values, label=pop)
+            axes.plot(list(-exp_het.index), exp_het.values, label=pop)
         axes.legend()
         return fig
 
@@ -360,7 +360,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Polymorphic (95%) ratio over variable")
         for pop, series in res[f"{param}_by_pop"].items():
-            axes.plot(list(series.index), series.values, label=pop)
+            axes.plot(list(-series.index), series.values, label=pop)
         axes.legend()
         return fig
 
@@ -383,7 +383,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Num. polymorphic (95%) variants")
         for pop, series in res[f"{param}_by_pop"].items():
-            axes.plot(list(series.index), series.values, label=pop)
+            axes.plot(list(-series.index), series.values, label=pop)
         axes.legend()
         return fig
 
@@ -406,7 +406,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Num. variants")
         for pop, series in res[f"{param}_by_pop"].items():
-            axes.plot(list(series.index), series.values, label=pop)
+            axes.plot(list(-series.index), series.values, label=pop)
         axes.legend()
         return fig
 
