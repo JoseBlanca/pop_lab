@@ -7,11 +7,22 @@ OUTPUT_SITE = PROJECT_DIR / "shiny_site"
 # OUTPUT_SITE = Path.home() / "webs" / "bioinf" / "github_io" / "pop_lab"
 
 SRC_DIR = Path(__file__).parent
-ONE_LOCUS_OUTPUT_SITE = OUTPUT_SITE / "one_locus"
-ONE_LOCUS_APP_SRC = SRC_DIR / "one_locus_app"
 PYNEI_DIR = PROJECT_DIR / ".." / "pynei" / "src" / "pynei"
 
 SHINY_BASE_CMD = ("uv", "run", "shinylive", "export")
+
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pop Lab</title>
+</head>
+<body>
+    <h1>Welcome to Pop Lab</h1>
+    <ul>{list_items}</ul>
+</body>
+</html>"""
 
 
 def clean_dir(dir):
@@ -43,17 +54,29 @@ def export_msprime_site(app_src_dir, output_site_dir, pynei_dir):
     export_shiny_site(app_src_dir, output_site_dir)
 
 
+def write_index_html(output_dir, lis):
+    index_path = output_dir / "index.html"
+    html = HTML_TEMPLATE.format(list_items="\n".join(lis))
+    with index_path.open("wt") as fhand:
+        fhand.write(html)
+
+
+LI_TEMPLATE = '<li><a href="{app_url}">{app_name}</a></li>'
+
+
 clean_dir(OUTPUT_SITE)
 
+app = "one_locus"
+ONE_LOCUS_OUTPUT_SITE = OUTPUT_SITE / app
+ONE_LOCUS_APP_SRC = SRC_DIR / f"{app}_app"
 export_one_locus_site(ONE_LOCUS_APP_SRC, ONE_LOCUS_OUTPUT_SITE)
 
-BOTTLENECK_APP_SRC = SRC_DIR / "bottleneck_app"
-BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "bottleneck"
-export_msprime_site(BOTTLENECK_APP_SRC, BOTTLENECK_OUTPUT_SITE, PYNEI_DIR)
+lis = [LI_TEMPLATE.format(app_name=app, app_url=f"{app}/")]
 
-BOTTLENECK_APP_SRC = SRC_DIR / "drifting_pops_app"
-BOTTLENECK_OUTPUT_SITE = OUTPUT_SITE / "drifting_pops"
-export_msprime_site(BOTTLENECK_APP_SRC, BOTTLENECK_OUTPUT_SITE, PYNEI_DIR)
+MSPRIME_APPS = ["bottleneck", "drifting_pops"]
+for app in MSPRIME_APPS:
+    export_msprime_site(SRC_DIR / f"{app}_app", OUTPUT_SITE / app, PYNEI_DIR)
+    lis.append(LI_TEMPLATE.format(app_name=app, app_url=f"{app}/"))
 
 
 SERVE_CMD = (
@@ -61,3 +84,5 @@ SERVE_CMD = (
 )
 print("you can serve the site by running:")
 print(SERVE_CMD)
+
+write_index_html(OUTPUT_SITE, lis)
