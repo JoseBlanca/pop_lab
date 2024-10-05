@@ -68,6 +68,8 @@ def demography_input_accordions():
 
 open_accordion_panels = [POP_SIZE_ACCORDION_ID, NUM_SPLIT_GENERATION_AGO_ID]
 
+ANCESTRAL_POP_NAME = "ancestral"
+
 
 @module.server
 def demography_server(input, output, session, get_msprime_params):
@@ -90,48 +92,47 @@ def demography_server(input, output, session, get_msprime_params):
             f"pop_{pop_idx}": pop_sizes_getters[pop_idx]()
             for pop_idx in range(1, NUM_POPS + 1)
         }
+        pop_sizes[ANCESTRAL_POP_NAME] = input.ancestral_pop_size_slider()
         return pop_sizes
 
     @reactive.calc
     def get_demography():
-        demography = msprime.Demography()
         pop_sizes = get_pop_sizes()
-        pops = sorted(pop_sizes.keys())
-        params = {}
-        for pop_name in pops:
-            size = pop_sizes[pop_name]
-            demography.add_population(
-                name=pop_name, initial_size=size, initially_active=True
-            )
-            params[f"{pop_name} size"] = size
+        demography = msprime.Demography()
+        demography.add_population(
+            name=ANCESTRAL_POP_NAME, initial_size=pop_sizes[ANCESTRAL_POP_NAME]
+        )
 
-        ancestral_pop = pops.pop(0)
-        derived_pops = pops
-        num_generations_ago_when_split_happened = input.num_generations_ago_split()
+        del pop_sizes[ANCESTRAL_POP_NAME]
+        drifting_pops_sizes = pop_sizes
+
+        derived_pops = []
+        for pop_name, size in drifting_pops_sizes.items():
+            demography.add_population(name=pop_name, initial_size=size)
+            derived_pops.append(pop_name)
+
         demography.add_population_split(
-            num_generations_ago_when_split_happened,
+            input.num_generations_ago_split(),
             derived=derived_pops,
-            ancestral=ancestral_pop,
+            ancestral=ANCESTRAL_POP_NAME,
         )
-        demography.add_population_parameters_change(
-            time=num_generations_ago_when_split_happened,
-            initial_size=input.ancestral_pop_size_slider(),
-            population="pop_1",
-        )
-
-        return {"demography": demography, "params_for_table": params}
+        return {"demography": demography}
 
     @reactive.calc
     def get_sample_sets():
         split_time = input.num_generations_ago_split()
-
         sampling_times = [
             split_time - 1,
             split_time // 2,
             0,
         ]
 
-        pop_names = sorted(get_pop_sizes().keys())
+        pops_info = msprime_sim_utils.get_info_from_demography(
+            get_demography()["demography"]
+        )["pops"]
+        pop_names = sorted(
+            pop_name for pop_name in pops_info.keys() if pop_name != ANCESTRAL_POP_NAME
+        )
 
         num_indis_to_sample = get_msprime_params()["sample_size"]
         sample_sets = []
