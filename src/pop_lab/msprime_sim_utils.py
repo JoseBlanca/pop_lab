@@ -51,7 +51,6 @@ class SimulationResult:
             if sample["sample_node_ids"].size == 0:
                 continue
             samples[sample_name] = sample
-
         return samples
 
     def get_vars_and_pop_samples(self):
@@ -166,8 +165,15 @@ class SimulationResult:
         return {"counts": res["hist_counts"], "bin_edges": res["hist_bin_edges"]}
 
 
-def get_pop_names_from_demography(demography: msprime.Demography):
-    return [deme.name for deme in demography.to_demes().demes]
+def get_info_from_demography(demography: msprime.Demography):
+    pop_info = {}
+    for population in demography.populations:
+        pop_info[population.name] = {
+            "id": population.id,
+            "name": population.name,
+            "initial_size": population.initial_size,
+        }
+    return {"pops": pop_info}
 
 
 def create_msprime_sample_set(num_samples: int, ploidy: int, pop_name: str, time: int):
