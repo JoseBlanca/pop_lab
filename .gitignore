@@ -20,3 +20,4 @@ src/drifting_pops_app/__pycache__/
 src/drifting_pops_app/shiny_modules_general_msprime.py
 src/drifting_pops_app/msprime_sim_utils.py
 src/drifting_pops_app/pynei/
+src/one_locus_app/__pycache__/
