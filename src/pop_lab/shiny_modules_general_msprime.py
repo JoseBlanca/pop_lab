@@ -468,6 +468,15 @@ def run_simulation_server(
         markers = ["o", "s", "v", "^", "<", ">", "p", "*", "h", "H", "D", "d"]
         marker_cycle = itertools.cycle(markers)
 
+        alpha_min = 0.3
+        times = list(
+            reversed(
+                sorted({info["sample_time"] for info in pop_samples_info.values()})
+            )
+        )
+        alpha_delta = (1 - alpha_min) / (len(times) - 1)
+        alphas = {time: alpha_delta * idx + alpha_min for idx, time in enumerate(times)}
+
         indi_names = projections.index.to_numpy()
         x_values = projections.iloc[:, 0].values
         y_values = projections.iloc[:, 1].values
@@ -496,6 +505,7 @@ def run_simulation_server(
                 label=f"{pop}-{time}",
                 color=color,
                 marker=marker,
+                alpha=alphas[time],
             )
 
         axes.set_xlabel(f"PC1 ({explained_variance[0]:.2f}%)")
