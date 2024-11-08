@@ -341,6 +341,7 @@ def run_simulation_server(
         axes.set_ylabel("Exp. het.")
         for pop, exp_het in res["exp_het_by_pop"].items():
             axes.plot(list(-exp_het.index), exp_het.values, label=pop)
+        axes.set_ylim(0)
         axes.legend()
         return fig
 
@@ -361,6 +362,7 @@ def run_simulation_server(
         axes.set_ylabel("Polymorphic (95%) ratio over variable")
         for pop, series in res[f"{param}_by_pop"].items():
             axes.plot(list(-series.index), series.values, label=pop)
+        axes.set_ylim(0)
         axes.legend()
         return fig
 
@@ -384,6 +386,7 @@ def run_simulation_server(
         axes.set_ylabel("Num. polymorphic (95%) variants")
         for pop, series in res[f"{param}_by_pop"].items():
             axes.plot(list(-series.index), series.values, label=pop)
+        axes.set_ylim(0)
         axes.legend()
         return fig
 
@@ -407,6 +410,7 @@ def run_simulation_server(
         axes.set_ylabel("Num. variants")
         for pop, series in res[f"{param}_by_pop"].items():
             axes.plot(list(-series.index), series.values, label=pop)
+        axes.set_ylim(0)
         axes.legend()
         return fig
 
@@ -430,8 +434,11 @@ def run_simulation_server(
         for pop_sample_name, counts in res["counts"].items():
             pop_sample_info = pop_samples_info[pop_sample_name]
             generation = pop_sample_info["sample_time"]
+            if generation > 0:
+                continue
             pop = pop_sample_info["pop_name"]
             axes.plot(x_poss, counts, label=f"{pop}-{generation}")
+        axes.set_xlim((0.5, 1))
         axes.set_xlabel("Allele frequency")
         axes.set_ylabel("Num. variants")
         axes.legend()
