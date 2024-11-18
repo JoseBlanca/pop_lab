@@ -1,3 +1,4 @@
+import numpy
 import pandas
 import msprime
 
@@ -68,6 +69,15 @@ class SimulationResult:
         gt_array = haplotype_array.reshape(new_shape)
         one_node_id_per_indi = node_ids[:: self.ploidy]
 
+        poss = tree_seqs.tables.sites.position
+
+        vars_info = pandas.DataFrame(
+            {
+                pynei.VAR_TABLE_POS_COL: poss,
+                pynei.VAR_TABLE_CHROM_COL: numpy.full((poss.size,), 1),
+            }
+        )
+
         indi_names = []
         indis_by_pop_sample = {
             pop_sample: [] for pop_sample in set(pop_sample_by_node_id.values())
@@ -77,7 +87,9 @@ class SimulationResult:
             indi_name = f"{node_id}-{pop_sample_name}"
             indi_names.append(indi_name)
             indis_by_pop_sample[pop_sample_name].append(indi_name)
-        vars = pynei.Variants.from_gt_array(gt_array, samples=indi_names)
+        vars = pynei.Variants.from_gt_array(
+            gt_array, samples=indi_names, vars_info=vars_info
+        )
         return {
             "vars": vars,
             "indis_by_pop_sample": indis_by_pop_sample,

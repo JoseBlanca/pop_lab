@@ -1,4 +1,5 @@
 import itertools
+from array import array
 
 from shiny import ui, module, reactive, render
 
@@ -6,6 +7,7 @@ import numpy
 import pandas
 import demesdraw
 import matplotlib.pyplot as plt
+import statsmodels.api as sm
 
 import msprime_sim_utils
 import pynei
@@ -270,6 +272,8 @@ def run_simulation_ui():
 
     pca_result = ui.output_plot(PCA_PLOT_ID)
 
+    ld_vs_dist_plot = ui.output_plot("ld_vs_dist_plot")
+
     output_card = ui.navset_card_tab(
         ui.nav_panel(
             "Exp. Het.",
@@ -295,6 +299,7 @@ def run_simulation_ui():
             "PCA",
             pca_result,
         ),
+        ui.nav_panel("LD", ld_vs_dist_plot),
     )
     return (run_button, output_card)
 
@@ -520,5 +525,68 @@ def run_simulation_server(
         axes.set_title(f"PCA done with {filter_stats['maf']['vars_kept']} variations")
         axes.set_xlabel(f"PC1 ({explained_variance.iloc[0]:.2f}%)")
         axes.set_ylabel(f"PC2 ({explained_variance.iloc[1]:.2f}%)")
+        axes.legend()
+        return fig
+
+    @render.plot(alt="LD vs dist plot")
+    def ld_vs_dist_plot():
+        sim_res = do_simulation()
+        fig, axes = plt.subplots()
+
+        res = sim_res.get_vars_and_pop_samples()
+        vars = res["vars"]
+        indis_by_pop_sample = res["indis_by_pop_sample"]
+        pop_samples_info = res["pop_samples_info"]
+
+        alpha_min = 0.3
+        times = list(
+            reversed(
+                sorted({info["sample_time"] for info in pop_samples_info.values()})
+            )
+        )
+        alpha_delta = (1 - alpha_min) / (len(times) - 1)
+        alphas = {time: alpha_delta * idx + alpha_min for idx, time in enumerate(times)}
+
+        color_cycle = itertools.cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        colors = {}
+
+        for pop_sample_name, lds_and_dists in pynei.get_ld_and_dist_for_pops(
+            vars, indis_by_pop_sample
+        ).items():
+            dists = array("f")
+            r2s = array("f")
+            for r2, dist in lds_and_dists:
+                r2s.append(r2)
+                dists.append(dist)
+            r2s = numpy.array(r2s, dtype=float)
+            dists = numpy.array(dists, dtype=float)
+
+            dist_delta = 0.01 * (dists.max() - dists.min())
+            print(dist_delta)
+
+            lowess_dists_lds = sm.nonparametric.lowess(r2s, dists, delta=dist_delta)
+            lowess_dists = lowess_dists_lds[:, 0]
+            lowess_lds = lowess_dists_lds[:, 1]
+            print(lowess_lds)
+
+            xs = numpy.linspace(0, dists.max(), 50)
+            interpolated_r2 = numpy.interp(xs, lowess_dists, lowess_lds)
+
+            pop_sample_info = pop_samples_info[pop_sample_name]
+            time = pop_sample_info["sample_time"]
+            pop = pop_sample_info["pop_name"]
+            if pop in colors:
+                color = colors[pop]
+            else:
+                color = next(color_cycle)
+                colors[pop] = color
+            axes.plot(
+                xs,
+                interpolated_r2,
+                label=f"{pop}-{time}",
+                color=color,
+                alpha=alphas[time],
+            )
+
         axes.legend()
         return fig
