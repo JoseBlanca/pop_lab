@@ -385,6 +385,15 @@ wheels = [
 ]
 
 [[package]]
+name = "more-itertools"
+version = "10.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/51/78/65922308c4248e0eb08ebcbe67c95d48615cc6f27854b6f2e57143e9178f/more-itertools-10.5.0.tar.gz", hash = "sha256:5482bfef7849c25dc3c6dd53a6173ae4795da2a41a80faea6700d9f5846c5da6", size = 121020 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/7e/3a64597054a70f7c86eb0a7d4fc315b8c1ab932f64883a297bdffeb5f967/more_itertools-10.5.0-py3-none-any.whl", hash = "sha256:037b0d3203ce90cca8ab1defbbdac29d5f993fc20131f3664dc8d6acfa872aef", size = 60952 },
+]
+
+[[package]]
 name = "msprime"
 version = "1.3.3"
 source = { registry = "https://pypi.org/simple" }
@@ -403,11 +412,11 @@ wheels = [
 
 [[package]]
 name = "narwhals"
-version = "1.13.5"
+version = "1.14.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9b/e5/f80c6e1591e952d57b53e16d4f9b16f56d1e8347c4989632679685569389/narwhals-1.13.5.tar.gz", hash = "sha256:2e71b70895759af455a83583052bb9dbada9f72efad786d8d1b2f38078054e73", size = 175110 }
+sdist = { url = "https://files.pythonhosted.org/packages/09/e8/3a7fdacfc12a3fe0f90afa5aece85402050a3172fdf525ff5f11a816ddd3/narwhals-1.14.0.tar.gz", hash = "sha256:950071645e6a79dfed18a82940a9ac83238f30b3c4a8f3986e01db39bd5155b6", size = 180041 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ad/18/3cf5f8b188424313833f085f4ae0452b7db858a687281e2e2ca893a296cc/narwhals-1.13.5-py3-none-any.whl", hash = "sha256:91fe95ffdece9e3837780b6cd32f4309a41f39b285bc9d42d60eaff47d48b39a", size = 208096 },
+    { url = "https://files.pythonhosted.org/packages/ed/e3/d07083aac31d09ec03e9d5087261e0ca02bc631c8569f442581ad6fc839d/narwhals-1.14.0-py3-none-any.whl", hash = "sha256:2498e5fa243d9e783df4f81e34fe33f0166d48f74d2db98d753e79510a6a1dd0", size = 213357 },
 ]
 
 [[package]]
@@ -654,6 +663,7 @@ name = "pynei"
 version = "0.1.0"
 source = { editable = "../pynei" }
 dependencies = [
+    { name = "more-itertools" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pyarrow" },
@@ -662,6 +672,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "more-itertools", specifier = ">=10.5.0" },
     { name = "numpy", specifier = ">=2.1.0" },
     { name = "pandas", specifier = ">=2.2.2" },
     { name = "pyarrow", specifier = ">=18.0.0" },
