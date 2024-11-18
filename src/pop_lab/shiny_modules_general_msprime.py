@@ -451,6 +451,7 @@ def run_simulation_server(
 
         res = sim_res.get_vars_and_pop_samples()
         vars = res["vars"]
+        vars = pynei.filter_by_maf(vars, max_allowed_maf=0.95)
         pop_samples_info = res["pop_samples_info"]
         indis_by_pop_sample = res["indis_by_pop_sample"]
 
@@ -465,6 +466,8 @@ def run_simulation_server(
                 raise error
         projections = pca_res["projections"]
         explained_variance = pca_res["explained_variance (%)"]
+
+        filter_stats = pynei.gather_filtering_stats(vars)
 
         pop_sample_names = sorted(
             pop_samples_info.keys(),
@@ -514,8 +517,8 @@ def run_simulation_server(
                 marker=marker,
                 alpha=alphas[time],
             )
-
-        axes.set_xlabel(f"PC1 ({explained_variance[0]:.2f}%)")
-        axes.set_ylabel(f"PC2 ({explained_variance[1]:.2f}%)")
+        axes.set_title(f"PCA done with {filter_stats['maf']['vars_kept']} variations")
+        axes.set_xlabel(f"PC1 ({explained_variance.iloc[0]:.2f}%)")
+        axes.set_ylabel(f"PC2 ({explained_variance.iloc[1]:.2f}%)")
         axes.legend()
         return fig
