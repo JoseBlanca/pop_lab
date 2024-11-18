@@ -562,12 +562,10 @@ def run_simulation_server(
             dists = numpy.array(dists, dtype=float)
 
             dist_delta = 0.01 * (dists.max() - dists.min())
-            print(dist_delta)
 
             lowess_dists_lds = sm.nonparametric.lowess(r2s, dists, delta=dist_delta)
             lowess_dists = lowess_dists_lds[:, 0]
             lowess_lds = lowess_dists_lds[:, 1]
-            print(lowess_lds)
 
             xs = numpy.linspace(0, dists.max(), 50)
             interpolated_r2 = numpy.interp(xs, lowess_dists, lowess_lds)
