@@ -9,6 +9,7 @@ import demesdraw
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
+import shiny_module_sim_demography
 import msprime_sim_utils
 import pynei
 
@@ -55,6 +56,8 @@ MAX_MUT_RATE = -6
 MIN_SAMPLE_SIZE = 20
 DEF_SAMPLE_SIZE = 50
 MAX_SAMPLE_SIZE = 100
+
+UNUSED_STYLE = {"color": "grey", "marker": ".", "alpha": 0.1}
 
 ######################################################################
 # msprime parameters
@@ -273,6 +276,17 @@ def run_simulation_ui():
     pca_result = ui.output_plot(PCA_PLOT_ID)
 
     ld_vs_dist_plot = ui.output_plot("ld_vs_dist_plot")
+    ld_sidebar = ui.sidebar(
+        [
+            ui.input_switch(f"ld_vs_dist_plot_swicth_pop_{pop}", pop, value=True)
+            for pop in shiny_module_sim_demography.POP_NAMES
+        ],
+        id="ld_vs_dist_sidebar",
+    )
+    ld_sidebar_layout = ui.layout_sidebar(
+        ld_sidebar, ld_vs_dist_plot, position="right", bg="#f8f8f8"
+    )
+    ld_card = ui.card(ld_sidebar_layout)
 
     output_card = ui.navset_card_tab(
         ui.nav_panel(
@@ -299,7 +313,7 @@ def run_simulation_ui():
             "PCA",
             pca_result,
         ),
-        ui.nav_panel("LD", ld_vs_dist_plot),
+        ui.nav_panel("LD", ld_card),
     )
     return (run_button, output_card)
 
@@ -324,6 +338,15 @@ def run_simulation_server(
             recomb_rate=msprime_params["recomb_rate"],
         )
         return sim_res
+
+    @render.ui
+    def add_plot_input_switches():
+        sidebar = input.ld_sidebar()
+        plot = "ld"
+        pop = "pop1"
+        switch_id = f"{plot}_{pop}_switch"
+        switch = ui.input_switch(switch_id, pop)
+        ui.insert_ui(switch, selector="#swicth1", where="afterEnd")
 
     @reactive.calc
     def get_exp_hets():
@@ -595,7 +618,13 @@ def run_simulation_server(
             pop_sample_info = pop_samples_info[pop_sample_name]
             time = pop_sample_info["sample_time"]
             pop = pop_sample_info["pop_name"]
-            style = get_style(pop=pop, time=time)
+
+            pop_input_switch_id = f"ld_vs_dist_plot_swicth_pop_{pop}"
+            pop_input_switch = getattr(input, pop_input_switch_id)
+            if pop_input_switch():
+                style = get_style(pop=pop, time=time)
+            else:
+                style = UNUSED_STYLE
             axes.plot(
                 xs,
                 interpolated_r2,

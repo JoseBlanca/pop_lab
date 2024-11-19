@@ -12,6 +12,7 @@ MAX_GENERATION_POP_SPLIT = 1000
 DEF_GENERATION_POP_SPLIT = 400
 
 NUM_POPS = 3
+POP_NAMES = [f"pop_{IDX+1}" for IDX in range(NUM_POPS)]
 
 ORIG_POP_SIZE_ACCORDION_ID = "Orig population size"
 NUM_SPLIT_GENERATION_AGO_ID = "Num. generations ago pop. split"
@@ -89,8 +90,8 @@ def demography_server(input, output, session, get_msprime_params):
         }
 
         pop_sizes = {
-            f"pop_{pop_idx}": pop_sizes_getters[pop_idx]()
-            for pop_idx in range(1, NUM_POPS + 1)
+            pop_name: pop_sizes_getters[pop_idx + 1]()
+            for pop_idx, pop_name in enumerate(POP_NAMES)
         }
         pop_sizes[ANCESTRAL_POP_NAME] = input.ancestral_pop_size_slider()
         return pop_sizes
