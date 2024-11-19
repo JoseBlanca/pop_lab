@@ -345,7 +345,10 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. het.")
         for pop, exp_het in res["exp_het_by_pop"].items():
-            axes.plot(list(-exp_het.index), exp_het.values, label=pop)
+            style = get_style(pop=pop)
+            axes.plot(
+                list(-exp_het.index), exp_het.values, label=pop, color=style["color"]
+            )
         axes.set_ylim(0)
         axes.legend()
         return fig
@@ -366,7 +369,10 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Polymorphic (95%) ratio over variable")
         for pop, series in res[f"{param}_by_pop"].items():
-            axes.plot(list(-series.index), series.values, label=pop)
+            style = get_style(pop=pop)
+            axes.plot(
+                list(-series.index), series.values, label=pop, color=style["color"]
+            )
         axes.set_ylim(0)
         axes.legend()
         return fig
@@ -390,7 +396,10 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Num. polymorphic (95%) variants")
         for pop, series in res[f"{param}_by_pop"].items():
-            axes.plot(list(-series.index), series.values, label=pop)
+            style = get_style(pop=pop)
+            axes.plot(
+                list(-series.index), series.values, label=pop, color=style["color"]
+            )
         axes.set_ylim(0)
         axes.legend()
         return fig
@@ -414,7 +423,10 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Num. variants")
         for pop, series in res[f"{param}_by_pop"].items():
-            axes.plot(list(-series.index), series.values, label=pop)
+            style = get_style(pop=pop)
+            axes.plot(
+                list(-series.index), series.values, label=pop, color=style["color"]
+            )
         axes.set_ylim(0)
         axes.legend()
         return fig
@@ -449,6 +461,52 @@ def run_simulation_server(
         axes.legend()
         return fig
 
+    @reactive.calc
+    def get_styles():
+        colors = list(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        color_cycle = itertools.cycle(colors)
+        markers = ["o", "s", "v", "^", "<", ">", "p", "*", "h", "H", "D", "d"]
+        marker_cycle = itertools.cycle(markers)
+
+        sim_res = do_simulation()
+        res = sim_res.get_vars_and_pop_samples()
+        pop_samples_info = res["pop_samples_info"]
+
+        pop_names = set()
+        sample_times = set()
+        for sample_info in pop_samples_info.values():
+            pop_names.add(sample_info["pop_name"])
+            sample_times.add(sample_info["sample_time"])
+        pop_names = sorted(pop_names)
+        sample_times = sorted(sample_times)
+
+        alpha_min = 0.3
+        alpha_delta = (1 - alpha_min) / (len(sample_times) - 1)
+
+        styles = {"time": {}, "pop": {}}
+        styles["default"] = {"color": colors[-1], "alpha": 1, "marker": "o"}
+
+        for idx, time in enumerate(reversed(sample_times)):
+            alpha = alpha_delta * idx + alpha_min
+            style = {"alpha": alpha, "marker": next(marker_cycle)}
+            styles["time"][time] = style
+
+        for pop in pop_names:
+            style = {"color": next(color_cycle)}
+            styles["pop"][pop] = style
+        return styles
+
+    def get_style(pop=None, time=None):
+        styles = get_styles()
+        if pop is not None:
+            style = styles["pop"][pop]
+        if time is not None:
+            style.update(styles["time"][time])
+        complete_style = {}
+        for trait in ("color", "marker", "alpha"):
+            complete_style[trait] = style.get(trait, styles["default"][trait])
+        return complete_style
+
     @render.plot(alt="Principal Component Analysis")
     def pca_plot():
         sim_res = do_simulation()
@@ -479,48 +537,24 @@ def run_simulation_server(
             key=lambda pop: pop_samples_info[pop]["sample_time"],
         )
 
-        color_cycle = itertools.cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        markers = ["o", "s", "v", "^", "<", ">", "p", "*", "h", "H", "D", "d"]
-        marker_cycle = itertools.cycle(markers)
-
-        alpha_min = 0.3
-        times = list(
-            reversed(
-                sorted({info["sample_time"] for info in pop_samples_info.values()})
-            )
-        )
-        alpha_delta = (1 - alpha_min) / (len(times) - 1)
-        alphas = {time: alpha_delta * idx + alpha_min for idx, time in enumerate(times)}
-
         indi_names = projections.index.to_numpy()
         x_values = projections.iloc[:, 0].values
         y_values = projections.iloc[:, 1].values
-        colors = {}
-        markers = {}
         for pop_sample_name in pop_sample_names:
             mask = numpy.isin(indi_names, indis_by_pop_sample[pop_sample_name])
             pop_sample_info = pop_samples_info[pop_sample_name]
 
             time = pop_sample_info["sample_time"]
-            if time in markers:
-                marker = markers[time]
-            else:
-                marker = next(marker_cycle)
-                markers[time] = marker
-
             pop = pop_sample_info["pop_name"]
-            if pop in colors:
-                color = colors[pop]
-            else:
-                color = next(color_cycle)
-                colors[pop] = color
+            style = get_style(pop=pop, time=time)
+
             axes.scatter(
                 x_values[mask],
                 y_values[mask],
                 label=f"{pop}-{time}",
-                color=color,
-                marker=marker,
-                alpha=alphas[time],
+                color=style["color"],
+                marker=style["marker"],
+                alpha=style["alpha"],
             )
         axes.set_title(f"PCA done with {filter_stats['maf']['vars_kept']} variations")
         axes.set_xlabel(f"PC1 ({explained_variance.iloc[0]:.2f}%)")
@@ -537,18 +571,6 @@ def run_simulation_server(
         vars = res["vars"]
         indis_by_pop_sample = res["indis_by_pop_sample"]
         pop_samples_info = res["pop_samples_info"]
-
-        alpha_min = 0.3
-        times = list(
-            reversed(
-                sorted({info["sample_time"] for info in pop_samples_info.values()})
-            )
-        )
-        alpha_delta = (1 - alpha_min) / (len(times) - 1)
-        alphas = {time: alpha_delta * idx + alpha_min for idx, time in enumerate(times)}
-
-        color_cycle = itertools.cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        colors = {}
 
         for pop_sample_name, lds_and_dists in pynei.get_ld_and_dist_for_pops(
             vars, indis_by_pop_sample, max_allowed_maf=0.90
@@ -573,17 +595,13 @@ def run_simulation_server(
             pop_sample_info = pop_samples_info[pop_sample_name]
             time = pop_sample_info["sample_time"]
             pop = pop_sample_info["pop_name"]
-            if pop in colors:
-                color = colors[pop]
-            else:
-                color = next(color_cycle)
-                colors[pop] = color
+            style = get_style(pop=pop, time=time)
             axes.plot(
                 xs,
                 interpolated_r2,
                 label=f"{pop}-{time}",
-                color=color,
-                alpha=alphas[time],
+                color=style["color"],
+                alpha=style["alpha"],
             )
 
         axes.legend()
