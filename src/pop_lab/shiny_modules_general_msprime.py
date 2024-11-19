@@ -551,7 +551,7 @@ def run_simulation_server(
         colors = {}
 
         for pop_sample_name, lds_and_dists in pynei.get_ld_and_dist_for_pops(
-            vars, indis_by_pop_sample
+            vars, indis_by_pop_sample, max_allowed_maf=0.90
         ).items():
             dists = array("f")
             r2s = array("f")
