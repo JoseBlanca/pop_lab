@@ -212,6 +212,11 @@ POLY_MARKERS_TABLE_ID = "poly_markers_table"
 AFS_PLOT_ID = "afs_plot"
 PCA_PLOT_ID = "pca_plot"
 
+LD_PLOT_ID = "ld_vs_dist"
+PCA_PLOT_ID = "pca"
+PLOT_STRS = ("PCA", "LD")
+PLOT_IDS = (PCA_PLOT_ID, LD_PLOT_ID)
+
 
 @module.ui
 def run_simulation_ui():
@@ -273,33 +278,7 @@ def run_simulation_ui():
 
     afs_result = ui.output_plot(AFS_PLOT_ID)
 
-    pca_result = ui.output_plot(PCA_PLOT_ID)
-
-    ld_vs_dist_plot = ui.output_plot("ld_vs_dist_plot")
-
-    pop_switches = [
-        ui.input_switch(f"ld_vs_dist_plot_swicth_pop_{pop}", pop, value=True)
-        for pop in shiny_module_sim_demography.POP_NAMES
-    ]
-    ld_sidebar = ui.sidebar(
-        [
-            ui.accordion(
-                ui.accordion_panel("Pops", pop_switches),
-                id="pop_switches_accordion",
-            ),
-            ui.accordion(
-                ui.accordion_panel("Times"),
-                id="time_switches_accordion",
-            ),
-        ],
-        id="ld_vs_dist_sidebar",
-    )
-    ld_sidebar_layout = ui.layout_sidebar(
-        ld_sidebar, ld_vs_dist_plot, position="right", bg="#f8f8f8"
-    )
-    ld_card = ui.card(ld_sidebar_layout)
-
-    output_card = ui.navset_card_tab(
+    nav_panels = [
         ui.nav_panel(
             "Exp. Het.",
             exp_het_result,
@@ -320,12 +299,39 @@ def run_simulation_ui():
             "Allele frequency spectrum",
             afs_result,
         ),
-        ui.nav_panel(
-            "PCA",
-            pca_result,
-        ),
-        ui.nav_panel("LD", ld_card),
-    )
+    ]
+
+    for plot_str, plot_id in zip(
+        PLOT_STRS,
+        PLOT_IDS,
+    ):
+        plot = ui.output_plot(f"{plot_id}_plot")
+
+        pop_switches = [
+            ui.input_switch(f"{plot_id}_plot_swicth_pop_{pop}", pop, value=True)
+            for pop in shiny_module_sim_demography.POP_NAMES
+        ]
+        ld_sidebar = ui.sidebar(
+            [
+                ui.accordion(
+                    ui.accordion_panel("Pops", pop_switches),
+                    id=f"{plot_id}_pop_switches_accordion",
+                ),
+                ui.accordion(
+                    ui.accordion_panel("Times"),
+                    id=f"{plot_id}_time_switches_accordion",
+                ),
+            ],
+            id=f"{plot_id}_sidebar",
+        )
+        ld_sidebar_layout = ui.layout_sidebar(
+            ld_sidebar, plot, position="right", bg="#f8f8f8"
+        )
+        ld_card = ui.card(ld_sidebar_layout)
+        nav_panels.append(ui.nav_panel(plot_str, ld_card))
+
+    output_card = ui.navset_card_tab(*nav_panels)
+
     return (run_button, output_card)
 
 
@@ -365,18 +371,21 @@ def run_simulation_server(
     @reactive.event(input.run_button)
     def update_time_swithes():
         sampling_times = get_sampling_times()
-        ui.remove_accordion_panel(id="time_switches_accordion", target="Times")
-        switches = [
-            ui.input_switch(
-                f"ld_vs_dist_plot_swicth_time_{time}", str(time), value=True
+        for plot in PLOT_IDS:
+            ui.remove_accordion_panel(
+                id=f"{plot}_time_switches_accordion", target="Times"
             )
-            for time in sampling_times
-        ]
-        ui.insert_accordion_panel(
-            id="time_switches_accordion",
-            target=None,
-            panel=ui.accordion_panel("Times", switches),
-        )
+            switches = [
+                ui.input_switch(
+                    f"{plot}_plot_swicth_time_{time}", str(time), value=True
+                )
+                for time in sampling_times
+            ]
+            ui.insert_accordion_panel(
+                id=f"{plot}_time_switches_accordion",
+                target="Pops",
+                panel=ui.accordion_panel("Times", switches),
+            )
 
     @reactive.calc
     def get_exp_hets():
@@ -398,7 +407,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. het.")
         for pop, exp_het in res["exp_het_by_pop"].items():
-            style = get_style(pop=pop)
+            style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
                 list(-exp_het.index), exp_het.values, label=pop, color=style["color"]
             )
@@ -422,7 +431,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Polymorphic (95%) ratio over variable")
         for pop, series in res[f"{param}_by_pop"].items():
-            style = get_style(pop=pop)
+            style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
                 list(-series.index), series.values, label=pop, color=style["color"]
             )
@@ -449,7 +458,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Num. polymorphic (95%) variants")
         for pop, series in res[f"{param}_by_pop"].items():
-            style = get_style(pop=pop)
+            style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
                 list(-series.index), series.values, label=pop, color=style["color"]
             )
@@ -476,7 +485,7 @@ def run_simulation_server(
         axes.set_xlabel("generation")
         axes.set_ylabel("Num. variants")
         for pop, series in res[f"{param}_by_pop"].items():
-            style = get_style(pop=pop)
+            style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
                 list(-series.index), series.values, label=pop, color=style["color"]
             )
@@ -549,7 +558,7 @@ def run_simulation_server(
             styles["pop"][pop] = style
         return styles
 
-    def get_style(pop=None, time=None):
+    def get_style_for_pop_and_time(pop=None, time=None):
         styles = get_styles()
         if pop is not None:
             style = styles["pop"][pop]
@@ -599,7 +608,7 @@ def run_simulation_server(
 
             time = pop_sample_info["sample_time"]
             pop = pop_sample_info["pop_name"]
-            style = get_style(pop=pop, time=time)
+            style = get_style(PCA_PLOT_ID, pop=pop, time=time)
 
             axes.scatter(
                 x_values[mask],
@@ -614,6 +623,17 @@ def run_simulation_server(
         axes.set_ylabel(f"PC2 ({explained_variance.iloc[1]:.2f}%)")
         axes.legend()
         return fig
+
+    def get_style(plot_id, time, pop):
+        time_switch_id = f"{plot_id}_plot_swicth_time_{time}"
+        time_input_switch = getattr(input, time_switch_id)
+        pop_input_switch_id = f"{plot_id}_plot_swicth_pop_{pop}"
+        pop_input_switch = getattr(input, pop_input_switch_id)
+        if pop_input_switch() and time_input_switch():
+            style = get_style_for_pop_and_time(pop=pop, time=time)
+        else:
+            style = UNUSED_STYLE
+        return style
 
     @render.plot(alt="LD vs dist plot")
     def ld_vs_dist_plot():
@@ -649,14 +669,7 @@ def run_simulation_server(
             time = pop_sample_info["sample_time"]
             pop = pop_sample_info["pop_name"]
 
-            time_switch_id = f"ld_vs_dist_plot_swicth_time_{time}"
-            time_input_switch = getattr(input, time_switch_id)
-            pop_input_switch_id = f"ld_vs_dist_plot_swicth_pop_{pop}"
-            pop_input_switch = getattr(input, pop_input_switch_id)
-            if pop_input_switch() and time_input_switch():
-                style = get_style(pop=pop, time=time)
-            else:
-                style = UNUSED_STYLE
+            style = get_style(LD_PLOT_ID, time, pop)
             axes.plot(
                 xs,
                 interpolated_r2,
