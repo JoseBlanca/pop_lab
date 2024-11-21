@@ -14,6 +14,9 @@ DEF_NUM_GENERATIONS_AGO = [-100, -50]
 BOTTLENECK_ACCORDION_ID = "Bottleneck duration"
 POP_SIZE_ACCORDION_ID = "Population size"
 
+POP_NAME = "pop"
+POP_NAMES = [POP_NAME]
+
 
 @module.ui
 def demography_input_accordions():
@@ -71,7 +74,7 @@ open_accordion_panels = [BOTTLENECK_ACCORDION_ID, POP_SIZE_ACCORDION_ID]
 @module.server
 def demography_server(input, output, session, get_msprime_params):
     def get_pop_name():
-        return "pop"
+        return POP_NAME
 
     @reactive.calc
     def get_pop_size_before():
