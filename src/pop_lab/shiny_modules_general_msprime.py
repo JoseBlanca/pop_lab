@@ -276,10 +276,21 @@ def run_simulation_ui():
     pca_result = ui.output_plot(PCA_PLOT_ID)
 
     ld_vs_dist_plot = ui.output_plot("ld_vs_dist_plot")
+
+    pop_switches = [
+        ui.input_switch(f"ld_vs_dist_plot_swicth_pop_{pop}", pop, value=True)
+        for pop in shiny_module_sim_demography.POP_NAMES
+    ]
     ld_sidebar = ui.sidebar(
         [
-            ui.input_switch(f"ld_vs_dist_plot_swicth_pop_{pop}", pop, value=True)
-            for pop in shiny_module_sim_demography.POP_NAMES
+            ui.accordion(
+                ui.accordion_panel("Pops", pop_switches),
+                id="pop_switches_accordion",
+            ),
+            ui.accordion(
+                ui.accordion_panel("Times"),
+                id="time_switches_accordion",
+            ),
         ],
         id="ld_vs_dist_sidebar",
     )
@@ -322,7 +333,7 @@ def run_simulation_ui():
 def run_simulation_server(
     input, output, session, get_sample_sets, get_demography, get_msprime_params
 ):
-    @reactive.calc
+    @reactive.calc()
     @reactive.event(input.run_button)
     def do_simulation():
         demography = get_demography()["demography"]
@@ -339,14 +350,33 @@ def run_simulation_server(
         )
         return sim_res
 
-    @render.ui
-    def add_plot_input_switches():
-        sidebar = input.ld_sidebar()
-        plot = "ld"
-        pop = "pop1"
-        switch_id = f"{plot}_{pop}_switch"
-        switch = ui.input_switch(switch_id, pop)
-        ui.insert_ui(switch, selector="#swicth1", where="afterEnd")
+    @reactive.calc
+    def get_sampling_times():
+        sim_res = do_simulation()
+        res = sim_res.get_vars_and_pop_samples()
+        pop_samples_info = res["pop_samples_info"]
+        sampling_times = {
+            sample_info["sample_time"] for sample_info in pop_samples_info.values()
+        }
+        sampling_times = sorted(sampling_times)
+        return sampling_times
+
+    @reactive.effect
+    @reactive.event(input.run_button)
+    def update_time_swithes():
+        sampling_times = get_sampling_times()
+        ui.remove_accordion_panel(id="time_switches_accordion", target="Times")
+        switches = [
+            ui.input_switch(
+                f"ld_vs_dist_plot_swicth_time_{time}", str(time), value=True
+            )
+            for time in sampling_times
+        ]
+        ui.insert_accordion_panel(
+            id="time_switches_accordion",
+            target=None,
+            panel=ui.accordion_panel("Times", switches),
+        )
 
     @reactive.calc
     def get_exp_hets():
@@ -619,9 +649,11 @@ def run_simulation_server(
             time = pop_sample_info["sample_time"]
             pop = pop_sample_info["pop_name"]
 
+            time_switch_id = f"ld_vs_dist_plot_swicth_time_{time}"
+            time_input_switch = getattr(input, time_switch_id)
             pop_input_switch_id = f"ld_vs_dist_plot_swicth_pop_{pop}"
             pop_input_switch = getattr(input, pop_input_switch_id)
-            if pop_input_switch():
+            if pop_input_switch() and time_input_switch():
                 style = get_style(pop=pop, time=time)
             else:
                 style = UNUSED_STYLE
