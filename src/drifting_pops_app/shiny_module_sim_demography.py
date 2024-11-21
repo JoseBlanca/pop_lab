@@ -104,8 +104,9 @@ def demography_server(input, output, session, get_msprime_params):
             name=ANCESTRAL_POP_NAME, initial_size=pop_sizes[ANCESTRAL_POP_NAME]
         )
 
-        del pop_sizes[ANCESTRAL_POP_NAME]
-        drifting_pops_sizes = pop_sizes
+        drifting_pops_sizes = {
+            pop: size for pop, size in pop_sizes.items() if pop != ANCESTRAL_POP_NAME
+        }
 
         derived_pops = []
         for pop_name, size in drifting_pops_sizes.items():
