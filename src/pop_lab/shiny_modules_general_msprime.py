@@ -635,8 +635,8 @@ def run_simulation_server(
             style = UNUSED_STYLE
         return style
 
-    @render.plot(alt="LD vs dist plot")
-    def ld_vs_dist_plot():
+    @reactive.calc
+    def calc_ld_curves():
         sim_res = do_simulation()
         fig, axes = plt.subplots()
 
@@ -644,6 +644,8 @@ def run_simulation_server(
         vars = res["vars"]
         indis_by_pop_sample = res["indis_by_pop_sample"]
         pop_samples_info = res["pop_samples_info"]
+
+        ld_curves = {}
 
         for pop_sample_name, lds_and_dists in pynei.get_ld_and_dist_for_pops(
             vars, indis_by_pop_sample, max_allowed_maf=0.90
@@ -668,15 +670,29 @@ def run_simulation_server(
             pop_sample_info = pop_samples_info[pop_sample_name]
             time = pop_sample_info["sample_time"]
             pop = pop_sample_info["pop_name"]
+            ld_curves[pop_sample_name] = {
+                "dists": xs,
+                "r2s": interpolated_r2,
+                "time": time,
+                "pop": pop,
+            }
+        return ld_curves
 
+    @render.plot(alt="LD vs dist plot")
+    def ld_vs_dist_plot():
+        fig, axes = plt.subplots()
+        for pop_sample_name, lds_and_dists in calc_ld_curves().items():
+            time = lds_and_dists["time"]
+            pop = lds_and_dists["pop"]
+            dists = lds_and_dists["dists"]
+            r2s = lds_and_dists["r2s"]
             style = get_style(LD_PLOT_ID, time, pop)
             axes.plot(
-                xs,
-                interpolated_r2,
+                dists,
+                r2s,
                 label=f"{pop}-{time}",
                 color=style["color"],
                 alpha=style["alpha"],
             )
-
         axes.legend()
         return fig
