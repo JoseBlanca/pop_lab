@@ -218,13 +218,12 @@ EXP_HET_PLOT_ID = "exp_het_plot"
 EXP_HET_TABLE_ID = "exp_het_table"
 POLY_MARKERS_PLOT_ID = "poly_markers_plot"
 POLY_MARKERS_TABLE_ID = "poly_markers_table"
-AFS_PLOT_ID = "afs_plot"
-PCA_PLOT_ID = "pca_plot"
 
 LD_PLOT_ID = "ld_vs_dist"
 PCA_PLOT_ID = "pca"
-PLOT_STRS = ("PCA", "LD")
-PLOT_IDS = (PCA_PLOT_ID, LD_PLOT_ID)
+AFS_PLOT_ID = "afs"
+PLOT_STRS = ("Allele freq. spectrum", "PCA", "LD")
+PLOT_IDS = (AFS_PLOT_ID, PCA_PLOT_ID, LD_PLOT_ID)
 
 
 @module.ui
@@ -303,10 +302,6 @@ def run_simulation_ui():
         ui.nav_panel(
             "Num. variable variants",
             num_variable_result,
-        ),
-        ui.nav_panel(
-            "Allele frequency spectrum",
-            afs_result,
         ),
     ]
 
@@ -542,10 +537,8 @@ def run_simulation_server(
         for pop_sample_name, counts in res["counts"].items():
             pop_sample_info = pop_samples_info[pop_sample_name]
             generation = pop_sample_info["sample_time"]
-            if generation > 0:
-                continue
             pop = pop_sample_info["pop_name"]
-            style = get_style_for_pop_and_time(pop=pop, time=generation)
+            style = get_style(AFS_PLOT_ID, pop=pop, time=generation)
             axes.plot(
                 x_poss,
                 counts,
