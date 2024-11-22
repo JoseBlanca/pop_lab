@@ -57,7 +57,16 @@ MIN_SAMPLE_SIZE = 20
 DEF_SAMPLE_SIZE = 50
 MAX_SAMPLE_SIZE = 100
 
-UNUSED_STYLE = {"color": "grey", "marker": ".", "alpha": 0.1}
+THIN_LINE = 1
+BROAD_LINE = 2
+UNUSED_STYLE = {
+    "color": "grey",
+    "marker": ".",
+    "alpha": 0.1,
+    "linewidth": THIN_LINE,
+    "marker_filled": False,
+    "linestyle": "solid",
+}
 
 ######################################################################
 # msprime parameters
@@ -409,7 +418,12 @@ def run_simulation_server(
         for pop, exp_het in res["exp_het_by_pop"].items():
             style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
-                list(-exp_het.index), exp_het.values, label=pop, color=style["color"]
+                list(-exp_het.index),
+                exp_het.values,
+                label=pop,
+                color=style["color"],
+                linewidth=style["linewidth"],
+                linestyle=style["linestyle"],
             )
         axes.set_ylim(0)
         axes.legend()
@@ -433,7 +447,12 @@ def run_simulation_server(
         for pop, series in res[f"{param}_by_pop"].items():
             style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
-                list(-series.index), series.values, label=pop, color=style["color"]
+                list(-series.index),
+                series.values,
+                label=pop,
+                color=style["color"],
+                linewidth=style["linewidth"],
+                linestyle=style["linestyle"],
             )
         axes.set_ylim(0)
         axes.legend()
@@ -460,7 +479,12 @@ def run_simulation_server(
         for pop, series in res[f"{param}_by_pop"].items():
             style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
-                list(-series.index), series.values, label=pop, color=style["color"]
+                list(-series.index),
+                series.values,
+                label=pop,
+                color=style["color"],
+                linewidth=style["linewidth"],
+                linestyle=style["linestyle"],
             )
         axes.set_ylim(0)
         axes.legend()
@@ -487,7 +511,12 @@ def run_simulation_server(
         for pop, series in res[f"{param}_by_pop"].items():
             style = get_style_for_pop_and_time(pop=pop)
             axes.plot(
-                list(-series.index), series.values, label=pop, color=style["color"]
+                list(-series.index),
+                series.values,
+                label=pop,
+                color=style["color"],
+                linewidth=style["linewidth"],
+                linestyle=style["linestyle"],
             )
         axes.set_ylim(0)
         axes.legend()
@@ -516,7 +545,15 @@ def run_simulation_server(
             if generation > 0:
                 continue
             pop = pop_sample_info["pop_name"]
-            axes.plot(x_poss, counts, label=f"{pop}-{generation}")
+            style = get_style_for_pop_and_time(pop=pop, time=generation)
+            axes.plot(
+                x_poss,
+                counts,
+                label=f"{pop}-{generation}",
+                color=style["color"],
+                linewidth=style["linewidth"],
+                linestyle=style["linestyle"],
+            )
         axes.set_xlim((0.5, 1))
         axes.set_xlabel("Allele frequency")
         axes.set_ylabel("Num. variants")
@@ -527,8 +564,24 @@ def run_simulation_server(
     def get_styles():
         colors = list(plt.rcParams["axes.prop_cycle"].by_key()["color"])
         color_cycle = itertools.cycle(colors)
-        markers = ["o", "s", "v", "^", "<", ">", "p", "*", "h", "H", "D", "d"]
+        markers = [
+            ("o", True),
+            ("x", True),
+            ("s", False),
+            ("v", True),
+            ("^", True),
+            ("<", True),
+            (">", True),
+            ("p", True),
+            ("*", True),
+            ("h", True),
+            ("H", True),
+            ("D", True),
+            ("d", True),
+        ]
         marker_cycle = itertools.cycle(markers)
+        linestyles = ["solid", "dashed", "dotted", "dashdotted", "dashdotdotted"]
+        linestyle_cycle = itertools.cycle(linestyles)
 
         sim_res = do_simulation()
         res = sim_res.get_vars_and_pop_samples()
@@ -546,15 +599,28 @@ def run_simulation_server(
         alpha_delta = (1 - alpha_min) / (len(sample_times) - 1)
 
         styles = {"time": {}, "pop": {}}
-        styles["default"] = {"color": colors[-1], "alpha": 1, "marker": "o"}
+        styles["default"] = {
+            "color": colors[-1],
+            "alpha": 1,
+            "marker": "o",
+            "marker_filled": False,
+            "linewidth": THIN_LINE,
+            "linestyle": "solid",
+        }
 
         for idx, time in enumerate(reversed(sample_times)):
+            style = {"linewidth": BROAD_LINE}
             alpha = alpha_delta * idx + alpha_min
-            style = {"alpha": alpha, "marker": next(marker_cycle)}
+            style["alpha"] = alpha
+            style["color"] = next(color_cycle)
             styles["time"][time] = style
 
         for pop in pop_names:
-            style = {"color": next(color_cycle)}
+            style = {"linewidth": BROAD_LINE}
+            marker_and_fill = next(marker_cycle)
+            style["marker"] = marker_and_fill[0]
+            style["marker_filled"] = marker_and_fill[1]
+            style["linestyle"] = next(linestyle_cycle)
             styles["pop"][pop] = style
         return styles
 
@@ -565,7 +631,14 @@ def run_simulation_server(
         if time is not None:
             style.update(styles["time"][time])
         complete_style = {}
-        for trait in ("color", "marker", "alpha"):
+        for trait in (
+            "color",
+            "marker",
+            "alpha",
+            "linewidth",
+            "marker_filled",
+            "linestyle",
+        ):
             complete_style[trait] = style.get(trait, styles["default"][trait])
         return complete_style
 
@@ -610,6 +683,8 @@ def run_simulation_server(
             pop = pop_sample_info["pop_name"]
             style = get_style(PCA_PLOT_ID, pop=pop, time=time)
 
+            facecolor = style["color"] if style["marker_filled"] else "none"
+
             axes.scatter(
                 x_values[mask],
                 y_values[mask],
@@ -617,6 +692,7 @@ def run_simulation_server(
                 color=style["color"],
                 marker=style["marker"],
                 alpha=style["alpha"],
+                facecolor=facecolor,
             )
         axes.set_title(f"PCA done with {filter_stats['maf']['vars_kept']} variations")
         axes.set_xlabel(f"PC1 ({explained_variance.iloc[0]:.2f}%)")
@@ -693,6 +769,8 @@ def run_simulation_server(
                 label=f"{pop}-{time}",
                 color=style["color"],
                 alpha=style["alpha"],
+                linewidth=style["linewidth"],
+                linestyle=style["linestyle"],
             )
         axes.legend()
         return fig
