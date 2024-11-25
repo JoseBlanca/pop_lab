@@ -177,11 +177,6 @@ app_ui = ui.page_fixed(
     lang="en",
 )
 
-# The server section is a function, named server by convention,
-# that always takes the arguments input, output, and session.
-# This function contains render functions and reactive functions, which are used to update the UI in
-# response to user input.
-
 
 def server(input, output, session):
     def get_pop_size():
@@ -406,8 +401,6 @@ def server(input, output, session):
         sim = do_simulation()
         genotypic_freqs = sim.results["genotypic_freqs"]
         parameters.append("Freq. AA (final)")
-        print(genotypic_freqs["freqs_AA"])
-        print(genotypic_freqs["freqs_AA"].iloc[-1])
         values.append(round(genotypic_freqs["freqs_AA"].iloc[-1, 0], ndigits=2))
         parameters.append("Freq. Aa (final)")
         values.append(round(genotypic_freqs["freqs_Aa"].iloc[-1, 0], 2))
