@@ -9,6 +9,12 @@ from one_locus_two_alleles_simulator import (
     INF,
     MutRates,
 )
+from fwd_in_time_app_specific_code import (
+    SELECT_FITNESS,
+    SELECT_MUTATION,
+    SELECT_SELFING,
+)
+
 
 MIN_POP_SIZE = 10
 MAX_POP_SIZE = 1000
@@ -27,10 +33,6 @@ FREQ_A_PLOT_ID = "freq_A_plot"
 EXP_HET_PLOT_ID = "exp_het_plot"
 SUMMARY_TABLE_ID = "summary_table"
 RESULT_TABLE_ID = "result_table"
-
-SELECT_FITNESS = True
-SELECT_MUTATION = True
-SELECT_SELFING = True
 
 
 @module.ui
