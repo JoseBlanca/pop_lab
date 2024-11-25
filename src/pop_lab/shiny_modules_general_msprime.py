@@ -222,8 +222,9 @@ POLY_MARKERS_TABLE_ID = "poly_markers_table"
 LD_PLOT_ID = "ld_vs_dist"
 PCA_PLOT_ID = "pca"
 AFS_PLOT_ID = "afs"
-PLOT_STRS = ("Allele freq. spectrum", "PCA", "LD")
-PLOT_IDS = (AFS_PLOT_ID, PCA_PLOT_ID, LD_PLOT_ID)
+DIVERSITY_ALONG_GENOME_PLOT_ID = "diversity_along_genome"
+PLOT_STRS = ("Allele freq. spectrum", "PCA", "LD", "Diversity along the genome")
+PLOT_IDS = (AFS_PLOT_ID, PCA_PLOT_ID, LD_PLOT_ID, DIVERSITY_ALONG_GENOME_PLOT_ID)
 
 
 @module.ui
@@ -777,4 +778,31 @@ def run_simulation_server(
                 linestyle=style["linestyle"],
             )
         axes.legend()
+        return fig
+
+    @render.plot(alt="Diversity along the genome plot")
+    def diversity_along_genome_plot():
+        sim_res = do_simulation()
+        res = sim_res.get_vars_and_pop_samples()
+        pop_samples_info = res["pop_samples_info"]
+        exp_hets = sim_res.calc_exp_het_along_genome()
+
+        fig, axes = plt.subplots()
+        for sampling, sampling_exp_hets in exp_hets.iterrows():
+            pop_sample_info = pop_samples_info[sampling]
+            time = pop_sample_info["sample_time"]
+            pop = pop_sample_info["pop_name"]
+            style = get_style(DIVERSITY_ALONG_GENOME_PLOT_ID, time, pop)
+            axes.plot(
+                sampling_exp_hets.index,
+                sampling_exp_hets.values,
+                label=f"{pop}-{time}",
+                color=style["color"],
+                alpha=style["alpha"],
+                linewidth=style["linewidth"],
+                linestyle=style["linestyle"],
+            )
+        axes.set_ylim((0, axes.get_ylim()[1]))
+        axes.set_xlabel("Genomic position (bp)")
+        axes.set_ylabel("Mean unbiased exp. het.")
         return fig

@@ -176,6 +176,32 @@ class SimulationResult:
         )
         return {"counts": res["hist_counts"], "bin_edges": res["hist_bin_edges"]}
 
+    def calc_exp_het_along_genome(self):
+        n_bins = 20
+        res = self.get_vars_and_pop_samples()
+        vars = res["vars"]
+        chunk = next(vars.iter_vars_chunks())
+        samples = vars.samples
+        pops = res["indis_by_pop_sample"]
+        pops = {
+            pop: numpy.isin(samples, pop_samples) for pop, pop_samples in pops.items()
+        }
+        exp_het_per_var = pynei.diversity._calc_unbiased_exp_het_per_var(
+            chunk, pops=pops
+        )["exp_het"]
+        poss = chunk.vars_info[pynei.VAR_TABLE_POS_COL]
+        bin_edges = numpy.linspace(0, poss.max(), n_bins + 1)
+
+        exp_hets = {}
+        for pos_start, pos_end in zip(bin_edges[:-1], bin_edges[1:]):
+            pos_mask = numpy.logical_and(poss > pos_start, poss <= pos_end)
+            exp_hets_in_genome_segment = exp_het_per_var.loc[pos_mask, :]
+            exp_het_in_genome_segment = exp_hets_in_genome_segment.mean(axis=0)
+            pos = int((pos_start + pos_end) / 2.0)
+            exp_hets[pos] = exp_het_in_genome_segment
+        exp_hets = pandas.DataFrame(exp_hets)
+        return exp_hets
+
 
 def get_info_from_demography(demography: msprime.Demography):
     pop_info = {}
