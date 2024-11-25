@@ -28,6 +28,10 @@ EXP_HET_PLOT_ID = "exp_het_plot"
 SUMMARY_TABLE_ID = "summary_table"
 RESULT_TABLE_ID = "result_table"
 
+SELECT_FITNESS = True
+SELECT_MUTATION = True
+SELECT_SELFING = True
+
 
 @module.ui
 def fwd_in_time_ui():
@@ -90,27 +94,36 @@ def fwd_in_time_ui():
         ),
     )
 
-    fitness_panel = (
-        ui.input_slider("wAA_slider", label="wAA", min=0, max=1, value=1),
-        ui.input_slider("wAa_slider", label="wAa", min=0, max=1, value=1),
-        ui.input_slider("waa_slider", label="waa", min=0, max=1, value=1),
-    )
-
-    mutation_panel = (
-        ui.input_slider("A2a_slider", label="A2a", min=0, max=0.1, value=0),
-        ui.input_slider("a2A_slider", label="a2A", min=0, max=0.1, value=0),
-    )
-    selfing_panel = (
-        ui.input_slider("selfing_slider", label="Selfing rate", min=0, max=1, value=0),
-    )
-
-    inputs_panel = ui.accordion(
+    accordion_panels = [
         ui.accordion_panel("Initial freqs.", freqs_tab),
         ui.accordion_panel("Pop. size", pop_size_panel),
         ui.accordion_panel("Num. generations", num_gen_panel),
-        ui.accordion_panel("Selection", fitness_panel),
-        ui.accordion_panel("Mutation", mutation_panel),
-        ui.accordion_panel("Selfing", selfing_panel),
+    ]
+
+    if SELECT_FITNESS:
+        fitness_panel = (
+            ui.input_slider("wAA_slider", label="wAA", min=0, max=1, value=1),
+            ui.input_slider("wAa_slider", label="wAa", min=0, max=1, value=1),
+            ui.input_slider("waa_slider", label="waa", min=0, max=1, value=1),
+        )
+        accordion = ui.accordion_panel("Selection", fitness_panel)
+        accordion_panels.append(accordion)
+    if SELECT_MUTATION:
+        mutation_panel = (
+            ui.input_slider("A2a_slider", label="A2a", min=0, max=0.1, value=0),
+            ui.input_slider("a2A_slider", label="a2A", min=0, max=0.1, value=0),
+        )
+        accordion = ui.accordion_panel("Mutation", mutation_panel)
+        accordion_panels.append(accordion)
+    if SELECT_SELFING:
+        selfing_slider = ui.input_slider(
+            "selfing_slider", label="", min=0, max=1, value=0
+        )
+        accordion = ui.accordion_panel("Selfing rate", selfing_slider)
+        accordion_panels.append(accordion)
+
+    inputs_panel = ui.accordion(
+        *accordion_panels,
         id="inputs_panel",
         open=["Initial freqs.", "Pop. size", "Num. generations"],
     )
@@ -258,6 +271,33 @@ def fwd_in_time_server(input, output, session):
         return f"{get_freq_aa():.2f}"
 
     @reactive.calc
+    def get_fitness_rates():
+        if SELECT_FITNESS:
+            wAA = input.wAA_slider()
+            wAa = input.wAa_slider()
+            waa = input.waa_slider()
+        else:
+            wAA, wAa, waa = 1.0, 1.0, 1.0
+        return wAA, wAa, waa
+
+    @reactive.calc
+    def get_mutation_rates():
+        if SELECT_MUTATION:
+            A2a = input.A2a_slider()
+            a2A = input.a2A_slider()
+        else:
+            A2a, a2A = 0.0, 0.0
+        return A2a, a2A
+
+    @reactive.calc
+    def get_selfing_rate():
+        if SELECT_SELFING:
+            selfing_rate = input.selfing_slider()
+        else:
+            selfing_rate = 0.0
+        return selfing_rate
+
+    @reactive.calc
     @reactive.event(input.run_button)
     def do_simulation():
         sim_params = {
@@ -265,7 +305,7 @@ def fwd_in_time_server(input, output, session):
                 "pop1": {
                     "genotypic_freqs": (get_freq_AA(), get_freq_Aa(), get_freq_aa()),
                     "size": get_pop_size(),
-                    "selfing_rate": input.selfing_slider(),
+                    "selfing_rate": get_selfing_rate(),
                 },
             },
             "num_generations": get_num_generations(),
@@ -276,9 +316,7 @@ def fwd_in_time_server(input, output, session):
             ],
         }
 
-        wAA = input.wAA_slider()
-        wAa = input.wAa_slider()
-        waa = input.waa_slider()
+        wAA, wAa, waa = get_fitness_rates()
         if (
             not math.isclose(wAA, 1)
             or not math.isclose(wAa, 1)
@@ -286,8 +324,7 @@ def fwd_in_time_server(input, output, session):
         ):
             sim_params["pops"]["pop1"]["fitness"] = (wAA, wAa, waa)
 
-        A2a = input.A2a_slider()
-        a2A = input.a2A_slider()
+        A2a, a2A = get_mutation_rates()
         if not math.isclose(A2a, 0) or not math.isclose(a2A, 0):
             sim_params["pops"]["pop1"]["mut_rates"] = MutRates(A2a, a2A)
 
@@ -353,14 +390,8 @@ def fwd_in_time_server(input, output, session):
         parameters.append("Freq. aa (init)")
         values.append(get_freq_aa())
 
-        wAA = input.wAA_slider()
-        wAa = input.wAa_slider()
-        waa = input.waa_slider()
-        if (
-            not math.isclose(wAA, 1)
-            or not math.isclose(wAa, 1)
-            or not math.isclose(waa, 1)
-        ):
+        if SELECT_FITNESS:
+            wAA, wAa, waa = get_fitness_rates()
             parameters.append("wAA")
             values.append(wAA)
             parameters.append("wAa")
@@ -368,17 +399,17 @@ def fwd_in_time_server(input, output, session):
             parameters.append("waa")
             values.append(waa)
 
-        mutA2a = input.A2a_slider()
-        muta2A = input.a2A_slider()
-        if not math.isclose(mutA2a, 0) or not math.isclose(muta2A, 0):
+        if SELECT_MUTATION:
+            mutA2a, muta2A = get_mutation_rates()
             parameters.append("mut. A -> a")
             values.append(mutA2a)
             parameters.append("mut. a -> A")
             values.append(muta2A)
 
-        if not math.isclose(input.selfing_slider(), 0):
+        if SELECT_SELFING:
+            selfing_rate = get_selfing_rate()
             parameters.append("Selfing rate")
-            values.append(input.selfing_slider())
+            values.append(selfing_rate)
 
         parameters.append("Pop. size")
         values.append(get_pop_size())
