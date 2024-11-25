@@ -309,28 +309,31 @@ def run_simulation_ui():
     ):
         plot = ui.output_plot(f"{plot_id}_plot")
 
-        pop_switches = [
-            ui.input_switch(f"{plot_id}_plot_swicth_pop_{pop}", pop, value=True)
-            for pop in shiny_module_sim_demography.POP_NAMES
-        ]
-        ld_sidebar = ui.sidebar(
-            [
-                ui.accordion(
-                    ui.accordion_panel("Pops", pop_switches),
-                    id=f"{plot_id}_pop_switches_accordion",
-                ),
-                ui.accordion(
-                    ui.accordion_panel("Times"),
-                    id=f"{plot_id}_time_switches_accordion",
-                ),
-            ],
+        accordions = []
+        if len(shiny_module_sim_demography.POP_NAMES) > 1:
+            pop_switches = [
+                ui.input_switch(f"{plot_id}_plot_swicth_pop_{pop}", pop, value=True)
+                for pop in shiny_module_sim_demography.POP_NAMES
+            ]
+            pops_accordion = ui.accordion(
+                ui.accordion_panel("Pops", pop_switches),
+                id=f"{plot_id}_pop_switches_accordion",
+            )
+            accordions.append(pops_accordion)
+        times_accordion = ui.accordion(
+            ui.accordion_panel("Times"),
+            id=f"{plot_id}_time_switches_accordion",
+        )
+        accordions.append(times_accordion)
+        sidebar = ui.sidebar(
+            accordions,
             id=f"{plot_id}_sidebar",
         )
-        ld_sidebar_layout = ui.layout_sidebar(
-            ld_sidebar, plot, position="right", bg="#f8f8f8"
+        sidebar_layout = ui.layout_sidebar(
+            sidebar, plot, position="right", bg="#f8f8f8"
         )
-        ld_card = ui.card(ld_sidebar_layout)
-        nav_panels.append(ui.nav_panel(plot_str, ld_card))
+        card = ui.card(sidebar_layout)
+        nav_panels.append(ui.nav_panel(plot_str, card))
 
     output_card = ui.navset_card_tab(*nav_panels)
 
@@ -385,7 +388,7 @@ def run_simulation_server(
             ]
             ui.insert_accordion_panel(
                 id=f"{plot}_time_switches_accordion",
-                target="Pops",
+                # target="Pops",
                 panel=ui.accordion_panel("Times", switches),
             )
 
@@ -695,8 +698,14 @@ def run_simulation_server(
         time_switch_id = f"{plot_id}_plot_swicth_time_{time}"
         time_input_switch = getattr(input, time_switch_id)
         pop_input_switch_id = f"{plot_id}_plot_swicth_pop_{pop}"
-        pop_input_switch = getattr(input, pop_input_switch_id)
-        if pop_input_switch() and time_input_switch():
+
+        if len(shiny_module_sim_demography.POP_NAMES) > 1:
+            pop_input_switch = getattr(input, pop_input_switch_id)
+            pop_is_on = pop_input_switch()
+        else:
+            pop_is_on = True
+
+        if pop_is_on and time_input_switch():
             style = get_style_for_pop_and_time(pop=pop, time=time)
         else:
             style = UNUSED_STYLE
