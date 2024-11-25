@@ -22,4 +22,4 @@ src/drifting_pops_app/msprime_sim_utils.py
 src/drifting_pops_app/pynei/
 src/one_locus_app/__pycache__/
 update_pynei.py
-src/simple_drift/__pycache__/
+src/simple_drift_app/__pycache__/
