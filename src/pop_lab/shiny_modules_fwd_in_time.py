@@ -20,8 +20,8 @@ MIN_NUM_GEN = 10
 MAX_NUM_GEN = 500
 DEF_NUM_GEN = 100
 
-GENOMIC_FREQS_TAB_ID = "genotypic_freqs"
-ALLELIC_FREQS_TAB_ID = "allelic_freqs"
+HW_FREQS_TAB_ID = "hw_freq_A_tab"
+GENOMIC_FREQS_TAB_ID = "genomic_freqs_tab"
 GENO_FREQS_PLOT_ID = "geno_freqs_plot"
 FREQ_A_PLOT_ID = "freq_A_plot"
 EXP_HET_PLOT_ID = "exp_het_plot"
@@ -31,19 +31,21 @@ RESULT_TABLE_ID = "result_table"
 
 @module.ui
 def fwd_in_time_ui():
-    freq_A_Aa_widget = ui.row(
-        ui.input_numeric(
-            "freq_A_input", "Freq. A", DEF_FREQ_A, min=0.0, max=1.0, step=0.01
-        ),
-        ui.input_numeric(
-            "freq_Aa_input", "Freq. Aa", DEF_FREQ_Aa, min=0.0, max=1.0, step=0.01
+    freq_A_slider = ui.row(
+        ui.input_slider(
+            "freq_A_slider",
+            label="Freq. A",
+            min=0,
+            max=1,
+            value=DEF_FREQ_A,
+            width="100%",
         ),
     )
 
     geno_freqs_slider = ui.row(
         ui.input_slider(
             "geno_freqs_slider",
-            label="",
+            label="Genomic freqs.: AA • Aa • aa",
             min=0,
             max=1,
             value=DEF_GENO_FREQS,
@@ -51,13 +53,11 @@ def fwd_in_time_ui():
         ),
     )
 
-    panels = [
-        ui.nav_panel("Genomic freqs.", geno_freqs_slider, value=GENOMIC_FREQS_TAB_ID),
-        ui.nav_panel("Allelic freqs.", freq_A_Aa_widget, value=ALLELIC_FREQS_TAB_ID),
-    ]
-
     freqs_tab = ui.navset_card_tab(
-        *panels,
+        ui.nav_panel("With Hardy-Weinberg eq.", freq_A_slider, value=HW_FREQS_TAB_ID),
+        ui.nav_panel(
+            "Without Hardy-Weinberg eq.", geno_freqs_slider, value=GENOMIC_FREQS_TAB_ID
+        ),
         id="freqs_tabs",
     )
 
@@ -186,28 +186,27 @@ def fwd_in_time_server(input, output, session):
     def get_freq_AA():
         if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
             freq_AA = input.geno_freqs_slider()[0]
-        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
-            freq_Aa = input.freq_Aa_input()
-            freq_A = input.freq_A_input()
-            freq_AA = freq_A - (freq_Aa / 2)
+        elif input.freqs_tabs() == HW_FREQS_TAB_ID:
+            freq_A = input.freq_A_slider()
+            freq_AA = freq_A**2
         return freq_AA
 
     @reactive.calc
     def get_freq_aa():
         if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
             freq_aa = 1 - input.geno_freqs_slider()[1]
-        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
-            freq_Aa = input.freq_Aa_input()
-            freq_A = input.freq_A_input()
-            freq_aa = (1 - freq_A) - (freq_Aa / 2)
+        elif input.freqs_tabs() == HW_FREQS_TAB_ID:
+            freq_A = input.freq_A_slider()
+            freq_aa = (1 - freq_A) ** 2
         return freq_aa
 
     @reactive.calc
     def get_freq_Aa():
         if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
             freq_Aa = input.geno_freqs_slider()[1] - input.geno_freqs_slider()[0]
-        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
-            freq_Aa = input.freq_Aa_input()
+        elif input.freqs_tabs() == HW_FREQS_TAB_ID:
+            freq_A = input.freq_A_slider()
+            freq_Aa = 1 - freq_A**2 - (1 - freq_A) ** 2
         return freq_Aa
 
     @reactive.calc
@@ -218,8 +217,8 @@ def fwd_in_time_server(input, output, session):
     def get_freq_A():
         if input.freqs_tabs() == GENOMIC_FREQS_TAB_ID:
             freq_A = get_freq_AA() + get_freq_Aa() * 0.5
-        elif input.freqs_tabs() == ALLELIC_FREQS_TAB_ID:
-            freq_A = input.freq_A_input()
+        elif input.freqs_tabs() == HW_FREQS_TAB_ID:
+            freq_A = input.freq_A_slider()
         return freq_A
 
     @reactive.effect
