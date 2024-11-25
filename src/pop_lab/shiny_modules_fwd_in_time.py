@@ -1,6 +1,6 @@
 import math
 
-from shiny import App, reactive, render, ui
+from shiny import module, reactive, render, ui
 import matplotlib.pyplot as plt
 import pandas
 
@@ -28,157 +28,154 @@ EXP_HET_PLOT_ID = "exp_het_plot"
 SUMMARY_TABLE_ID = "summary_table"
 RESULT_TABLE_ID = "result_table"
 
-freq_A_Aa_widget = ui.row(
-    ui.input_numeric(
-        "freq_A_input", "Freq. A", DEF_FREQ_A, min=0.0, max=1.0, step=0.01
-    ),
-    ui.input_numeric(
-        "freq_Aa_input", "Freq. Aa", DEF_FREQ_Aa, min=0.0, max=1.0, step=0.01
-    ),
-)
 
-geno_freqs_slider = ui.row(
-    ui.input_slider(
-        "geno_freqs_slider",
-        label="",
-        min=0,
-        max=1,
-        value=DEF_GENO_FREQS,
-        width="100%",
-    ),
-)
-
-panels = [
-    ui.nav_panel("Genomic freqs.", geno_freqs_slider, value=GENOMIC_FREQS_TAB_ID),
-    ui.nav_panel("Allelic freqs.", freq_A_Aa_widget, value=ALLELIC_FREQS_TAB_ID),
-]
-
-freqs_tab = ui.navset_card_tab(
-    *panels,
-    id="freqs_tabs",
-)
-
-pop_size_panel = (
-    ui.layout_columns(
-        ui.panel_conditional(
-            "!input.pop_is_inf_checkbox",
-            ui.input_slider(
-                "pop_size_slider",
-                label="",
-                min=MIN_POP_SIZE,
-                max=MAX_POP_SIZE,
-                value=DEF_POP_SIZE,
-                width="100%",
-            ),
+@module.ui
+def fwd_in_time_ui():
+    freq_A_Aa_widget = ui.row(
+        ui.input_numeric(
+            "freq_A_input", "Freq. A", DEF_FREQ_A, min=0.0, max=1.0, step=0.01
         ),
-        ui.input_checkbox("pop_is_inf_checkbox", label="Pop. is inf.", value=False),
-        col_widths=(10, 2),
-    ),
-)
-
-num_gen_panel = (
-    ui.input_slider(
-        "num_gen_slider",
-        label="",
-        min=MIN_NUM_GEN,
-        max=MAX_NUM_GEN,
-        value=DEF_NUM_GEN,
-        width="100%",
-    ),
-)
-
-
-fitness_panel = (
-    ui.input_slider("wAA_slider", label="wAA", min=0, max=1, value=1),
-    ui.input_slider("wAa_slider", label="wAa", min=0, max=1, value=1),
-    ui.input_slider("waa_slider", label="waa", min=0, max=1, value=1),
-)
-
-mutation_panel = (
-    ui.input_slider("A2a_slider", label="A2a", min=0, max=0.1, value=0),
-    ui.input_slider("a2A_slider", label="a2A", min=0, max=0.1, value=0),
-)
-selfing_panel = (
-    ui.input_slider("selfing_slider", label="Selfing rate", min=0, max=1, value=0),
-)
-
-inputs_panel = ui.accordion(
-    ui.accordion_panel("Initial freqs.", freqs_tab),
-    ui.accordion_panel("Pop. size", pop_size_panel),
-    ui.accordion_panel("Num. generations", num_gen_panel),
-    ui.accordion_panel("Selection", fitness_panel),
-    ui.accordion_panel("Mutation", mutation_panel),
-    ui.accordion_panel("Selfing", selfing_panel),
-    id="inputs_panel",
-    open=["Initial freqs.", "Pop. size", "Num. generations"],
-)
-
-sim_params_widget = ui.layout_columns(
-    ui.value_box(
-        title="Freq. AA",
-        value=ui.output_ui("freq_AA_output"),
-    ),
-    ui.value_box(
-        title="Freq. Aa",
-        value=ui.output_ui("freq_Aa_output"),
-    ),
-    ui.value_box(
-        title="Freq. aa",
-        value=ui.output_ui("freq_aa_output"),
-    ),
-)
-
-run_button = ui.input_action_button("run_button", "Run simulation")
-
-input_card = ui.card(
-    ui.h1("One locus foward in time simulation"),
-    ui.card(inputs_panel, sim_params_widget),
-    run_button,
-)
-
-summary = ui.navset_tab(
-    ui.nav_panel(
-        "Parameters",
-        ui.output_data_frame(SUMMARY_TABLE_ID),
-    ),
-    ui.nav_panel(
-        "Results",
-        ui.output_data_frame(RESULT_TABLE_ID),
-    ),
-    selected="Results",
-)
-
-output_panels = (
-    ui.nav_panel(
-        "Genotypic freqs.",
-        ui.output_plot(GENO_FREQS_PLOT_ID),
-    ),
-    ui.nav_panel(
-        "Freq A.",
-        ui.output_plot(FREQ_A_PLOT_ID),
-    ),
-    ui.nav_panel(
-        "Exp. Het.",
-        ui.output_plot(EXP_HET_PLOT_ID),
-    ),
-    ui.nav_panel("Summary", summary),
-)
-
-output_card = ui.card(
-    ui.navset_tab(
-        *output_panels,
+        ui.input_numeric(
+            "freq_Aa_input", "Freq. Aa", DEF_FREQ_Aa, min=0.0, max=1.0, step=0.01
+        ),
     )
-)
 
-app_ui = ui.page_fixed(
-    input_card,
-    output_card,
-    title="Pop Lab",
-    lang="en",
-)
+    geno_freqs_slider = ui.row(
+        ui.input_slider(
+            "geno_freqs_slider",
+            label="",
+            min=0,
+            max=1,
+            value=DEF_GENO_FREQS,
+            width="100%",
+        ),
+    )
+
+    panels = [
+        ui.nav_panel("Genomic freqs.", geno_freqs_slider, value=GENOMIC_FREQS_TAB_ID),
+        ui.nav_panel("Allelic freqs.", freq_A_Aa_widget, value=ALLELIC_FREQS_TAB_ID),
+    ]
+
+    freqs_tab = ui.navset_card_tab(
+        *panels,
+        id="freqs_tabs",
+    )
+
+    pop_size_panel = (
+        ui.layout_columns(
+            ui.panel_conditional(
+                "!input.pop_is_inf_checkbox",
+                ui.input_slider(
+                    "pop_size_slider",
+                    label="",
+                    min=MIN_POP_SIZE,
+                    max=MAX_POP_SIZE,
+                    value=DEF_POP_SIZE,
+                    width="100%",
+                ),
+            ),
+            ui.input_checkbox("pop_is_inf_checkbox", label="Pop. is inf.", value=False),
+            col_widths=(10, 2),
+        ),
+    )
+
+    num_gen_panel = (
+        ui.input_slider(
+            "num_gen_slider",
+            label="",
+            min=MIN_NUM_GEN,
+            max=MAX_NUM_GEN,
+            value=DEF_NUM_GEN,
+            width="100%",
+        ),
+    )
+
+    fitness_panel = (
+        ui.input_slider("wAA_slider", label="wAA", min=0, max=1, value=1),
+        ui.input_slider("wAa_slider", label="wAa", min=0, max=1, value=1),
+        ui.input_slider("waa_slider", label="waa", min=0, max=1, value=1),
+    )
+
+    mutation_panel = (
+        ui.input_slider("A2a_slider", label="A2a", min=0, max=0.1, value=0),
+        ui.input_slider("a2A_slider", label="a2A", min=0, max=0.1, value=0),
+    )
+    selfing_panel = (
+        ui.input_slider("selfing_slider", label="Selfing rate", min=0, max=1, value=0),
+    )
+
+    inputs_panel = ui.accordion(
+        ui.accordion_panel("Initial freqs.", freqs_tab),
+        ui.accordion_panel("Pop. size", pop_size_panel),
+        ui.accordion_panel("Num. generations", num_gen_panel),
+        ui.accordion_panel("Selection", fitness_panel),
+        ui.accordion_panel("Mutation", mutation_panel),
+        ui.accordion_panel("Selfing", selfing_panel),
+        id="inputs_panel",
+        open=["Initial freqs.", "Pop. size", "Num. generations"],
+    )
+
+    sim_params_widget = ui.layout_columns(
+        ui.value_box(
+            title="Freq. AA",
+            value=ui.output_ui("freq_AA_output"),
+        ),
+        ui.value_box(
+            title="Freq. Aa",
+            value=ui.output_ui("freq_Aa_output"),
+        ),
+        ui.value_box(
+            title="Freq. aa",
+            value=ui.output_ui("freq_aa_output"),
+        ),
+    )
+
+    run_button = ui.input_action_button("run_button", "Run simulation")
+
+    input_card = ui.card(
+        ui.h1("One locus foward in time simulation"),
+        ui.card(inputs_panel, sim_params_widget),
+        run_button,
+    )
+
+    summary = ui.navset_tab(
+        ui.nav_panel(
+            "Parameters",
+            ui.output_data_frame(SUMMARY_TABLE_ID),
+        ),
+        ui.nav_panel(
+            "Results",
+            ui.output_data_frame(RESULT_TABLE_ID),
+        ),
+        selected="Results",
+    )
+
+    output_panels = (
+        ui.nav_panel(
+            "Genotypic freqs.",
+            ui.output_plot(GENO_FREQS_PLOT_ID),
+        ),
+        ui.nav_panel(
+            "Freq A.",
+            ui.output_plot(FREQ_A_PLOT_ID),
+        ),
+        ui.nav_panel(
+            "Exp. Het.",
+            ui.output_plot(EXP_HET_PLOT_ID),
+        ),
+        ui.nav_panel("Summary", summary),
+    )
+
+    output_card = ui.card(
+        ui.navset_tab(
+            *output_panels,
+        )
+    )
+    return input_card, output_card
 
 
-def server(input, output, session):
+@module.server
+def fwd_in_time_server(input, output, session):
     def get_pop_size():
         pop_size = int(input.pop_size_slider())
         if input.pop_is_inf_checkbox():
@@ -412,6 +409,3 @@ def server(input, output, session):
 
         df = pandas.DataFrame({"Parameter": parameters, "Value": values})
         return render.DataGrid(df)
-
-
-app = App(app_ui, server)
