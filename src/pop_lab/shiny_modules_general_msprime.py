@@ -641,9 +641,11 @@ def run_simulation_server(
         sim_res = do_simulation()
         fig, axes = plt.subplots()
 
+        max_maf = 0.95
+
         res = sim_res.get_vars_and_pop_samples()
         vars = res["vars"]
-        vars = pynei.filter_by_maf(vars, max_allowed_maf=0.95)
+        vars = pynei.filter_by_maf(vars, max_allowed_maf=max_maf)
         pop_samples_info = res["pop_samples_info"]
         indis_by_pop_sample = res["indis_by_pop_sample"]
 
@@ -688,7 +690,9 @@ def run_simulation_server(
                 alpha=style["alpha"],
                 facecolor=facecolor,
             )
-        axes.set_title(f"PCA done with {filter_stats['maf']['vars_kept']} variations")
+        axes.set_title(
+            f"PCA done with {filter_stats['maf']['vars_kept']} polymorphic ({int(max_maf*100)}%) variations"
+        )
         axes.set_xlabel(f"PC1 ({explained_variance.iloc[0]:.2f}%)")
         axes.set_ylabel(f"PC2 ({explained_variance.iloc[1]:.2f}%)")
         axes.legend()
