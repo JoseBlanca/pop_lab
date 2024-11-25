@@ -1,0 +1,95 @@
+# Practices
+
+## Selection
+
+
+### Minor recessive allele (aa) advantage
+
+This is the case of a new benefitial mutation.
+
+Do simulations starting with mostly AA genotypes and a minimum amount of Aa, and set the fitness of wAA and wAa to different levels from (0.1 to 1).
+
+Which is the fate of the A and a alleles?
+
+Run the simulation several times. Does the a allele always manages to be fixed in the end? Why?
+
+Make the population infinite to remove the drift effect and write down number of generations in which the a allele is fixed
+
+### Minor deletereous allele
+
+This is a common example in genetic diseases.
+
+Start mostly with AA genotypes and a minimum amount of Aa, and set the fitness of waa to different levels from (0.1 to 1) and wAA and WAa to 1 (a is recessive).
+
+Does the deletereous allele disapears from the population? (Try with and without drift).
+
+What happens when if we make the disease dominant? (wAa = waa)
+
+In the case of a dominant disadvantage what happens when this dissadvantage is very low? (wAA=1, wAa=0.9, waa=0.9)
+
+### Heterozygote superiority, the malaria case
+
+Set wAA=0.8, wAa=1, and waa=0.4. What happens in this case?
+
+Try with different fitness values, and study what happens with the allelic and genotypic frequencies.
+
+### Heterozygote inferiority
+
+Simulate the existance of a big chromosomal inversion that impairs the heterozygotes reproduction. WAA=Waa=1, different values of wAa.
+
+What happens in an infinite population? And in a population with 1000 indiviuals?
+
+For this case, study also the effect of introducing selfing.
+
+## Balancing selection with different selective preasures
+
+
+Selection in both populations
+
+Set fitness values that creates the same selection preasure in both populations in favor of the A allele. What happens with the A allelic frequency and the diversity? Does the migration beteween both populations influence something?
+Balancing selection
+
+Let's imagine that now we have selection favoring the A allele in one population and the a allele in the other. We can assume that A is dominant. This would be the case, for instance, of a wild and a cultivated population living in the same area. There will be some crosses between them, so some gene flow, and one allele (for instance in a fruit size gene) will be favored in the wild population and the other will be selected in the cultivated one.
+
+This is also the case in a cultivated species in which some varieties are selected from some fruit size, shape, or color and other for others.
+
+Let's try starting with the following settings:
+
+Pop. 1:
+
+    Freq. A = 1
+    WAA = 1
+    WAa = 1
+    waa = 0.7
+    imigration = 0.06
+
+Pop. 2:
+
+    Freq. A = 0
+    WAA = 0.7
+    WAa = 0.7
+    waa = 1
+    imigration = 0.06
+
+What happens now with the diversity in both populations?
+
+How does the diversity respond to different selective preasures?
+
+Could we fix the cultivated allele in the cultivated population while there are still crosses with the wild population? How does migration affects this situation?
+
+## Imbreeding
+
+## Founder Effect
+
+The ancestral population will not disapear, so both populations will exist at generation 0 (present day).
+
+## Mutation-drift and diversities
+
+Analyze the influence of the population size in the number or markers and in the number of polymorfic markers. Plot the different diversity indexes for populations of sizes: 500, 1000, 10000, 50000, 100000, 200000, 500000
+
+    How does the number of markers change with the population size?
+    How does the diversity, and number of polymorphic markers change with population size?
+    How does the proportion of polymorphic markers and Allele Frequency Spectrum change with population size?
+
+
+## Selection hitchhiking
