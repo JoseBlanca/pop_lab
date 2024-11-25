@@ -1,15 +1,6 @@
-from shiny import App, ui, render, module, reactive
+from shiny import App, ui
 
-import msprime
-import numpy
-import pandas
-import scipy
-import demesdraw
-
-import pynei
-import msprime_sim_utils
 from shiny_modules_general_msprime import (
-    Table,
     msprime_params_ui,
     msprime_params_server,
     input_params_tabs,
