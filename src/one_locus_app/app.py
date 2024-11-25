@@ -406,14 +406,16 @@ def server(input, output, session):
         sim = do_simulation()
         genotypic_freqs = sim.results["genotypic_freqs"]
         parameters.append("Freq. AA (final)")
-        values.append(genotypic_freqs["freqs_AA"].iloc[-1])
+        print(genotypic_freqs["freqs_AA"])
+        print(genotypic_freqs["freqs_AA"].iloc[-1])
+        values.append(round(genotypic_freqs["freqs_AA"].iloc[-1, 0], ndigits=2))
         parameters.append("Freq. Aa (final)")
-        values.append(genotypic_freqs["freqs_Aa"].iloc[-1])
+        values.append(round(genotypic_freqs["freqs_Aa"].iloc[-1, 0], 2))
         parameters.append("Freq. aa (final)")
-        values.append(genotypic_freqs["freqs_aa"].iloc[-1])
+        values.append(round(genotypic_freqs["freqs_aa"].iloc[-1, 0], 2))
 
         parameters.append("Exp. het. (final)")
-        values.append(sim.results["expected_hets"].iloc[-1])
+        values.append(round(sim.results["expected_hets"].iloc[-1, 0], 2))
 
         df = pandas.DataFrame({"Parameter": parameters, "Value": values})
         return render.DataGrid(df)
