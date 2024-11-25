@@ -777,6 +777,8 @@ def run_simulation_server(
                 linewidth=style["linewidth"],
                 linestyle=style["linestyle"],
             )
+        axes.set_xlabel("Dist. between markers (bp.)")
+        axes.set_ylabel("Rogers & Huff r2")
         axes.legend()
         return fig
 
