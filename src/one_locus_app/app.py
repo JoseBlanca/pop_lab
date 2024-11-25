@@ -10,26 +10,6 @@ from one_locus_two_alleles_simulator import (
     MutRates,
 )
 
-# The UI section consists of a single (potentially very long and deeply nested) expression,
-# stored as a variable named app_ui by convention. The object this produces is actually simply HTML,
-# which is sent to the browser when it first loads the app.
-
-# Broadly speaking, there are two kinds of UI components in Shiny: container components, which,
-# as the name suggests, can contain other components, and non-container components, which cannot.
-# (You can also think of the UI as a tree data structure: container components have children,
-# while non-container components are leaf nodes in the tree.)
-# some examples of container components:
-#
-#    ui.sidebar()
-#    ui.card()
-#    ui.layout_columns()
-#    ui.div()
-# some examples of non-container components:
-#    ui.input_text()
-#    ui.output_plot()
-#
-# to put a component inside of a container, you nest the function calls, like ui.sidebar(ui.input_text())
-
 MIN_POP_SIZE = 10
 MAX_POP_SIZE = 1000
 DEF_POP_SIZE = 100
