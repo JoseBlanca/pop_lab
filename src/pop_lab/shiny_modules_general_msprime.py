@@ -284,8 +284,6 @@ def run_simulation_ui():
         selected="num_variable_plot",
     )
 
-    afs_result = ui.output_plot(AFS_PLOT_ID)
-
     nav_panels = [
         ui.nav_panel(
             "Exp. Het.",
