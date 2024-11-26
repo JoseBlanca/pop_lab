@@ -2,9 +2,7 @@
 output_site
 .jupyterlite.doit.db
 src/pop_lab.egg-info/
-src/pop_lab/__pycache__/
 .vscode/settings.json
-tests/__pycache__/
 pop_lab_site/
 shiny_site/
 src/pop_lab/pynei
@@ -12,14 +10,10 @@ src/bottleneck_app/pynei/
 src/bottleneck_app/msprime_utils.py
 pop_lab.code-workspace
 src/bottleneck_app/pynei_old/
-src/bottleneck_app/__pycache__/
 src/example_msprime_sim_app/shiny_modules_general_msprime.py
-src/example_msprime_sim_app/__pycache__/
 src/example_msprime_sim_app/msprime_sim_utils.py
-src/drifting_pops_app/__pycache__/
 src/drifting_pops_app/shiny_modules_general_msprime.py
 src/drifting_pops_app/msprime_sim_utils.py
 src/drifting_pops_app/pynei/
-src/one_locus_app/__pycache__/
 update_pynei.py
-src/simple_drift_app/__pycache__/
+*.pyc

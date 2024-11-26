@@ -102,6 +102,7 @@ def fwd_in_time_ui():
         ui.accordion_panel("Num. generations", num_gen_panel),
     ]
 
+    extra_open_panels = []
     if SELECT_FITNESS:
         fitness_panel = (
             ui.input_slider("wAA_slider", label="wAA", min=0, max=1, value=1),
@@ -110,6 +111,7 @@ def fwd_in_time_ui():
         )
         accordion = ui.accordion_panel("Selection", fitness_panel)
         accordion_panels.append(accordion)
+        extra_open_panels.append("Selection")
     if SELECT_MUTATION:
         mutation_panel = (
             ui.input_slider("A2a_slider", label="A2a", min=0, max=0.1, value=0),
@@ -117,17 +119,23 @@ def fwd_in_time_ui():
         )
         accordion = ui.accordion_panel("Mutation", mutation_panel)
         accordion_panels.append(accordion)
+        extra_open_panels.append("Mutation")
     if SELECT_SELFING:
         selfing_slider = ui.input_slider(
             "selfing_slider", label="", min=0, max=1, value=0
         )
         accordion = ui.accordion_panel("Selfing rate", selfing_slider)
         accordion_panels.append(accordion)
+        extra_open_panels.append("Selfing")
+
+    open_panels = ["Initial freqs.", "Pop. size", "Num. generations"]
+    if len(extra_open_panels) == 1:
+        open_panels.extend(extra_open_panels)
 
     inputs_panel = ui.accordion(
         *accordion_panels,
         id="inputs_panel",
-        open=["Initial freqs.", "Pop. size", "Num. generations"],
+        open=open_panels,
     )
 
     sim_params_widget = ui.layout_columns(

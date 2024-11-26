@@ -1,0 +1,4 @@
+SELECT_FITNESS = True
+SELECT_MUTATION = False
+SELECT_SELFING = False
+TITLE = "Selection"
