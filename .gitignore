@@ -17,3 +17,5 @@ src/drifting_pops_app/msprime_sim_utils.py
 src/drifting_pops_app/pynei/
 update_pynei.py
 *.pyc
+src/apps/fwd/balancing_selection/one_locus_two_alleles_simulator.py
+src/apps/fwd/balancing_selection/shiny_modules_fwd_in_time.py
