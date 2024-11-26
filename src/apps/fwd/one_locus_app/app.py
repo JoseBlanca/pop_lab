@@ -2,7 +2,7 @@ from shiny import App, ui
 from shiny_modules_fwd_in_time import fwd_in_time_ui, fwd_in_time_server
 import fwd_in_time_app_specific_code
 
-APP_ID = "one_allele_app"
+APP_ID = "one_locus_app"
 
 input_card, output_card = fwd_in_time_ui(APP_ID)
 
