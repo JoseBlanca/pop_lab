@@ -2,30 +2,32 @@ import numpy
 
 import msprime
 
-from pop_lab.msprime_utils import (
-    create_msprime_sampling,
+from pop_lab.msprime_sim_utils import (
+    create_msprime_sample_set,
     simulate,
-    get_pop_names_from_demography,
 )
 
 
 def create_simple_demography(num_pops=1, pop_size=10000):
     demography = msprime.Demography()
+    pop_names = []
     for idx in range(num_pops):
         pop_name = f"pop_{idx + 1}"
+        pop_names.append(pop_name)
         demography.add_population(
             name=pop_name, initial_size=pop_size, initially_active=True
         )
-    return demography
+    return demography, pop_names
 
 
 def test_msprime_simulation():
-    demography = create_simple_demography(num_pops=1)
-    pop_names = get_pop_names_from_demography(demography)
+    demography, pop_names = create_simple_demography(num_pops=1)
 
     num_samples = 10
     samplings = [
-        create_msprime_sampling(num_samples=num_samples, ploidy=2, pop_name=pop, time=0)
+        create_msprime_sample_set(
+            num_samples=num_samples, ploidy=2, pop_name=pop, time=0
+        )
         for pop in pop_names
     ]
     sim_res = simulate(
@@ -42,13 +44,12 @@ def test_msprime_simulation():
 
 
 def test_exp_het():
-    demography = create_simple_demography(num_pops=1)
-    pop_names = get_pop_names_from_demography(demography)
+    demography, pop_names = create_simple_demography(num_pops=1)
 
     num_samples = 20
     times = [10, 20]
     samplings = [
-        create_msprime_sampling(
+        create_msprime_sample_set(
             num_samples=num_samples, ploidy=2, pop_name=pop_names[0], time=time
         )
         for time in times
@@ -61,12 +62,13 @@ def test_exp_het():
 
 
 def test_samplings():
-    demography = create_simple_demography(num_pops=1)
-    pop_names = get_pop_names_from_demography(demography)
+    demography, pop_names = create_simple_demography(num_pops=1)
 
     num_samples = 20
     samplings = [
-        create_msprime_sampling(num_samples=num_samples, ploidy=2, pop_name=pop, time=0)
+        create_msprime_sample_set(
+            num_samples=num_samples, ploidy=2, pop_name=pop, time=0
+        )
         for pop in pop_names
     ]
     sim_res = simulate(
@@ -77,13 +79,12 @@ def test_samplings():
 
 
 def test_num_vars():
-    demography = create_simple_demography(num_pops=1)
-    pop_names = get_pop_names_from_demography(demography)
+    demography, pop_names = create_simple_demography(num_pops=1)
 
     num_samples = 20
     times = [10, 20]
     samplings = [
-        create_msprime_sampling(
+        create_msprime_sample_set(
             num_samples=num_samples, ploidy=2, pop_name=pop_names[0], time=time
         )
         for time in times
@@ -101,13 +102,12 @@ def test_num_vars():
 
 
 def test_gt_df():
-    demography = create_simple_demography(num_pops=1)
-    pop_names = get_pop_names_from_demography(demography)
+    demography, pop_names = create_simple_demography(num_pops=1)
 
     num_samples = 20
     times = [10, 20]
     samplings = [
-        create_msprime_sampling(
+        create_msprime_sample_set(
             num_samples=num_samples, ploidy=2, pop_name=pop_names[0], time=time
         )
         for time in times
