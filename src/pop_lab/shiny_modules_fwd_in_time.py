@@ -148,7 +148,6 @@ def fwd_in_time_ui():
     run_button = ui.input_action_button("run_button", "Run simulation")
 
     input_card = ui.card(
-        ui.h1("One locus foward in time simulation"),
         ui.card(inputs_panel, sim_params_widget),
         run_button,
     )
