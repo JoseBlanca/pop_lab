@@ -10,4 +10,8 @@ rm -r shiny_site/drifting_pops
 uv run shinylive export src/apps/msprime/drifting_pops_app/ shiny_site/drifting_pops/
 rm -r shiny_site/bottleneck
 uv run shinylive export src/apps/msprime/bottleneck_app/ shiny_site/bottleneck/
+rm -r shiny_site/founder
+uv run shinylive export src/apps/msprime/founder_app/ shiny_site/founder/
+
+
 cp -ra /home/jose/devel/pop_lab/shiny_site/* /home/jose/webs/bioinf/github_io/pop_lab/
