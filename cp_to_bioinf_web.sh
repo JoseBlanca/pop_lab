@@ -14,6 +14,10 @@ rm -r shiny_site/founder
 uv run shinylive export src/apps/msprime/founder_app/ shiny_site/founder/
 rm -r shiny_site/admixture
 uv run shinylive export src/apps/msprime/admixture_app/ shiny_site/admixture/
+rm -r shiny_site/selective_sweep
+uv run shinylive export src/apps/msprime/selective_sweep_app/ shiny_site/selective_sweep/
 
 
 cp -ra /home/jose/devel/pop_lab/shiny_site/* /home/jose/webs/bioinf/github_io/pop_lab/
+
+echo "python3 -m http.server --directory shiny_site/ --bind localhost 8008"

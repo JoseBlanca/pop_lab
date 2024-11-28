@@ -177,7 +177,7 @@ class SimulationResult:
         return {"counts": res["hist_counts"], "bin_edges": res["hist_bin_edges"]}
 
     def calc_exp_het_along_genome(self):
-        n_bins = 20
+        n_bins = 15
         res = self.get_vars_and_pop_samples()
         vars = res["vars"]
         chunk = next(vars.iter_vars_chunks())
@@ -224,6 +224,7 @@ def create_msprime_sample_set(num_samples: int, ploidy: int, pop_name: str, time
 def simulate(
     sample_sets: list[msprime.SampleSet],
     demography: msprime.Demography,
+    model: None,
     seq_length_in_bp: int,
     recomb_rate=1e-8,
     add_mutations=True,
@@ -231,13 +232,16 @@ def simulate(
     mutation_rate=1e-8,
     ploidy=2,
 ):
-    tree_seqs = msprime.sim_ancestry(
-        samples=sample_sets,
-        demography=demography,
-        recombination_rate=recomb_rate,
-        sequence_length=seq_length_in_bp,
-        random_seed=random_seed,
-    )
+    kwargs = {
+        "samples": sample_sets,
+        "demography": demography,
+        "recombination_rate": recomb_rate,
+        "sequence_length": seq_length_in_bp,
+        "random_seed": random_seed,
+    }
+    if model is not None:
+        kwargs["model"] = model
+    tree_seqs = msprime.sim_ancestry(**kwargs)
     if add_mutations:
         tree_seqs = msprime.sim_mutations(
             tree_seqs, rate=mutation_rate, random_seed=random_seed

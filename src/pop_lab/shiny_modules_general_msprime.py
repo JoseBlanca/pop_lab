@@ -45,12 +45,12 @@ MIN_SEQ_LENGTH = 5e5
 MAX_SEQ_LENGTH = 10e6
 DEF_SEQ_LENGTH = 2e6
 
-MIN_RECOMB_RATE = -10
-DEF_RECOMB_RATE = -8
+MIN_RECOMB_RATE = -9
+DEF_RECOMB_RATE = -7
 MAX_RECOMB_RATE = -6
 
-MIN_MUT_RATE = -10
-DEF_MUT_RATE = -8
+MIN_MUT_RATE = -8
+DEF_MUT_RATE = -7
 MAX_MUT_RATE = -6
 
 MIN_SAMPLE_SIZE = 20
@@ -348,7 +348,10 @@ def run_simulation_server(
     @reactive.calc()
     @reactive.event(input.run_button)
     def do_simulation():
-        demography = get_demography()["demography"]
+        res = get_demography()
+        demography = res["demography"]
+        model = res.get("model", None)
+
         sample_sets = get_sample_sets()
 
         msprime_params = get_msprime_params()
@@ -356,6 +359,7 @@ def run_simulation_server(
         sim_res = msprime_sim_utils.simulate(
             sample_sets,
             demography=demography,
+            model=model,
             seq_length_in_bp=msprime_params["seq_length_in_bp"],
             mutation_rate=msprime_params["mut_rate"],
             recomb_rate=msprime_params["recomb_rate"],
@@ -590,8 +594,11 @@ def run_simulation_server(
         pop_names = sorted(pop_names)
         sample_times = sorted(sample_times)
 
-        alpha_min = 0.3
-        alpha_delta = (1 - alpha_min) / (len(sample_times) - 1)
+        if len(sample_times) > 1:
+            alpha_min = 0.3
+            alpha_delta = (1 - alpha_min) / (len(sample_times) - 1)
+        else:
+            alpha_delta = None
 
         styles = {"time": {}, "pop": {}}
         styles["default"] = {
@@ -605,7 +612,7 @@ def run_simulation_server(
 
         for idx, time in enumerate(reversed(sample_times)):
             style = {"linewidth": BROAD_LINE}
-            alpha = alpha_delta * idx + alpha_min
+            alpha = 1 if alpha_delta is None else alpha_delta * idx + alpha_min
             style["alpha"] = alpha
             style["color"] = next(color_cycle)
             styles["time"][time] = style
