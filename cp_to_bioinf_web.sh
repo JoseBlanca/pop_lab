@@ -12,6 +12,8 @@ rm -r shiny_site/bottleneck
 uv run shinylive export src/apps/msprime/bottleneck_app/ shiny_site/bottleneck/
 rm -r shiny_site/founder
 uv run shinylive export src/apps/msprime/founder_app/ shiny_site/founder/
+rm -r shiny_site/admixture
+uv run shinylive export src/apps/msprime/admixture_app/ shiny_site/admixture/
 
 
 cp -ra /home/jose/devel/pop_lab/shiny_site/* /home/jose/webs/bioinf/github_io/pop_lab/

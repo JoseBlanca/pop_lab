@@ -22,3 +22,4 @@ src/apps/fwd/balancing_selection/shiny_modules_fwd_in_time.py
 src/apps/msprime/founder_app/shiny_modules_general_msprime.py
 src/apps/msprime/founder_app/msprime_sim_utils.py
 src/apps/msprime/founder_app/pynei/
+src/apps/msprime/admixture_app/pynei/
