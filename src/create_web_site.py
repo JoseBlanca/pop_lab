@@ -3,7 +3,7 @@ from pathlib import Path
 from subprocess import run
 
 PROJECT_DIR = Path(__file__).parent.parent
-OUTPUT_SITE = PROJECT_DIR / "shiny_site"
+OUTPUT_SITE = PROJECT_DIR / "built_site"
 # OUTPUT_SITE = Path.home() / "webs" / "bioinf" / "github_io" / "pop_lab"
 
 SRC_DIR = Path(__file__).parent

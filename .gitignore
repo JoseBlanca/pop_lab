@@ -24,3 +24,4 @@ src/apps/msprime/founder_app/msprime_sim_utils.py
 src/apps/msprime/founder_app/pynei/
 src/apps/msprime/admixture_app/pynei/
 src/apps/msprime/selective_sweep_app/pynei/
+built_site/

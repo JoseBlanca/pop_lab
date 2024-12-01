@@ -1,23 +1,28 @@
-rm -r shiny_site/simple_drift
-uv run shinylive export src/apps/fwd/simple_drift_app/ shiny_site/simple_drift/
-rm -r shiny_site/simple_selection
-uv run shinylive export src/apps/fwd/simple_selection_app/ shiny_site/simple_selection/
-rm -r shiny_site/balancing_selection
-uv run shinylive export src/apps/fwd/balancing_selection_app/ shiny_site/balancing_selection/
-rm -r shiny_site/one_locus
-uv run shinylive export src/apps/fwd/one_locus_app/ shiny_site/one_locus/
-rm -r shiny_site/drifting_pops
-uv run shinylive export src/apps/msprime/drifting_pops_app/ shiny_site/drifting_pops/
-rm -r shiny_site/bottleneck
-uv run shinylive export src/apps/msprime/bottleneck_app/ shiny_site/bottleneck/
-rm -r shiny_site/founder
-uv run shinylive export src/apps/msprime/founder_app/ shiny_site/founder/
-rm -r shiny_site/admixture
-uv run shinylive export src/apps/msprime/admixture_app/ shiny_site/admixture/
-rm -r shiny_site/selective_sweep
-uv run shinylive export src/apps/msprime/selective_sweep_app/ shiny_site/selective_sweep/
+OUTPUT_SITE="built_site"
+OUTPUT_HTML_DIR="$OUTPUT_SITE/html"
+
+uv run sphinx-build -M html pop_lab_site $OUTPUT_SITE
+
+rm -r $OUTPUT_HTML_DIR/simple_drift
+uv run shinylive export src/apps/fwd/simple_drift_app/ $OUTPUT_HTML_DIR/simple_drift/
+rm -r $OUTPUT_HTML_DIR/simple_selection
+uv run shinylive export src/apps/fwd/simple_selection_app/ $OUTPUT_HTML_DIR/simple_selection/
+rm -r $OUTPUT_HTML_DIR/balancing_selection
+uv run shinylive export src/apps/fwd/balancing_selection_app/ $OUTPUT_HTML_DIR/balancing_selection/
+rm -r $OUTPUT_HTML_DIR/one_locus
+uv run shinylive export src/apps/fwd/one_locus_app/ $OUTPUT_HTML_DIR/one_locus/
+rm -r $OUTPUT_HTML_DIR/drifting_pops
+uv run shinylive export src/apps/msprime/drifting_pops_app/ $OUTPUT_HTML_DIR/drifting_pops/
+rm -r $OUTPUT_HTML_DIR/bottleneck
+uv run shinylive export src/apps/msprime/bottleneck_app/ $OUTPUT_HTML_DIR/bottleneck/
+rm -r $OUTPUT_HTML_DIR/founder
+uv run shinylive export src/apps/msprime/founder_app/ $OUTPUT_HTML_DIR/founder/
+rm -r $OUTPUT_HTML_DIR/admixture
+uv run shinylive export src/apps/msprime/admixture_app/ $OUTPUT_HTML_DIR/admixture/
+rm -r $OUTPUT_HTML_DIR/selective_sweep
+uv run shinylive export src/apps/msprime/selective_sweep_app/ $OUTPUT_HTML_DIR/selective_sweep/
 
 
-cp -ra /home/jose/devel/pop_lab/shiny_site/* /home/jose/webs/bioinf/github_io/pop_lab/
+cp -ra /home/jose/devel/pop_lab/$OUTPUT_HTML_DIR/* /home/jose/webs/bioinf/github_io/pop_lab/
 
-echo "python3 -m http.server --directory shiny_site/ --bind localhost 8008"
+echo "python3 -m http.server --directory $OUTPUT_HTML_DIR/ --bind localhost 8008"
