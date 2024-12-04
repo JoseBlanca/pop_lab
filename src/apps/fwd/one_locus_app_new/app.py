@@ -1,51 +1,10 @@
 from shiny import App, reactive, render, ui, module
+import matplotlib.pyplot as plt
+
+from one_locus_two_alleles_simulator import OneLocusTwoAlleleSimulation
 
 APP_ID = "one_locus_app"
 MAX_MUTATION_RATE = 0.1
-
-
-def set_config_defaults(config: dict):
-    config.setdefault("title", "One locus two alleles simulation")
-
-    if "pops" not in config:
-        config["pops"] = {"pop": {}}
-
-    pops_config = {}
-    for idx, pop_name in enumerate(config["pops"].keys()):
-        pop_id = f"pop_{idx}"
-        pop_config = {}
-        pop_config["name"] = pop_name
-        if (
-            "freq_A" in config["pops"][pop_name]
-            and "genotypic_freqs" in config["pops"][pop_id]
-        ):
-            raise ValueError(
-                'Either "freq_A" or "genotypic_freqs" can be set, but not both'
-            )
-        elif "freq_A" in config["pops"][pop_name]:
-            pop_config["freq_A"] = config["pops"][pop_name]["freq_A"]
-        elif "genotypic_freqs" in config["pops"][pop_name]:
-            pop_config["genotypic_freqs"] = config["pops"][pop_name]["genotypic_freqs"]
-        else:
-            pop_config["freq_A"] = 0.5
-        pop_config["ui_freq_options"] = config["pops"][pop_name].get(
-            "ui_freq_options", ("genotypic", "allelic")
-        )
-        pop_config.setdefault("size", {"min": 10, "max": 200, "value": 100})
-        pops_config[pop_id] = pop_config
-
-    config["pops"] = pops_config
-
-    config.setdefault("num_generations", {"min": 10, "max": 200, "value": 100})
-    # the panels shown will be the loggers chosen
-    config.setdefault(
-        "loggers",
-        (
-            "allelic_freqs_logger",
-            "genotypic_freqs_logger",
-            "exp_het_logger",
-        ),
-    )
 
 
 def create_num_gen_panel(config):
@@ -147,7 +106,6 @@ def create_freqs_panel(pop_config):
         raise ValueError(
             f"Either genotypic, allelic or both should be in the pop {pop_config['name']} ui_options"
         )
-
     genotypic_freqs = ui.layout_columns(
         ui.value_box(
             title="Freq. AA",
@@ -163,6 +121,7 @@ def create_freqs_panel(pop_config):
             "Freq. aa",
             ui.output_ui("freq_aa_output"),
             id="freq_aa_value_box",
+            class_=pop_config["name"],
         ),
     )
 
@@ -273,6 +232,9 @@ def create_pop_accordion(pop_config):
     return pop_accordion
 
 
+sim_config = reactive.value(None)
+
+
 @module.server
 def pop_input_server(input, output, session):
     @reactive.calc
@@ -306,14 +268,42 @@ def pop_input_server(input, output, session):
         freq = calc_geno_allelic_freqs()[2]
         return f"{freq:.2f}"
 
+    def calc_pop_values():
+        freq_AA, freq_Aa, freq_aa, freq_A = calc_geno_allelic_freqs()
+        values = {"genotypic_freqs": (freq_AA, freq_Aa, freq_aa)}
+        values["size"] = input.size_slider()
+        if "wAA_slider" in input:
+            values["fitness"] = (
+                input.wAA_slider(),
+                input.wAa_slider(),
+                input.waa_slider(),
+            )
+        if "A2a_slider" in input:
+            values["mut_rates"] = (input.A2a_slider(), input.a2A_slider())
+        if "selfing_slider" in input:
+            values["selfing_rate"] = input.selfing_slider()
+        return values
+
+    return calc_pop_values()
+
+
+def get_pop_ids(config):
+    idss = []
+    for pop_id in sorted(config["pops"].keys()):
+        pop_module_id = f"module_pop_{pop_id}"
+        ids = {"id": pop_id, "module_id": pop_module_id}
+        idss.append(ids)
+    return idss
+
 
 def create_pops_panel(config):
     tabs = []
-    for pop_idx in sorted(config["pops"].keys()):
-        pop_config = config["pops"][pop_idx]
-        pop_module_id = f"module_pop_{pop_idx}"
-        print(pop_module_id)
-        pop_accordion = create_pop_accordion(pop_module_id, pop_config)
+    for pop_ids in get_pop_ids(config):
+        pop_id = pop_ids["id"]
+        module_id = pop_ids["module_id"]
+        pop_config = config["pops"][pop_id]
+        print(module_id)
+        pop_accordion = create_pop_accordion(module_id, pop_config)
         pop_name = pop_config["name"]
         tab = ui.nav_panel(pop_name, pop_accordion)
         tabs.append(tab)
@@ -339,20 +329,68 @@ def create_simulation_input_card(config):
     return card
 
 
+def set_config_defaults(config: dict):
+    config.setdefault("title", "One locus two alleles simulation")
+
+    if "pops" not in config:
+        config["pops"] = {"pop": {}}
+
+    pops_config = {}
+    for idx, pop_name in enumerate(config["pops"].keys()):
+        pop_id = f"pop_{idx}"
+        pop_config = {}
+        pop_config["name"] = pop_name
+        if (
+            "freq_A" in config["pops"][pop_name]
+            and "genotypic_freqs" in config["pops"][pop_name]
+        ):
+            raise ValueError(
+                'Either "freq_A" or "genotypic_freqs" can be set, but not both'
+            )
+        elif "freq_A" in config["pops"][pop_name]:
+            pop_config["freq_A"] = config["pops"][pop_name]["freq_A"]
+        elif "genotypic_freqs" in config["pops"][pop_name]:
+            pop_config["genotypic_freqs"] = config["pops"][pop_name]["genotypic_freqs"]
+        else:
+            pop_config["freq_A"] = 0.5
+        pop_config["ui_freq_options"] = config["pops"][pop_name].get(
+            "ui_freq_options", ("genotypic", "allelic")
+        )
+        pop_config.setdefault("size", {"min": 10, "max": 200, "value": 100})
+        pops_config[pop_id] = pop_config
+
+    config["pops"] = pops_config
+
+    config.setdefault("num_generations", {"min": 10, "max": 200, "value": 100})
+    # the panels shown will be the loggers chosen
+    config.setdefault(
+        "loggers",
+        (
+            "allelic_freqs_logger",
+            "genotypic_freqs_logger",
+            "exp_het_logger",
+        ),
+    )
+
+
 def app_ui(request):
     print(request)
-    config = {}
-    set_config_defaults(config)
     if True:
-        # if selfing rate is given the selfing rate accordion will be shown
-        config["pops"]["pop_0"]["selfing_rate"] = 0
-    if True:
-        # if fitness is given the selection accordion will be shown
-        config["pops"]["pop_0"]["fitness"] = {"wAA": 1, "wAa": 1, "waa": 0.5}
-    if True:
-        config["pops"]["pop_0"]["mutation"] = {"a2A": 0.01, "A2a": 0.01}
+        config = {}
+        set_config_defaults(config)
+        if True:
+            # if selfing rate is given the selfing rate accordion will be shown
+            config["pops"]["pop_0"]["selfing_rate"] = 0
+        if True:
+            # if fitness is given the selection accordion will be shown
+            config["pops"]["pop_0"]["fitness"] = {"wAA": 1, "wAa": 1, "waa": 0.5}
+        if True:
+            config["pops"]["pop_0"]["mutation"] = {"a2A": 0.01, "A2a": 0.01}
+    elif True:
+        config = {"pops": {"pop_a": {"freq_A": 0.9}, "pop_b": {"freq_A": 0.1}}}
+        set_config_defaults(config)
 
-    print(config)
+    sim_config.set(config)
 
     input_card = create_simulation_input_card(config)
     output_card = create_simulation_output_card(config)
@@ -362,10 +400,71 @@ def app_ui(request):
 
 
 def server(input, output, session):
-    pop_id = "pop_0"
-    module_id = f"module_pop_{pop_id}"
-    print(module_id)
-    pop_input_server(module_id)
+    @reactive.calc
+    @reactive.event(input.run_button)
+    def run_simulation():
+        config = sim_config.get()
+
+        pops_params = {}
+        for pop_ids in get_pop_ids(config):
+            pop_id = pop_ids["id"]
+            pop_name = config["pops"][pop_id]["name"]
+            module_id = pop_ids["module_id"]
+            pops_params[pop_name] = pop_input_server(module_id)
+
+        sim_params = {"pops": pops_params}
+        sim_params["num_generations"] = input.num_gen_slider()
+        sim_params["loggers"] = config["loggers"]
+        sim = OneLocusTwoAlleleSimulation(sim_params)
+        return sim
+
+    @render.plot(alt="Freq. A plot")
+    def allelic_freqs_plot():
+        sim = run_simulation()
+
+        fig, axes = plt.subplots()
+        axes.set_title("Freq. A")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("freq")
+
+        freqs_series = sim.results["allelic_freqs"]
+        axes.plot(freqs_series.index, freqs_series.values, label="Freq. A")
+        axes.set_ylim((0, 1))
+        return fig
+
+    @render.plot(alt="Genotypic freqs. plot")
+    def genotypic_freqs_plot():
+        sim = run_simulation()
+
+        fig, axes = plt.subplots()
+        axes.set_title("Genotypic freqs.")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("freq")
+
+        genotypic_freqs = sim.results["genotypic_freqs"]
+        geno_freqs_labels = sorted(genotypic_freqs.keys())
+        for geno_freq_label in geno_freqs_labels:
+            geno_freqs_series = genotypic_freqs[geno_freq_label]
+            axes.plot(
+                geno_freqs_series.index, geno_freqs_series.values, label=geno_freq_label
+            )
+        axes.legend()
+        axes.set_ylim((0, 1))
+        return fig
+
+    @render.plot(alt="Exp. Het.")
+    def exp_het_plot():
+        sim = run_simulation()
+
+        fig, axes = plt.subplots()
+        axes.set_title("Expected Het.")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("Exp. Het.")
+
+        freqs_series = sim.results["expected_hets"]
+        axes.plot(freqs_series.index, freqs_series.values, label="Exp. Het.")
+        axes.set_ylim((0, 1))
+        return fig
 
 
 app = App(app_ui, server)
