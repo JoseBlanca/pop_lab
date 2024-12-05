@@ -4,16 +4,18 @@ import fwd_in_time_app_specific_code
 
 APP_ID = "one_locus_app"
 
-input_card, output_card = fwd_in_time_ui(APP_ID)
 
+def app_ui(request):
+    input_card, output_card = fwd_in_time_ui(APP_ID)
 
-app_ui = ui.page_fixed(
-    ui.panel_title(fwd_in_time_app_specific_code.TITLE),
-    input_card,
-    output_card,
-    title="Pop Lab",
-    lang="en",
-)
+    app_ui = ui.page_fixed(
+        ui.panel_title(fwd_in_time_app_specific_code.TITLE),
+        input_card,
+        output_card,
+        title="Pop Lab",
+        lang="en",
+    )
+    return app_ui
 
 
 def server(input, output, session):
