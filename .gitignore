@@ -25,3 +25,4 @@ src/apps/msprime/founder_app/pynei/
 src/apps/msprime/admixture_app/pynei/
 src/apps/msprime/selective_sweep_app/pynei/
 built_site/
+src/apps/fwd/one_locus_app_new/one_locus_two_alleles_simulator.py
