@@ -26,7 +26,7 @@ def create_allelic_freqs_panel():
     return panel
 
 
-def create_genotypic_freqs_panel():
+def create_genotypic_freqs_panel_old():
     plot = ui.output_plot("genotypic_freqs_plot")
     panel = ui.nav_panel("Genotypic Freqs.", plot)
     return panel
@@ -38,13 +38,49 @@ def create_exp_het_panel():
     return panel
 
 
+def create_geno_freqs_plot_id(pop_name):
+    return f"genotypic_freqs_plot_{pop_name}"
+
+
+@module.ui
+def genotypic_plot_ui():
+    return ui.output_plot("genotypic_plot")
+
+
+@module.server
+def genotypic_plot_server(input, output, session, geno_freqs: dict):
+    @render.plot
+    def genotypic_plot():
+        fig, axes = plt.subplots()
+        axes.set_title("Genotypic freqs.")
+        axes.set_xlabel("generation")
+        axes.set_ylabel("freq")
+
+        for geno_freq_label, geno_freqs_series in geno_freqs.items():
+            axes.plot(
+                geno_freqs_series.index, geno_freqs_series.values, label=geno_freq_label
+            )
+        axes.legend()
+        axes.set_ylim((0, 1))
+        return fig
+
+
+def create_geno_freqs_module_plot_id(pop_name):
+    return f"geno_freqs_plot_{pop_name}"
+
+
+def create_genotypic_freqs_panel(config):
+    panel_content = ui.output_ui("genotypic_plots")
+    return ui.nav_panel("Genotypic Freqs.", panel_content)
+
+
 def create_simulation_output_card(config):
     loggers = config["loggers"]
     panels = []
     if "allelic_freqs_logger" in loggers:
         panels.append(create_allelic_freqs_panel())
     if "allelic_freqs_logger" in loggers:
-        panels.append(create_genotypic_freqs_panel())
+        panels.append(create_genotypic_freqs_panel(config))
     if "exp_het_logger" in loggers:
         panels.append(create_exp_het_panel())
 
@@ -302,7 +338,6 @@ def create_pops_panel(config):
         pop_id = pop_ids["id"]
         module_id = pop_ids["module_id"]
         pop_config = config["pops"][pop_id]
-        print(module_id)
         pop_accordion = create_pop_accordion(module_id, pop_config)
         pop_name = pop_config["name"]
         tab = ui.nav_panel(pop_name, pop_accordion)
@@ -375,7 +410,7 @@ def set_config_defaults(config: dict):
 
 def app_ui(request):
     print(request)
-    if True:
+    if False:
         config = {}
         set_config_defaults(config)
         if True:
@@ -427,30 +462,49 @@ def server(input, output, session):
         axes.set_xlabel("generation")
         axes.set_ylabel("freq")
 
-        freqs_series = sim.results["allelic_freqs"]
-        axes.plot(freqs_series.index, freqs_series.values, label="Freq. A")
+        freqs_dframe = sim.results["allelic_freqs"]
+        for pop, pop_allelic_freqs in freqs_dframe.items():
+            axes.plot(pop_allelic_freqs.index, pop_allelic_freqs.values, label=pop)
+
+        num_pops = freqs_dframe.shape[1]
+        if num_pops > 1:
+            axes.legend()
+
         axes.set_ylim((0, 1))
         return fig
 
-    @render.plot(alt="Genotypic freqs. plot")
-    def genotypic_freqs_plot():
+    @render.ui
+    def genotypic_plots():
         sim = run_simulation()
 
-        fig, axes = plt.subplots()
-        axes.set_title("Genotypic freqs.")
-        axes.set_xlabel("generation")
-        axes.set_ylabel("freq")
-
         genotypic_freqs = sim.results["genotypic_freqs"]
+
         geno_freqs_labels = sorted(genotypic_freqs.keys())
-        for geno_freq_label in geno_freqs_labels:
-            geno_freqs_series = genotypic_freqs[geno_freq_label]
-            axes.plot(
-                geno_freqs_series.index, geno_freqs_series.values, label=geno_freq_label
-            )
-        axes.legend()
-        axes.set_ylim((0, 1))
-        return fig
+        first_label = geno_freqs_labels[0]
+        pop_names = genotypic_freqs[first_label].columns
+
+        plots = {}
+        for pop in pop_names:
+            module_id = f"geno_freqs_plot_{pop}"
+            # Dynamically create UI components for each plot
+            plot = genotypic_plot_ui(module_id)
+            plots[pop] = plot
+
+            geno_freqs = {
+                geno_freq_label: genotypic_freqs[geno_freq_label][pop]
+                for geno_freq_label in geno_freqs_labels
+            }
+            # Dynamically create server-side functions for each plot
+            genotypic_plot_server(module_id, geno_freqs=geno_freqs)
+
+        if len(plots) == 1:
+            output_content = plot
+        else:
+            panels = [ui.nav_panel(pop_name, plot) for pop_name, plot in plots.items()]
+            navset_tab = ui.navset_tab(*panels, id="geno_freqs_navset")
+            output_content = navset_tab
+
+        return output_content
 
     @render.plot(alt="Exp. Het.")
     def exp_het_plot():
@@ -461,8 +515,15 @@ def server(input, output, session):
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. Het.")
 
-        freqs_series = sim.results["expected_hets"]
-        axes.plot(freqs_series.index, freqs_series.values, label="Exp. Het.")
+        exp_hets_dframe = sim.results["expected_hets"]
+
+        for pop, pop_exp_hets in exp_hets_dframe.items():
+            axes.plot(pop_exp_hets.index, pop_exp_hets.values, label=pop)
+
+        num_pops = exp_hets_dframe.shape[1]
+        if num_pops > 1:
+            axes.legend()
+
         axes.set_ylim((0, 1))
         return fig
 
