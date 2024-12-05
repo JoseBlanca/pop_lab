@@ -409,21 +409,22 @@ def set_config_defaults(config: dict):
 
 
 def app_ui(request):
-    print(request)
-    if False:
+    config = request.query_params.get("app_config")
+    if config is None:
         config = {}
-        set_config_defaults(config)
-        if True:
-            # if selfing rate is given the selfing rate accordion will be shown
-            config["pops"]["pop_0"]["selfing_rate"] = 0
-        if True:
-            # if fitness is given the selection accordion will be shown
-            config["pops"]["pop_0"]["fitness"] = {"wAA": 1, "wAa": 1, "waa": 0.5}
-        if True:
-            config["pops"]["pop_0"]["mutation"] = {"a2A": 0.01, "A2a": 0.01}
-    elif True:
-        config = {"pops": {"pop_a": {"freq_A": 0.9}, "pop_b": {"freq_A": 0.1}}}
-        set_config_defaults(config)
+    else:
+        # howto encode
+        # app_config = {"pops": {"pop_a": {"freq_A": 0.9}, "pop_b": {"freq_A": 0.1}}}
+        # encoded = urllib.parse.urlencode({"app_config": json.dumps(config)})
+        # app_config=%7B%22pops%22%3A+%7B%22pop_a%22%3A+%7B%22freq_A%22%3A+0.9%7D%2C+%22pop_b%22%3A+%7B%22freq_A%22%3A+0.1%7D%7D%7D
+        # app_config = {'title': 'One locus two alleles simulation', 'pops': {'pop_0': {'name': 'pop_0', 'freq_A': 0.5, 'ui_freq_options': ('genotypic', 'allelic'), 'size': {'min': 10, 'max': 200, 'value': 100}}}, 'num_generations': {'min': 10, 'max': 200, 'value': 100}, 'loggers': ('allelic_freqs_logger', 'genotypic_freqs_logger', 'exp_het_logger')}
+        # encoded
+        # app_config=%7B%22title%22%3A+%22One+locus+two+alleles+simulation%22%2C+%22pops%22%3A+%7B%22pop_0%22%3A+%7B%22name%22%3A+%22pop_0%22%2C+%22freq_A%22%3A+0.5%2C+%22ui_freq_options%22%3A+%5B%22genotypic%22%2C+%22allelic%22%5D%2C+%22size%22%3A+%7B%22min%22%3A+10%2C+%22max%22%3A+200%2C+%22value%22%3A+100%7D%7D%7D%2C+%22num_generations%22%3A+%7B%22min%22%3A+10%2C+%22max%22%3A+200%2C+%22value%22%3A+100%7D%2C+%22loggers%22%3A+%5B%22allelic_freqs_logger%22%2C+%22genotypic_freqs_logger%22%2C+%22exp_het_logger%22%5D%7D
+        import json
+
+        config = json.loads(config)
+
+    set_config_defaults(config)
 
     sim_config.set(config)
 
