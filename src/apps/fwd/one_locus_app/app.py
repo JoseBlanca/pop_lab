@@ -245,6 +245,26 @@ def create_selfing_rate_panel(pop_config):
     return panel
 
 
+def create_immigration_slider_id(from_pop, to_pop):
+    return f"immigration_slider_from_{from_pop}_to_{to_pop}"
+
+
+def create_immigration_panel(pop_config):
+    config = pop_config["immigration"]
+    slider_id = create_immigration_slider_id(config["from_pop"], pop_config["name"])
+    print("slider_id", slider_id)
+    slider = ui.input_slider(
+        id=slider_id,
+        label="",
+        min=config["rate"]["min"],
+        max=config["rate"]["max"],
+        value=config["rate"]["value"],
+        width="100%",
+    )
+    panel = ui.accordion_panel(f"Immigration from {config['from_pop']}", slider)
+    return panel
+
+
 @module.ui
 def create_pop_accordion(pop_config):
     freqs_panel = create_freqs_panel(pop_config)
@@ -259,6 +279,9 @@ def create_pop_accordion(pop_config):
     if "selfing_rate" in pop_config:
         selfing_rate_panel = create_selfing_rate_panel(pop_config)
         panels.append(selfing_rate_panel)
+    if "immigration" in pop_config:
+        immigration_panel = create_immigration_panel(pop_config)
+        panels.append(immigration_panel)
 
     pop_accordion = ui.accordion(
         *panels,
@@ -272,7 +295,7 @@ sim_config = reactive.value(None)
 
 
 @module.server
-def pop_input_server(input, output, session):
+def pop_input_server(input, output, session, pop_name, config):
     @reactive.calc
     def calc_geno_allelic_freqs():
         if "freqs_tabs" in input:
@@ -324,7 +347,26 @@ def pop_input_server(input, output, session):
             values["mut_rates"] = (input.A2a_slider(), input.a2A_slider())
         if "selfing_slider" in input:
             values["selfing_rate"] = input.selfing_slider()
-        return values
+
+        demographic_events = {}
+        for pop_config in config["pops"].values():
+            this_pop_name = pop_config["name"]
+            if this_pop_name != pop_name:
+                continue
+            if "immigration" in pop_config:
+                from_pop = pop_config["immigration"]["from_pop"]
+                slider_id = create_immigration_slider_id(from_pop, pop_name)
+                immigration_rate = getattr(input, slider_id)()
+                event = {
+                    "type": "migration_start",
+                    "from_pop": from_pop,
+                    "to_pop": pop_name,
+                    "inmigrant_rate": immigration_rate,
+                    "num_generation": 1,
+                }
+                id = f"migration_{from_pop}_to_{pop_name}"
+                demographic_events[id] = event
+        return values, demographic_events
 
     return calc_pop_values()
 
@@ -398,9 +440,9 @@ def set_config_defaults(config: dict):
         )
         pop_config.setdefault("size", {"min": 10, "max": 200, "value": 100})
 
-        for param in "fitness", "mutation", "selfing_rate":
+        for param in ("fitness", "mutation", "selfing_rate", "immigration"):
             if param in config["pops"][pop_name]:
-                pop_config["fitness"] = config["pops"][pop_name][param]
+                pop_config[param] = config["pops"][pop_name][param]
 
         pops_config[pop_id] = pop_config
 
@@ -433,27 +475,19 @@ def app_ui(request):
                     "freq_A": 0.5,
                     "fitness": (1, 1, 0),
                     "ui_freq_options": ("allelic",),
+                    "immigration": {
+                        "rate": {"min": 0, "max": 0.2, "value": 0.1},
+                        "from_pop": "pop_b",
+                    },
                 },
                 "pop_b": {
                     "freq_A": 0.5,
                     "fitness": (0, 1, 1),
                     "ui_freq_options": ("allelic",),
-                },
-            },
-            "demographic_events": {
-                "migration_pop_a_to_pop_b": {
-                    "type": "migration_start",
-                    "from_pop": "pop_a",
-                    "to_pop": "pop_b",
-                    "inmigrant_rate": 0.1,
-                    "num_generation": 1,
-                },
-                "migration_pop_b_to_pop_a": {
-                    "type": "migration_start",
-                    "from_pop": "pop_b",
-                    "to_pop": "pop_a",
-                    "inmigrant_rate": 0.1,
-                    "num_generation": 1,
+                    "immigration": {
+                        "rate": {"min": 0, "max": 0.2, "value": 0.1},
+                        "from_pop": "pop_a",
+                    },
                 },
             },
             "loggers": (
@@ -503,15 +537,21 @@ def server(input, output, session):
         config = sim_config.get()
 
         pops_params = {}
+        demographic_events = {}
         for pop_ids in get_pop_ids(config):
             pop_id = pop_ids["id"]
             pop_name = config["pops"][pop_id]["name"]
             module_id = pop_ids["module_id"]
-            pops_params[pop_name] = pop_input_server(module_id)
+            pops_params[pop_name], pop_demographic_events = pop_input_server(
+                module_id, pop_name, config
+            )
+            demographic_events.update(pop_demographic_events)
 
         sim_params = {"pops": pops_params}
         sim_params["num_generations"] = input.num_gen_slider()
         sim_params["loggers"] = config["loggers"]
+        if demographic_events:
+            sim_params["demographic_events"] = demographic_events
         sim = OneLocusTwoAlleleSimulation(sim_params)
         return sim
 
