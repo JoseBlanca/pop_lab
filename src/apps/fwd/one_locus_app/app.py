@@ -252,7 +252,6 @@ def create_immigration_slider_id(from_pop, to_pop):
 def create_immigration_panel(pop_config):
     config = pop_config["immigration"]
     slider_id = create_immigration_slider_id(config["from_pop"], pop_config["name"])
-    print("slider_id", slider_id)
     slider = ui.input_slider(
         id=slider_id,
         label="",
@@ -554,7 +553,7 @@ def server(input, output, session):
         return sim_params
 
     @reactive.calc
-    @reactive.event(input.run_button)
+    @reactive.event(input.run_button, ignore_none=False)
     def run_simulation():
         sim_params = get_sim_params()
 
