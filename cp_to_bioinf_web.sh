@@ -1,7 +1,7 @@
 OUTPUT_SITE="built_site"
 OUTPUT_HTML_DIR="$OUTPUT_SITE/html"
 
-uv run sphinx-build -M html pop_lab_site $OUTPUT_SITE
+#uv run sphinx-build -M html pop_lab_site $OUTPUT_SITE
 
 rm -r $OUTPUT_HTML_DIR/simple_drift
 uv run shinylive export src/apps/fwd/simple_drift_app/ $OUTPUT_HTML_DIR/simple_drift/

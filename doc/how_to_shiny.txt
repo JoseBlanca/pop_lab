@@ -10,6 +10,8 @@ $ shinylive export testapp shiny_site
 
 $ python3 -m http.server --directory shiny_site --bind localhost 8008
 
+uv run shinylive export src/apps/fwd/one_locus_app tmp_shiny_site/; uv run python3 -m http.server --directory tmp_shiny_site --bind localhost 8008
+
 This will serve the files in the site directory on port 8008. Then point your browser at http://localhost:8008/. You can also see the application with an online editor by pointing your browser at http://localhost:8008/edit/. (Note that any changes to the files there are ephemeral—they won’t be saved to disk.)
 
 How to serve a new development version, all together:

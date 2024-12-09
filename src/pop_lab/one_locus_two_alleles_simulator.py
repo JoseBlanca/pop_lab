@@ -560,7 +560,6 @@ def simulate_one_locus_two_alleles_one_pop(
     selfing_rate=0,
     num_populations=1,
 ):
-
     if (w11, w12, w22) == (1, 1, 1):
         fitness = None
     else:
