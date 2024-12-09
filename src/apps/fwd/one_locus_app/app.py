@@ -532,10 +532,8 @@ def app_ui(request):
 
 def server(input, output, session):
     @reactive.calc
-    @reactive.event(input.run_button)
-    def run_simulation():
+    def get_sim_params():
         config = sim_config.get()
-
         pops_params = {}
         demographic_events = {}
         for pop_ids in get_pop_ids(config):
@@ -552,6 +550,14 @@ def server(input, output, session):
         sim_params["loggers"] = config["loggers"]
         if demographic_events:
             sim_params["demographic_events"] = demographic_events
+
+        return sim_params
+
+    @reactive.calc
+    @reactive.event(input.run_button)
+    def run_simulation():
+        sim_params = get_sim_params()
+
         sim = OneLocusTwoAlleleSimulation(sim_params)
         return sim
 
