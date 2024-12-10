@@ -1,6 +1,12 @@
-check were the selective sweep happens in the genome, right now is hardcoded
+fix error in msprime sims when pop sizes are big
 
-Add pop dist. matrix
+write out of Africa human simulation
+https://tskit.dev/msprime/docs/stable/demography.html
+
+create web page with practice scripts
+
+
+
 
 # Practices
 

@@ -1,7 +1,9 @@
 OUTPUT_SITE="built_site"
 OUTPUT_HTML_DIR="$OUTPUT_SITE/html"
 
-#uv run sphinx-build -M html pop_lab_site $OUTPUT_SITE
+rm -r $OUTPUT_SITE
+
+uv run sphinx-build -M html pop_lab_site $OUTPUT_SITE
 
 rm -r $OUTPUT_HTML_DIR/simple_drift
 uv run shinylive export src/apps/fwd/simple_drift_app/ $OUTPUT_HTML_DIR/simple_drift/
@@ -25,4 +27,4 @@ uv run shinylive export src/apps/msprime/selective_sweep_app/ $OUTPUT_HTML_DIR/s
 
 cp -ra /home/jose/devel/pop_lab/$OUTPUT_HTML_DIR/* /home/jose/webs/bioinf/github_io/pop_lab/
 
-echo "python3 -m http.server --directory $OUTPUT_HTML_DIR/ --bind localhost 8008"
+echo "uv run python -m http.server --directory $OUTPUT_HTML_DIR/ --bind localhost 8008"

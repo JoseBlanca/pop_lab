@@ -3,7 +3,6 @@ output_site
 .jupyterlite.doit.db
 src/pop_lab.egg-info/
 .vscode/settings.json
-pop_lab_site/
 shiny_site/
 src/pop_lab/pynei
 src/bottleneck_app/pynei/
