@@ -1,4 +1,6 @@
 import math
+from urllib.parse import unquote
+import json
 
 from shiny import App, reactive, render, ui, module
 import matplotlib.pyplot as plt
@@ -479,13 +481,13 @@ def set_config_defaults(config: dict):
 
 
 def app_ui(request):
-    from urllib.parse import unquote
-    import json
-
-    config = None
-    if False and config is None:
+    encoded_config = request.query_params.get("app_config")
+    if encoded_config is not None:
+        config = json.loads(unquote(encoded_config))
+    else:
         config = {}
-    elif True:
+
+    if False:
         # All options
         config = {
             "title": "One locus two alleles simulation",
@@ -536,7 +538,7 @@ def app_ui(request):
                 "exp_het_logger",
             ),
         }
-    elif True:
+    elif False:
         # balancing selection
         config = {
             "title": "Balancing selection",
@@ -566,32 +568,17 @@ def app_ui(request):
             ),
         }
 
-    else:
-        print("request", request)
-        url_query = request.url.query
-
-        print("url_query", url_query)
-        config = request.query_params.get("app_config")
-
-        print("str_config", config)
-
-        # howto encode
-        # from urllib.parse import urlencode
-        # import json
-        # app_config = {"pops": {"pop_a": {"freq_A": 0.9}, "pop_b": {"freq_A": 0.1}}}
-        # encoded = urlencode({"app_config": json.dumps(app_config, separators=(',', ':'))})
-        # app_config=%7B%22pops%22%3A%7B%22pop_a%22%3A%7B%22freq_A%22%3A0.9%7D%2C%22pop_b%22%3A%7B%22freq_A%22%3A0.1%7D%7D%7D
-        # app_config = {'title': 'One locus two alleles simulation', 'pops': {'pop_0': {'name': 'pop_0', 'freq_A': 0.5, 'ui_freq_options': ('genotypic', 'allelic'), 'size': {'min': 10, 'max': 200, 'value': 100}}}, 'num_generations': {'min': 10, 'max': 200, 'value': 100}, 'loggers': ('allelic_freqs_logger', 'genotypic_freqs_logger', 'exp_het_logger')}
-        # encoded
-        # app_config=%7B%22title%22%3A%22One+locus+two+alleles+simulation%22%2C%22pops%22%3A%7B%22pop_0%22%3A%7B%22name%22%3A%22pop_0%22%2C%22freq_A%22%3A0.5%2C%22ui_freq_options%22%3A%5B%22genotypic%22%2C%22allelic%22%5D%2C%22size%22%3A%7B%22min%22%3A10%2C%22max%22%3A200%2C%22value%22%3A100%7D%7D%7D%2C%22num_generations%22%3A%7B%22min%22%3A10%2C%22max%22%3A200%2C%22value%22%3A100%7D%2C%22loggers%22%3A%5B%22allelic_freqs_logger%22%2C%22genotypic_freqs_logger%22%2C%22exp_het_logger%22%5D%7D
+    # howto encode
+    encode_config = True
+    if encode_config:
+        from urllib.parse import urlencode
         import json
 
-        config = json.loads(config)
+        encoded = urlencode({"app_config": json.dumps(config, separators=(",", ":"))})
+        print(encoded)
 
     set_config_defaults(config)
-
     sim_config.set(config)
-    # print(config)
 
     input_card = create_simulation_input_card(config)
     output_card = create_simulation_output_card(config)
@@ -626,7 +613,6 @@ def server(input, output, session):
     @reactive.event(input.run_button, ignore_none=False)
     def run_simulation():
         sim_params = get_sim_params()
-
         sim = OneLocusTwoAlleleSimulation(sim_params)
         return sim
 
