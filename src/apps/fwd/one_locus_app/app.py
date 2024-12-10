@@ -26,12 +26,6 @@ def create_allelic_freqs_panel():
     return panel
 
 
-def create_genotypic_freqs_panel_old():
-    plot = ui.output_plot("genotypic_freqs_plot")
-    panel = ui.nav_panel("Genotypic Freqs.", plot)
-    return panel
-
-
 def create_exp_het_panel():
     plot = ui.output_plot("exp_het_plot")
     panel = ui.nav_panel("Expected het.", plot)
@@ -79,7 +73,7 @@ def create_simulation_output_card(config):
     panels = []
     if "allelic_freqs_logger" in loggers:
         panels.append(create_allelic_freqs_panel())
-    if "allelic_freqs_logger" in loggers:
+    if "genotypic_freqs_logger" in loggers:
         panels.append(create_genotypic_freqs_panel(config))
     if "exp_het_logger" in loggers:
         panels.append(create_exp_het_panel())
@@ -466,6 +460,20 @@ def app_ui(request):
     config = None
     if False and config is None:
         config = {}
+    elif True:
+        # Simple drift
+        config = {
+            "pops": {
+                "pop": {
+                    "freq_A": 0.5,
+                    "ui_freq_options": ("allelic",),
+                },
+            },
+            "loggers": (
+                "allelic_freqs_logger",
+                "exp_het_logger",
+            ),
+        }
     elif True:
         # balancing selection
         config = {
