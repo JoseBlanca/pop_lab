@@ -2,11 +2,11 @@
 
 We are simulating one locus with two alleles.
 
-1. First simultate the frecuency variation along the time in a big population (1000 individuals) and 100 generations.
+1. First simulate the frecuency variation along the time in a big population (1000 individuals) and 100 generations. 
 
- The  genotypic graphic is that you expected? 
+    · The  genotypic graphic is that you expected? 
 
- Will be the result similar if you run again the simulation? Why?
+    · Will be the result similar if you run again the simulation? Why?
 
 2. Reduce the population size to 100 and ran the similation 10 times. Save the genotypic frecuences obtained in each simulation.
 
