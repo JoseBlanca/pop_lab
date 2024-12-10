@@ -485,9 +485,10 @@ def app_ui(request):
     config = None
     if False and config is None:
         config = {}
-    elif True:
+    elif False:
         # All options
         config = {
+            "title": "One locus two alleles simulation",
             "pops": {
                 "pop": {
                     "freq_A": 0.5,
@@ -503,9 +504,10 @@ def app_ui(request):
                 "exp_het_logger",
             ),
         }
-    elif True:
+    elif False:
         # Simple selection
         config = {
+            "title": "Selection",
             "pops": {
                 "pop": {
                     "freq_A": 0,
@@ -519,9 +521,10 @@ def app_ui(request):
                 "genotypic_freqs_logger",
             ),
         }
-    elif True:
+    elif False:
         # Simple drift
         config = {
+            "title": "Drift",
             "pops": {
                 "pop": {
                     "freq_A": 0.5,
@@ -536,6 +539,7 @@ def app_ui(request):
     elif True:
         # balancing selection
         config = {
+            "title": "Balancing selection",
             "pops": {
                 "pop_a": {
                     "freq_A": 0.5,
