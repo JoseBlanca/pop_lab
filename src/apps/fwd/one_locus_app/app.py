@@ -292,7 +292,7 @@ def create_pop_accordion(pop_config):
     pop_accordion = ui.accordion(
         *panels,
         id="pop_accordion",
-        title=pop_config["name"],
+        title="hola",
     )
     return pop_accordion
 
@@ -408,7 +408,7 @@ def create_pops_panel(config):
         nav_panel = ui.navset_tab(*tabs, id="Populations")
         accordion_panel = ui.accordion_panel("Populations", nav_panel)
     else:
-        accordion_panel = ui.accordion_panel(pop_name, pop_accordion)
+        accordion_panel = ui.accordion_panel("Pop. config.", pop_accordion)
     return accordion_panel
 
 
@@ -485,7 +485,7 @@ def app_ui(request):
     config = None
     if False and config is None:
         config = {}
-    elif False:
+    elif True:
         # All options
         config = {
             "title": "One locus two alleles simulation",
