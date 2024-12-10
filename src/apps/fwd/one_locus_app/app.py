@@ -1,7 +1,9 @@
+import math
+
 from shiny import App, reactive, render, ui, module
 import matplotlib.pyplot as plt
 
-from one_locus_two_alleles_simulator import OneLocusTwoAlleleSimulation
+from one_locus_two_alleles_simulator import OneLocusTwoAlleleSimulation, INF
 
 APP_ID = "one_locus_app"
 MAX_MUTATION_RATE = 0.1
@@ -168,7 +170,18 @@ def create_pop_size_panel(pop_config):
         value=pop_config["size"]["value"],
         width="100%",
     )
-    panel = ui.accordion_panel("Size", size_slider)
+
+    check_value = math.isinf(pop_config["size"]["value"])
+    inf_size_checkbox = (
+        ui.input_checkbox("inf_size_checkbox", "Inf. size", check_value),
+    )
+    conditional_panel = (
+        ui.panel_conditional(
+            "!input.inf_size_checkbox",
+            size_slider,
+        ),
+    )
+    panel = ui.accordion_panel("Size", inf_size_checkbox, conditional_panel)
     return panel
 
 
@@ -326,10 +339,17 @@ def pop_input_server(input, output, session, pop_name, config):
         freq = calc_geno_allelic_freqs()[2]
         return f"{freq:.2f}"
 
+    def get_size():
+        if input.inf_size_checkbox():
+            size = INF
+        else:
+            size = input.size_slider()
+        return size
+
     def calc_pop_values():
         freq_AA, freq_Aa, freq_aa, freq_A = calc_geno_allelic_freqs()
         values = {"genotypic_freqs": (freq_AA, freq_Aa, freq_aa)}
-        values["size"] = input.size_slider()
+        values["size"] = get_size()
         if "wAA_slider" in input:
             values["fitness"] = (
                 input.wAA_slider(),
@@ -431,7 +451,12 @@ def set_config_defaults(config: dict):
         pop_config["ui_freq_options"] = config["pops"][pop_name].get(
             "ui_freq_options", ("genotypic", "allelic")
         )
-        pop_config.setdefault("size", {"min": 10, "max": 200, "value": 100})
+        if "size" in config["pops"][pop_name]:
+            pop_config["size"] = config["pops"][pop_name]["size"]
+        else:
+            pop_config.setdefault("size", {"min": 10, "max": 200, "value": 100})
+        if pop_config["size"]["value"] in ("inf", "inf."):
+            pop_config["size"]["value"] = INF
 
         for param in ("fitness", "mutation", "selfing_rate", "immigration"):
             if param in config["pops"][pop_name]:
