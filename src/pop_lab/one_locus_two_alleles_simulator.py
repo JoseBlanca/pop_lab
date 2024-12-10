@@ -3,6 +3,7 @@ import random
 import math
 from array import array
 from collections import defaultdict, namedtuple
+import copy
 
 import numpy
 import pandas
@@ -449,6 +450,7 @@ LOGGER_PARAMETERS = {
 
 class OneLocusTwoAlleleSimulation:
     def __init__(self, sim_definition: dict):
+        sim_definition = copy.deepcopy(sim_definition)
         pops = self._create_pops(sim_definition["pops"])
         events = self._create_demographic_events(
             sim_definition.get("demographic_events", {}), pops
