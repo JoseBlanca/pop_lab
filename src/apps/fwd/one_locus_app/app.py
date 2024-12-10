@@ -461,6 +461,22 @@ def app_ui(request):
     if False and config is None:
         config = {}
     elif True:
+        # Simple selection
+        config = {
+            "pops": {
+                "pop": {
+                    "freq_A": 0,
+                    "ui_freq_options": ("allelic", "genotypic"),
+                    "fitness": (1, 0.8, 0.8),
+                    "mutation": {"a2A": 0.01, "A2a": 0},
+                },
+            },
+            "loggers": (
+                "allelic_freqs_logger",
+                "genotypic_freqs_logger",
+            ),
+        }
+    elif True:
         # Simple drift
         config = {
             "pops": {
@@ -557,7 +573,6 @@ def server(input, output, session):
         sim_params["loggers"] = config["loggers"]
         if demographic_events:
             sim_params["demographic_events"] = demographic_events
-
         return sim_params
 
     @reactive.calc
