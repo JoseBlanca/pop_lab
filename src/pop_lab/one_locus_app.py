@@ -492,7 +492,7 @@ def app_ui(request):
     encode_config = True
     if encode_config:
         encoded = urlencode({"app_config": json.dumps(config, separators=(",", ":"))})
-        print(encoded)
+        # print("encoded", encoded)
 
     set_config_defaults(config)
     sim_config.set(config)
@@ -500,7 +500,18 @@ def app_ui(request):
     input_card = create_simulation_input_card(config)
     output_card = create_simulation_output_card(config)
 
-    page = ui.page_fixed(ui.h1(config["title"]), input_card, output_card)
+    page = ui.page_fixed(
+        # This javascript code is a workaround for a shinylive behaviour
+        # in shinylive the app is located inside an iframe, and that prevents it
+        # to access the query parameters directly. This javascript code tries to fix that
+        ui.tags.script(
+            "if(window.location.search !== window.parent.location.search) { window.location.search = window.parent.location.search }",
+            type="text/JavaScript",
+        ),
+        ui.h1(config["title"]),
+        input_card,
+        output_card,
+    )
     return page
 
 
