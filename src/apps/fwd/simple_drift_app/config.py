@@ -10,4 +10,5 @@ CONFIG = {
         "allelic_freqs_logger",
         "exp_het_logger",
     ),
+    "num_simulations": {"value": 3},
 }
