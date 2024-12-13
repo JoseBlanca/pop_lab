@@ -4,9 +4,11 @@ import json
 
 from shiny import App, reactive, render, ui, module
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 from one_locus_two_alleles_simulator import OneLocusTwoAlleleSimulation, INF
 import config as config_module
+import style
 
 APP_ID = "one_locus_app"
 MAX_MUTATION_RATE = 0.1
@@ -55,11 +57,21 @@ def genotypic_plot_server(input, output, session, geno_freqs: dict):
         axes.set_xlabel("generation")
         axes.set_ylabel("freq")
 
-        for geno_freq_label, geno_freqs_series in geno_freqs.items():
-            axes.plot(
-                geno_freqs_series.index, geno_freqs_series.values, label=geno_freq_label
-            )
-        axes.legend()
+        colors = {}
+        for geno_freq_label, geno_freqs_seriess in geno_freqs.items():
+            color = colors.setdefault(geno_freq_label, next(style.COLOR_CYCLE))
+            for geno_freqs_series in geno_freqs_seriess:
+                axes.plot(
+                    geno_freqs_series.index,
+                    geno_freqs_series.values,
+                    label=geno_freq_label,
+                    color=color,
+                )
+        legend_lines = [
+            Line2D([0], [0], color=colors[freq_label], lw=2)
+            for freq_label in sorted(colors.keys())
+        ]
+        axes.legend(legend_lines, sorted(colors.keys()))
         axes.set_ylim((0, 1))
         return fig
 
@@ -415,12 +427,28 @@ def create_pops_panel(config):
     return accordion_panel
 
 
+def create_num_sims_panel(config):
+    slider = ui.input_slider(
+        id="num_simulations_slider",
+        label="",
+        min=config["num_simulations"]["min"],
+        max=config["num_simulations"]["max"],
+        value=config["num_simulations"]["value"],
+        width="100%",
+    )
+    accordion_panel = ui.accordion_panel("Num. simulations", slider)
+    return accordion_panel
+
+
 def create_simulation_input_card(config):
     pops_panel = create_pops_panel(config)
     num_gen_panel = create_num_gen_panel(config)
-    input_accordion = ui.accordion(
-        pops_panel, num_gen_panel, id="num_generations_accordion"
-    )
+    panels = [pops_panel, num_gen_panel]
+    if "num_simulations" in config:
+        num_sim_panel = create_num_sims_panel(config)
+        panels.append(num_sim_panel)
+
+    input_accordion = ui.accordion(*panels, id="input_accordion")
     run_button = ui.input_action_button("run_button", "Run simulation")
 
     card = ui.card(input_accordion, run_button)
@@ -479,6 +507,10 @@ def set_config_defaults(config: dict):
             "exp_het_logger",
         ),
     )
+    if "num_simulations" in config:
+        num_simulations = config["num_simulations"].setdefault("value", 1)
+        config["num_simulations"].setdefault("min", 1)
+        config["num_simulations"].setdefault("max", max(10, num_simulations))
 
 
 def app_ui(request):
@@ -535,27 +567,44 @@ def server(input, output, session):
         sim_params["loggers"] = config["loggers"]
         if demographic_events:
             sim_params["demographic_events"] = demographic_events
-        return sim_params
+
+        if "num_simulations_slider" in input:
+            num_simulations = input.num_simulations_slider()
+        else:
+            num_simulations = config.get("num_simulations", {}).get("value", 1)
+
+        return {"sim_params": sim_params, "num_simulations": num_simulations}
 
     @reactive.calc
     @reactive.event(input.run_button, ignore_none=False)
-    def run_simulation():
-        sim_params = get_sim_params()
-        sim = OneLocusTwoAlleleSimulation(sim_params)
-        return sim
+    def run_simulations():
+        res = get_sim_params()
+        sims = [
+            OneLocusTwoAlleleSimulation(res["sim_params"])
+            for _ in range(res["num_simulations"])
+        ]
+        return sims
 
     @render.plot(alt="Freq. A plot")
     def allelic_freqs_plot():
-        sim = run_simulation()
+        sims = run_simulations()
 
         fig, axes = plt.subplots()
         axes.set_title("Freq. A")
         axes.set_xlabel("generation")
         axes.set_ylabel("freq")
 
-        freqs_dframe = sim.results["allelic_freqs"]
-        for pop, pop_allelic_freqs in freqs_dframe.items():
-            axes.plot(pop_allelic_freqs.index, pop_allelic_freqs.values, label=pop)
+        colors = {}
+        for sim in sims:
+            freqs_dframe = sim.results["allelic_freqs"]
+            for pop, pop_allelic_freqs in freqs_dframe.items():
+                color = colors.setdefault(pop, next(style.COLOR_CYCLE))
+                axes.plot(
+                    pop_allelic_freqs.index,
+                    pop_allelic_freqs.values,
+                    label=pop,
+                    color=color,
+                )
 
         num_pops = freqs_dframe.shape[1]
         if num_pops > 1:
@@ -566,10 +615,10 @@ def server(input, output, session):
 
     @render.ui
     def genotypic_plots():
-        sim = run_simulation()
+        sims = run_simulations()
 
+        sim = sims[0]
         genotypic_freqs = sim.results["genotypic_freqs"]
-
         geno_freqs_labels = sorted(genotypic_freqs.keys())
         first_label = geno_freqs_labels[0]
         pop_names = genotypic_freqs[first_label].columns
@@ -581,10 +630,11 @@ def server(input, output, session):
             plot = genotypic_plot_ui(module_id)
             plots[pop] = plot
 
-            geno_freqs = {
-                geno_freq_label: genotypic_freqs[geno_freq_label][pop]
-                for geno_freq_label in geno_freqs_labels
-            }
+            geno_freqs = {}
+            for geno_freq_label in geno_freqs_labels:
+                geno_freqs[geno_freq_label] = [
+                    sim.results["genotypic_freqs"][geno_freq_label][pop] for sim in sims
+                ]
             # Dynamically create server-side functions for each plot
             genotypic_plot_server(module_id, geno_freqs=geno_freqs)
 
@@ -599,23 +649,28 @@ def server(input, output, session):
 
     @render.plot(alt="Exp. Het.")
     def exp_het_plot():
-        sim = run_simulation()
+        sims = run_simulations()
 
         fig, axes = plt.subplots()
         axes.set_title("Expected Het.")
         axes.set_xlabel("generation")
         axes.set_ylabel("Exp. Het.")
 
-        exp_hets_dframe = sim.results["expected_hets"]
+        colors = {}
+        for sim in sims:
+            exp_hets_dframe = sim.results["expected_hets"]
 
-        for pop, pop_exp_hets in exp_hets_dframe.items():
-            axes.plot(pop_exp_hets.index, pop_exp_hets.values, label=pop)
+            for pop, pop_exp_hets in exp_hets_dframe.items():
+                color = colors.setdefault(pop, next(style.COLOR_CYCLE))
+                axes.plot(
+                    pop_exp_hets.index, pop_exp_hets.values, label=pop, color=color
+                )
 
         num_pops = exp_hets_dframe.shape[1]
         if num_pops > 1:
             axes.legend()
 
-        axes.set_ylim((0, 1))
+        axes.set_ylim((0, 0.6))
         return fig
 
 

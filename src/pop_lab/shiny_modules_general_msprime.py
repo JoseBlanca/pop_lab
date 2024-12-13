@@ -1,4 +1,3 @@
-import itertools
 from array import array
 
 from shiny import ui, module, reactive, render
@@ -11,6 +10,7 @@ import statsmodels.api as sm
 
 import shiny_module_sim_demography
 import msprime_sim_utils
+from style import COLOR_CYCLE, MARKER_CYCLE, LINESTYLES_CYCLE
 import pynei
 
 
@@ -561,26 +561,9 @@ def run_simulation_server(
 
     @reactive.calc
     def get_styles():
-        colors = list(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        color_cycle = itertools.cycle(colors)
-        markers = [
-            ("o", True),
-            ("x", True),
-            ("s", False),
-            ("v", True),
-            ("^", True),
-            ("<", True),
-            (">", True),
-            ("p", True),
-            ("*", True),
-            ("h", True),
-            ("H", True),
-            ("D", True),
-            ("d", True),
-        ]
-        marker_cycle = itertools.cycle(markers)
-        linestyles = ["solid", "dashed", "dotted", "dashdotted", "dashdotdotted"]
-        linestyle_cycle = itertools.cycle(linestyles)
+        color_cycle = COLOR_CYCLE
+        marker_cycle = MARKER_CYCLE
+        linestyle_cycle = LINESTYLE_CYCLE
 
         sim_res = do_simulation()
         res = sim_res.get_vars_and_pop_samples()
