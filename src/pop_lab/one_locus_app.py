@@ -497,7 +497,7 @@ def set_config_defaults(config: dict):
 
     config["pops"] = pops_config
 
-    config.setdefault("num_generations", {"min": 10, "max": 200, "value": 100})
+    config.setdefault("num_generations", {"min": 10, "max": 300, "value": 100})
     # the panels shown will be the loggers chosen
     config.setdefault(
         "loggers",
