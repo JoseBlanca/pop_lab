@@ -3,6 +3,7 @@ from urllib.parse import unquote, urlencode
 import json
 
 from shiny import App, reactive, render, ui, module
+import pandas
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
@@ -29,7 +30,13 @@ def create_num_gen_panel(config):
 
 def create_allelic_freqs_panel():
     plot = ui.output_plot("allelic_freqs_plot")
-    panel = ui.nav_panel("Allelic Freqs.", plot)
+    plot_panel = ui.nav_panel("Plot", plot)
+    df = (ui.output_data_frame("allelic_freqs_df"),)
+    table_panel = ui.nav_panel("Table", df)
+
+    navset = ui.navset_tab(plot_panel, table_panel, id="allelic_freqs_navset")
+
+    panel = ui.nav_panel("Allelic Freqs.", navset)
     return panel
 
 
@@ -612,6 +619,28 @@ def server(input, output, session):
 
         axes.set_ylim((0, 1))
         return fig
+
+    @render.data_frame
+    def allelic_freqs_df():
+        sims = run_simulations()
+        pops = []
+        sims_idxs = []
+        initial_freqs = []
+        final_freqs = []
+        for sim_idx, sim in enumerate(sims):
+            for pop, freqs_series in sim.results["allelic_freqs"].items():
+                pops.append(pop)
+                sims_idxs.append(sim_idx)
+                initial_freqs.append(round(float(freqs_series.iloc[0]), ndigits=2))
+                final_freqs.append(round(float(freqs_series.iloc[-1]), ndigits=2))
+        freqs = {}
+        if len(sims) > 1:
+            freqs["Simulation"] = sims_idxs
+        freqs["Population"] = pops
+        freqs["Initial freq."] = initial_freqs
+        freqs["Final freq."] = final_freqs
+        freqs_df = pandas.DataFrame(freqs)
+        return render.DataTable(freqs_df)
 
     @render.ui
     def genotypic_plots():
