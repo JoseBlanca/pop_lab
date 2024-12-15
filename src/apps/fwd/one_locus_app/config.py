@@ -14,4 +14,5 @@ CONFIG = {
         "genotypic_freqs_logger",
         "exp_het_logger",
     ),
+    "num_simulations": {"value": 1},
 }
