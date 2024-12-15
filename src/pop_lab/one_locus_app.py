@@ -42,7 +42,13 @@ def create_allelic_freqs_panel():
 
 def create_exp_het_panel():
     plot = ui.output_plot("exp_het_plot")
-    panel = ui.nav_panel("Expected het.", plot)
+    plot_panel = ui.nav_panel("Plot", plot)
+    df = (ui.output_data_frame("expected_hets_df"),)
+    table_panel = ui.nav_panel("Table", df)
+
+    navset = ui.navset_tab(plot_panel, table_panel, id="exp_hets_navset")
+
+    panel = ui.nav_panel("Expected het.", navset)
     return panel
 
 
@@ -701,6 +707,28 @@ def server(input, output, session):
 
         axes.set_ylim((0, 0.6))
         return fig
+
+    @render.data_frame
+    def expected_hets_df():
+        sims = run_simulations()
+        pops = []
+        sims_idxs = []
+        initial_freqs = []
+        final_freqs = []
+        for sim_idx, sim in enumerate(sims):
+            for pop, freqs_series in sim.results["expected_hets"].items():
+                pops.append(pop)
+                sims_idxs.append(sim_idx)
+                initial_freqs.append(round(float(freqs_series.iloc[0]), ndigits=2))
+                final_freqs.append(round(float(freqs_series.iloc[-1]), ndigits=2))
+        freqs = {}
+        if len(sims) > 1:
+            freqs["Simulation"] = sims_idxs
+        freqs["Population"] = pops
+        freqs["Initial exp. het."] = initial_freqs
+        freqs["Final exp. het."] = final_freqs
+        freqs_df = pandas.DataFrame(freqs)
+        return render.DataTable(freqs_df)
 
 
 app = App(app_ui, server)
