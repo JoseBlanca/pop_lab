@@ -27,8 +27,3 @@ built_site/
 src/apps/fwd/one_locus_app_new/one_locus_two_alleles_simulator.py
 tmp_shiny_site/
 src/apps/fwd/one_locus_app/style.py
-src/apps/fwd/balancing_selection_app/style.py
-.gitignore
-src/apps/fwd/simple_drift_app/style.py
-src/apps/fwd/simple_one_locus_app/style.py
-src/apps/fwd/simple_selection_app/style.py
