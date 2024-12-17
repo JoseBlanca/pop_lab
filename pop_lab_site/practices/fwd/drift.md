@@ -8,7 +8,7 @@ We are simulating one locus with two alleles.
 
     · Will be the result similar if you run again the simulation? Why?
 
-2. Reduce the population size to 100 and ran the similation 10 times. Save the genotypic frecuences obtained in each simulation.
+2. Reduce the population size to 100 and run the similation 10 times. Save the genotypic frecuences obtained in each simulation.
 
 How times the allele A is fixed or lost?
 
