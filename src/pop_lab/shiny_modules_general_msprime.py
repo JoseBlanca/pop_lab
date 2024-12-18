@@ -10,7 +10,7 @@ import statsmodels.api as sm
 
 import shiny_module_sim_demography
 import msprime_sim_utils
-from style import COLOR_CYCLE, MARKER_CYCLE, LINESTYLES_CYCLE
+from style import COLOR_CYCLE, MARKER_CYCLE, LINESTYLES_CYCLE, COLORS
 import pynei
 
 
@@ -563,7 +563,7 @@ def run_simulation_server(
     def get_styles():
         color_cycle = COLOR_CYCLE
         marker_cycle = MARKER_CYCLE
-        linestyle_cycle = LINESTYLE_CYCLE
+        linestyle_cycle = LINESTYLES_CYCLE
 
         sim_res = do_simulation()
         res = sim_res.get_vars_and_pop_samples()
@@ -585,7 +585,7 @@ def run_simulation_server(
 
         styles = {"time": {}, "pop": {}}
         styles["default"] = {
-            "color": colors[-1],
+            "color": COLORS[-1],
             "alpha": 1,
             "marker": "o",
             "marker_filled": False,
