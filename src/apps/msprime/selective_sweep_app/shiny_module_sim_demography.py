@@ -30,33 +30,6 @@ NUM_POPS_ACCORDION_ID = "Num. populations"
 
 @module.ui
 def demography_input_accordions():
-    pop_a_proportion_slider = ui.input_slider(
-        "pop_a_proportion_slider",
-        label="Proportion of pop. A in the admixture",
-        min=MIN_POP_A_PROPORTION,
-        max=MAX_POP_A_PROPORTION,
-        value=DEF_POP_A_PROPORTION,
-        width="100%",
-    )
-
-    admix_generation_slider = ui.input_slider(
-        "admix_generation_slider",
-        label="Admix. pop. creation time",
-        min=MIN_ADMIX_GENERATION,
-        max=MAX_ADMIX_GENERATION,
-        value=DEF_ADMIX_GENERATION,
-        width="100%",
-    )
-
-    ancestral_split_generation_slider = ui.input_slider(
-        "ancestral_split_generation_slider",
-        label="Pop. A and Pop. B split time",
-        min=MIN_ANCESTRAL_SPLIT_GENERATION,
-        max=MAX_ANCESTRAL_SPLIT_GENERATION,
-        value=DEF_ANCESTRAL_SPLIT_GENERATION,
-        width="100%",
-    )
-
     pop_size_slider = ui.input_slider(
         "pop_size_slider",
         label="population sizes",
@@ -69,9 +42,6 @@ def demography_input_accordions():
     accordion_panels = [
         ui.accordion_panel(
             "Simulation parameters",
-            pop_a_proportion_slider,
-            admix_generation_slider,
-            ancestral_split_generation_slider,
             pop_size_slider,
         ),
     ]
@@ -113,11 +83,12 @@ def demography_server(input, output, session, get_msprime_params):
         # append final model
         mod_list.append("hudson")
 
-        return {"demography": demography, "model": mod_list}
+        params = {"Pop. size": pop_size}
+
+        return {"demography": demography, "model": mod_list, "params_for_table": params}
 
     @reactive.calc
     def get_sample_sets():
-        admix_generation = input.admix_generation_slider()
         sampling_times = [0]
 
         num_indis_to_sample = get_msprime_params()["sample_size"]
