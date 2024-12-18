@@ -21,6 +21,12 @@ Population genetic practices.
       <li><a href="admixture/">Admixture</a></li>
       <li><a href="selective_sweep/">Selective sweep</a></li>
 
+.. card:: Simple drift
+   :link: practices/fwd/drift
+   :link-type: ref
+
+    Allele frequency drift in one locus
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
