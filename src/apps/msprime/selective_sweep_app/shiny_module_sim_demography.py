@@ -73,7 +73,7 @@ def demography_server(input, output, session, get_msprime_params):
 
         start_frequency = 1.0 / (2 * pop_size)
         end_frequency = 1.0 - (1.0 / (2 * pop_size))
-        s = input.pop_size_slider()
+        s = input.selection_coef_slider()
         # dt is the small increment of time for stepping through the sweep phase of the model.
         # a good rule of thumb is for this to be approximately or smaller
         dt = 1e-6
@@ -81,18 +81,24 @@ def demography_server(input, output, session, get_msprime_params):
         # The strength of selection during the sweep is determined by the parameter s
         # Here we define s such that the fitness of the three genotypes at our beneficial locus are
         # wBB = 1, wBb = 1 + s/2, wbb = 1+s
-        mod = msprime.SweepGenicSelection(
-            position=int(seq_length * 0.5),
-            start_frequency=start_frequency,
-            end_frequency=end_frequency,
-            s=s,
-            dt=dt,
-        )
-        mod_list = [mod, msprime.StandardCoalescent(duration=sweep_mod_time)]
+        if s > 0:
+            mod = msprime.SweepGenicSelection(
+                position=int(seq_length * 0.5),
+                start_frequency=start_frequency,
+                end_frequency=end_frequency,
+                s=s,
+                dt=dt,
+            )
+            mod_list = [mod, msprime.StandardCoalescent(duration=sweep_mod_time)]
+        else:
+            mod_list = []
         # append final model
         mod_list.append("hudson")
 
-        params = {"Pop. size": pop_size}
+        params = {
+            "Pop. size": pop_size,
+            "selection coef.": input.selection_coef_slider(),
+        }
 
         return {"demography": demography, "model": mod_list, "params_for_table": params}
 
