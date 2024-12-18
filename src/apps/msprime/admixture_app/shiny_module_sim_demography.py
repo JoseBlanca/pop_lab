@@ -108,7 +108,13 @@ def demography_server(input, output, session, get_msprime_params):
             derived=["pop_a", "pop_b"],
             ancestral="ancestral",
         )
-        return {"demography": demography}
+        params = {
+            "Split from ancestral population (generations ago)": ancestral_split_generation,
+            "Admixture (generations ago)": admix_generation,
+            "Pop. sizes": pop_sizes,
+            "Pop. a to pop. b proportion": pop_a_proportion,
+        }
+        return {"demography": demography, "params_for_table": params}
 
     @reactive.calc
     def get_sample_sets():
