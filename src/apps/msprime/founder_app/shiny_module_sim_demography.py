@@ -124,8 +124,15 @@ def demography_server(input, output, session, get_msprime_params):
             derived=["split_pop"],
             ancestral="orig_pop",
         )
+        params = {
+            "Original pop. size": orig_pop_size,
+            "Num. founder individuals": num_founders,
+            "Split pop. size": split_pop_size,
+            "Founding time (generation ago)": founding_time,
+            "Bottleneck duration (num. generations)": bottleneck_time,
+        }
 
-        return {"demography": demography}
+        return {"demography": demography, "params_for_table": params}
 
     @reactive.calc
     def get_sample_sets():
