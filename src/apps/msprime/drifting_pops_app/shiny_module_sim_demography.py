@@ -118,7 +118,16 @@ def demography_server(input, output, session, get_msprime_params):
             derived=derived_pops,
             ancestral=ANCESTRAL_POP_NAME,
         )
-        return {"demography": demography}
+
+        params = {f"{ANCESTRAL_POP_NAME} pop. size": pop_sizes[ANCESTRAL_POP_NAME]}
+        params.update(
+            {f"{pop} pop. size": size for pop, size in drifting_pops_sizes.items()}
+        )
+        params[f"Split from {ANCESTRAL_POP_NAME} pop. (num. generations ago)"] = (
+            input.num_generations_ago_split()
+        )
+
+        return {"demography": demography, "params_for_table": params}
 
     @reactive.calc
     def get_sample_sets():
