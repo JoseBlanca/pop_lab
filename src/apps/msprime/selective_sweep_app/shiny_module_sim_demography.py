@@ -57,7 +57,7 @@ def demography_server(input, output, session, get_msprime_params):
     def get_demography():
         pop_size = input.pop_size_slider()
         sweep_mod_time = 200
-        seq_length = 2e6
+        seq_length = get_msprime_params()["seq_length_in_bp"]
 
         demography = msprime.Demography()
         demography.add_population(name="pop", initial_size=pop_size)
