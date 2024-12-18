@@ -38,10 +38,19 @@ def demography_input_accordions():
         value=DEF_POP_SIZE,
         width="100%",
     )
+    selection_coef_slider = ui.input_slider(
+        "selection_coef_slider",
+        label="selection coeff. of the beneficial mutation",
+        min=0,
+        max=1,
+        value=1,
+        width="100%",
+    )
 
     accordion_panels = [
         ui.accordion_panel(
             "Simulation parameters",
+            selection_coef_slider,
             pop_size_slider,
         ),
     ]
@@ -64,7 +73,7 @@ def demography_server(input, output, session, get_msprime_params):
 
         start_frequency = 1.0 / (2 * pop_size)
         end_frequency = 1.0 - (1.0 / (2 * pop_size))
-        s = 1
+        s = input.pop_size_slider()
         # dt is the small increment of time for stepping through the sweep phase of the model.
         # a good rule of thumb is for this to be approximately or smaller
         dt = 1e-6
