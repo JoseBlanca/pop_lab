@@ -22,5 +22,5 @@ MARKERS = [
 ]
 MARKER_CYCLE = itertools.cycle(MARKERS)
 
-LINESTYLES = ["solid", "dashed", "dotted", "dashdotted", "dashdotdotted"]
+LINESTYLES = ["solid", "dashed", "dotted", "-."]
 LINESTYLES_CYCLE = itertools.cycle(LINESTYLES)
