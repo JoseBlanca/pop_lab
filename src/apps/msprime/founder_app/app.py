@@ -23,6 +23,7 @@ from shiny_module_sim_demography import (
     open_accordion_panels,
 )
 
+TITLE = "Founder effect"
 MSPRIME_MODULE_ID = "msprime"
 DEMOGRAPHY_MODULE_ID = "demography"
 INPUT_PARAMS_MODULE_ID = "input_params"
@@ -37,7 +38,7 @@ input_accordion = ui.accordion(
     open=open_accordion_panels,
 )
 
-page_elements = [input_accordion]
+page_elements = [ui.h1(TITLE), input_accordion]
 page_elements.append(input_params_tabs(INPUT_PARAMS_MODULE_ID))
 run_sim_elements = run_simulation_ui(RUM_SIM_ID)
 page_elements.extend(run_sim_elements)
