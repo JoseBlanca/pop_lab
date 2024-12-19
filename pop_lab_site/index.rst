@@ -21,8 +21,10 @@ One locus forward in time
    .. grid-item-card:: Balancing selection
       :link: balancing_selection
 
-   .. grid-item-card:: One locus simulation
+   .. grid-item-card:: One locus general
       :link: one_locus
+
+There is a description of the of the general :doc:`one locus forward in time <practices/fwd/one_locus>` simulation application.
 
 Coalescence
 -----------
@@ -67,11 +69,6 @@ One locus
       :link: practices/fwd/balancing_selection.html
 
       Balancing selection with differing selection preasures in different populations
-
-   .. grid-item-card:: One locus simulation
-      :link: practices/fwd/one_locus.html
-
-      General one locus forward in time simulation
 
 
 One genomic region
