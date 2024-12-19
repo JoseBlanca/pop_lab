@@ -2,7 +2,48 @@
 Pop lab
 =======
 
-Population genetics simulation for the classroom.
+Population genetics simulations for the classroom.
+
+Simulation applications
+=======================
+
+One locus forward in time
+-------------------------
+
+.. grid:: 2
+
+   .. grid-item-card:: Drift
+      :link: simple_drift
+
+   .. grid-item-card:: Selection
+      :link: simple_selection
+
+   .. grid-item-card:: Balancing selection
+      :link: balancing_selection
+
+   .. grid-item-card:: One locus simulation
+      :link: one_locus
+
+Coalescence
+-----------
+
+.. grid:: 2
+
+   .. grid-item-card:: Bottleneck
+      :link: bottleneck
+
+   .. grid-item-card:: Founder effect
+      :link: founder
+
+   .. grid-item-card:: Drifting pops.
+      :link: drifting_pops
+
+   .. grid-item-card:: Admixture
+      :link: admixture
+
+   .. grid-item-card:: Selective sweep
+      :link: selective_sweep
+
 
 Population genetic practices
 ============================
@@ -63,46 +104,6 @@ One genomic region
 
       Diversity sweep due to selection
 
-
-Applications
-============
-
-One locus forward in time
--------------------------
-
-.. grid:: 2
-
-   .. grid-item-card:: Drift
-      :link: simple_drift
-
-   .. grid-item-card:: Selection
-      :link: simple_selection
-
-   .. grid-item-card:: Balancing selection
-      :link: balancing_selection
-
-   .. grid-item-card:: One locus simulation
-      :link: one_locus
-
-Coalescence
------------
-
-.. grid:: 2
-
-   .. grid-item-card:: Bottleneck
-      :link: bottleneck
-
-   .. grid-item-card:: Founder effect
-      :link: founder
-
-   .. grid-item-card:: Drifting pops.
-      :link: drifting_pops
-
-   .. grid-item-card:: Admixture
-      :link: admixture
-
-   .. grid-item-card:: Selective sweep
-      :link: selective_sweep
 
 
 .. toctree::
