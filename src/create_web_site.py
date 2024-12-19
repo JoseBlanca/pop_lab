@@ -51,9 +51,10 @@ def create_apps(app_names, apps_src_base_dir, output_base_dir):
 if OUTPUT_SITE_SPHINX_DIR.exists():
     shutil.rmtree(OUTPUT_SITE_SPHINX_DIR)
 
-create_sphinx_site()
+OUTPUT_HTML_DIR.mkdir(parents=True)
 create_apps(FWD_APP_NAMES, FWD_APPS_SRC_DIR, OUTPUT_HTML_DIR)
 create_apps(MSPRIME_APPS, MSPRIME_APPS_SRC_DIR, OUTPUT_HTML_DIR)
+create_sphinx_site()
 
 SERVE_CMD = (
     f"uv run python -m http.server --directory {OUTPUT_HTML_DIR} --bind localhost 8008"
