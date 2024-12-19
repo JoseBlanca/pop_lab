@@ -1,1 +1,1 @@
-# Founder effect practice
+# Founder effect

@@ -1,1 +1,1 @@
-# Admixture practice
+# Admixture

@@ -4,10 +4,11 @@ Pop lab
 
 Population genetics simulation for the classroom.
 
-Population genetic practices.
+Population genetic practices
+============================
 
-One locus simulations
-=====================
+One locus
+---------
 
 .. grid:: 2
 
@@ -26,14 +27,14 @@ One locus simulations
 
       Balancing selection with differing selection preasures in different populations
 
-   .. grid-item-card:: One locus simulaiton
+   .. grid-item-card:: One locus simulation
       :link: practices/fwd/one_locus.html
 
       General one locus forward in time simulation
 
 
-One genomic region simulations
-==============================
+One genomic region
+------------------
 
 .. grid:: 2
 
@@ -66,24 +67,55 @@ One genomic region simulations
 Applications
 ============
 
-.. raw:: html
+One locus forward in time
+-------------------------
 
-   <ul>Forward in time
-      <li><a href="simple_drift/">Drift</a></li>
-      <li><a href="simple_selection/">Selection</a></li>
-      <li><a href="balancing_selection/">Balancing selection</a></li>
-      <li><a href="one_locus/">General one locus simulation</a></li>
-   </ul>
-   <ul>Coalescence
-      <li><a href="bottleneck/">Bottleneck</a></li>
-      <li><a href="drifting_pops/">Drifting pops</a></li>
-      <li><a href="founder/">Founder</a></li>
-      <li><a href="admixture/">Admixture</a></li>
-      <li><a href="selective_sweep/">Selective sweep</a></li>
+.. grid:: 2
+
+   .. grid-item-card:: Drift
+      :link: simple_drift
+
+   .. grid-item-card:: Selection
+      :link: simple_selection
+
+   .. grid-item-card:: Balancing selection
+      :link: balancing_selection
+
+   .. grid-item-card:: One locus simulation
+      :link: one_locus
+
+Coalescence
+-----------
+
+.. grid:: 2
+
+   .. grid-item-card:: Bottleneck
+      :link: bottleneck
+
+   .. grid-item-card:: Founder effect
+      :link: founder
+
+   .. grid-item-card:: Drifting pops.
+      :link: drifting_pops
+
+   .. grid-item-card:: Admixture
+      :link: admixture
+
+   .. grid-item-card:: Selective sweep
+      :link: selective_sweep
+
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :hidden:
 
    practices/fwd/drift
+   practices/fwd/selection
+   practices/fwd/balancing_selection
+   practices/fwd/one_locus
+   practices/coalescence/bottleneck
+   practices/coalescence/founder
+   practices/coalescence/drifting_pops
+   practices/coalescence/admixture
+   practices/coalescence/selective_sweep
 

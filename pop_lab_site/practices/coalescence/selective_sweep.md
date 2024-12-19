@@ -1,1 +1,1 @@
-# Selective sweep practice
+# Selective sweep
