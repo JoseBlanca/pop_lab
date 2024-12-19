@@ -24,6 +24,7 @@ Take a look at the genotypic frequencies and explain what happens with them, esp
 How would you increase or decrease the strength of the selection?
 Think about what would happen if you increase or decrease the aa and Aa genotypes fitnesses to make them more or less similar to the AA fitness, that should always be 1.
 Run the simulation and find out what happens.
+Which is the relation between the selection strength and the number of generations require to reach an equilibrium?
 
 ### Recessive and dominant alleles
 
@@ -47,8 +48,11 @@ Compare the result of the simulation when the population size is 100 and the cas
 
 Now the AA genotype is lethal, so it's fitness is 0, but recessive, so Aa and aa have a fitness of 1. Let's set it's initial frequency to 0.01 and remove the mutation. What do you think that will happen to the allele?
 Run the simulation with a population of 100 individuals and an infinite one and explain the result.
+Does the deleterous allele dissapears when there is no drift?
 
 What would happen if if add a minimal mutation rate of 0.001 from a to the deletereous allele A? 
+
+Set different fitnesses for AA and check what happens.
 
 Compare the result with a dominant lethal allele, so now both AA and Aa are lethal.
 
@@ -58,7 +62,9 @@ In some cases both homozygotes are OK, but the heterozygote is not viable.
 This could happen, for instance, in the case in which a large chromosomal inversion has happened. Both homozygotes can reproduce without any problem between them, but the heterozygote cannot reproduce, so it has a fitness of zero.
 
 What do you think would happen in this case?
-Run the simulation several times starting with the following starting genotypic frequencies (AA: 0.5, Aa: 0, aa: 0.5) and explain the result.  
+Run the simulation several times starting with the following starting genotypic frequencies (AA: 0.5, Aa: 0, aa: 0.5) and explain the result.
+
+Would the result change if we would start with the following genotypic frequencies: AA: 0.01, Aa: 0.98, aa: 0.01?
 
 ## Heterozygote advantage
 
