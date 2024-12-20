@@ -10,6 +10,10 @@ Simulation applications
 One locus forward in time
 -------------------------
 
+These applications simulate the classic one locus with two alleles scenario in one or more populations.
+They can be used to explore: drift, selection, mutation, migration and selfing.
+For more details use the applications or read their :doc:`documentation <practices/fwd/one_locus>`.
+
 .. grid:: 2
 
    .. grid-item-card:: Drift
@@ -24,10 +28,10 @@ One locus forward in time
    .. grid-item-card:: One locus general
       :link: one_locus
 
-There is a description of the of the general :doc:`one locus forward in time <practices/fwd/one_locus>` simulation application.
-
 Coalescence
 -----------
+
+The following set of applications simulate the evolution of a genomic region, with mutation, drift, recombination and selection, in different demographic scenarios using a coalescence approach.
 
 .. grid:: 2
 
