@@ -47,7 +47,7 @@ DEF_SEQ_LENGTH = 2e6
 
 MIN_RECOMB_RATE = -9
 DEF_RECOMB_RATE = -7
-MAX_RECOMB_RATE = -6
+MAX_RECOMB_RATE = -7
 
 MIN_MUT_RATE = -8
 DEF_MUT_RATE = -7
@@ -152,7 +152,10 @@ def msprime_params_server(input, output, session):
         sample_size = input.sample_size_slider()
         seq_length_in_bp = input.seq_len_slider()
         mut_rate = 10 ** input.mut_rate_slider()
-        recomb_rate = 10 ** input.recomb_rate_slider()
+        if input.no_recomb_checkbox:
+            recomb_rate = 0
+        else:
+            recomb_rate = 10 ** input.recomb_rate_slider()
         return {
             "sample_size": sample_size,
             "seq_length_in_bp": seq_length_in_bp,
