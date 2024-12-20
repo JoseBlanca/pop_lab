@@ -16,6 +16,7 @@ POP_SIZE_ACCORDION_ID = "Population size"
 
 POP_NAME = "pop"
 POP_NAMES = [POP_NAME]
+DESIRED_PLOTS = ["afs"]
 
 
 @module.ui

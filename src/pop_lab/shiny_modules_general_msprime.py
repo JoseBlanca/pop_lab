@@ -223,8 +223,19 @@ LD_PLOT_ID = "ld_vs_dist"
 PCA_PLOT_ID = "pca"
 AFS_PLOT_ID = "afs"
 DIVERSITY_ALONG_GENOME_PLOT_ID = "diversity_along_genome"
-PLOT_STRS = ("Allele freq. spectrum", "PCA", "LD", "Diversity along the genome")
 PLOT_IDS = (AFS_PLOT_ID, PCA_PLOT_ID, LD_PLOT_ID, DIVERSITY_ALONG_GENOME_PLOT_ID)
+PLOT_DESCRIPTIONS = {
+    AFS_PLOT_ID: "Allele freq. spectrum",
+    PCA_PLOT_ID: "PCA",
+    LD_PLOT_ID: "LD",
+    DIVERSITY_ALONG_GENOME_PLOT_ID: "Diversity along the genome",
+}
+
+PLOT_STRS = []
+PLOT_IDS = []
+for plot_id in shiny_module_sim_demography.DESIRED_PLOTS:
+    PLOT_IDS.append(plot_id)
+    PLOT_STRS.append(PLOT_DESCRIPTIONS[plot_id])
 
 
 @module.ui

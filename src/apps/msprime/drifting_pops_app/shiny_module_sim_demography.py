@@ -13,6 +13,7 @@ DEF_GENERATION_POP_SPLIT = 400
 
 NUM_POPS = 3
 POP_NAMES = [f"pop_{IDX+1}" for IDX in range(NUM_POPS)]
+DESIRED_PLOTS = ["afs", "pca"]
 
 ORIG_POP_SIZE_ACCORDION_ID = "Orig population size"
 NUM_SPLIT_GENERATION_AGO_ID = "Num. generations ago pop. split"

@@ -21,6 +21,7 @@ DEF_POP_A_PROPORTION = 0.5
 
 NUM_POPS = 3
 POP_NAMES = ["pop"]
+DESIRED_PLOTS = ["diversity_along_genome"]
 
 ORIG_POP_SIZE_ACCORDION_ID = "Orig population size"
 NUM_SPLIT_GENERATION_AGO_ID = "Times"
