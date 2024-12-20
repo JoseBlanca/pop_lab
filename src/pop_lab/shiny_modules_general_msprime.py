@@ -433,7 +433,7 @@ def run_simulation_server(
     @render.data_frame
     def exp_het_table():
         res = get_exp_hets()
-        return render.DataGrid(res["exp_het_dframe"])
+        return render.DataGrid(res["exp_het_dframe"].round(2))
 
     @render.plot(alt="Polymorphic (95%) ratio over variable")
     def poly_ratio_over_variables_plot():
