@@ -21,6 +21,7 @@ DEF_POP_A_PROPORTION = 0.5
 
 NUM_POPS = 3
 POP_NAMES = ["pop_a", "pop_b", "admix"]
+DESIRED_PLOTS = ["afs"]
 
 ORIG_POP_SIZE_ACCORDION_ID = "Orig population size"
 NUM_SPLIT_GENERATION_AGO_ID = "Times"
