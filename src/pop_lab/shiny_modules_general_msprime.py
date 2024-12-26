@@ -677,7 +677,7 @@ def run_simulation_server(
         )
 
         indi_names = projections.index.to_numpy()
-        print(filter_stats)
+
         vars_kept = filter_stats["ld_and_maf"]["vars_kept"]
         if vars_kept < MIN_NUM_VARS_FOR_PCA:
             raise RuntimeError(
