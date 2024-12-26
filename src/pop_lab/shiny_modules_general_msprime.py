@@ -13,6 +13,9 @@ import msprime_sim_utils
 from style import COLOR_CYCLE, MARKER_CYCLE, LINESTYLES_CYCLE, COLORS
 import pynei
 
+PCA_MAX_MAF = 0.95
+MIN_LD_R2 = 0.1
+
 
 class Table:
     def __init__(self, col_names: list[str]):
@@ -641,21 +644,15 @@ def run_simulation_server(
             complete_style[trait] = style.get(trait, styles["default"][trait])
         return complete_style
 
-    @render.plot(alt="Principal Component Analysis")
-    def pca_plot():
+    @reactive.calc
+    def _do_pca():
         sim_res = do_simulation()
-        fig, axes = plt.subplots()
 
-        max_maf = 0.95
-        min_ld_r2 = 0.1
-
-        res = sim_res.get_vars_and_pop_samples()
-        vars = res["vars"]
+        pop_and_samples = sim_res.get_vars_and_pop_samples()
+        vars = pop_and_samples["vars"]
         vars = pynei.filter_by_ld_and_maf(
-            vars, min_allowed_r2=min_ld_r2, max_allowed_maf=max_maf
+            vars, min_allowed_r2=MIN_LD_R2, max_allowed_maf=PCA_MAX_MAF
         )
-        pop_samples_info = res["pop_samples_info"]
-        indis_by_pop_sample = res["indis_by_pop_sample"]
 
         try:
             pca_res = pynei.pca.do_pca_with_vars(vars, transform_to_biallelic=True)
@@ -666,6 +663,16 @@ def run_simulation_server(
                 )
             else:
                 raise error
+        return pop_and_samples, pca_res, vars
+
+    @render.plot(alt="Principal Component Analysis")
+    def pca_plot():
+        pop_and_samples, pca_res, vars = _do_pca()
+        pop_samples_info = pop_and_samples["pop_samples_info"]
+        indis_by_pop_sample = pop_and_samples["indis_by_pop_sample"]
+
+        fig, axes = plt.subplots()
+
         projections = pca_res["projections"]
         explained_variance = pca_res["explained_variance (%)"]
 
@@ -699,7 +706,7 @@ def run_simulation_server(
                 facecolor=facecolor,
             )
         axes.set_title(
-            f"PCA done with {filter_stats['ld_and_maf']['vars_kept']} polymorphic ({int(max_maf*100)}%) variations"
+            f"PCA done with {filter_stats['ld_and_maf']['vars_kept']} polymorphic ({int(PCA_MAX_MAF*100)}%) and not in LD (r2={MIN_LD_R2}) variations"
         )
         axes.set_xlabel(f"PC1 ({explained_variance.iloc[0]:.2f}%)")
         axes.set_ylabel(f"PC2 ({explained_variance.iloc[1]:.2f}%)")
