@@ -15,6 +15,7 @@ import pynei
 
 PCA_MAX_MAF = 0.95
 MIN_LD_R2 = 0.1
+MIN_NUM_VARS_FOR_PCA = 10
 
 
 class Table:
@@ -676,7 +677,13 @@ def run_simulation_server(
         )
 
         indi_names = projections.index.to_numpy()
-        print(projections)
+        print(filter_stats)
+        vars_kept = filter_stats["ld_and_maf"]["vars_kept"]
+        if vars_kept < MIN_NUM_VARS_FOR_PCA:
+            raise RuntimeError(
+                f"After filtering only {vars_kept} SNPs were kept, at leat {MIN_NUM_VARS_FOR_PCA} required to do PCA, you could rerun the simulation"
+            )
+
         x_values = projections.iloc[:, 0].values
         y_values = projections.iloc[:, 1].values
         for pop_sample_name in pop_sample_names:
