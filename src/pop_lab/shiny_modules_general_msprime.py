@@ -228,6 +228,7 @@ PLOT_DESCRIPTIONS = {
     PCA_PLOT_ID: "PCA",
     LD_PLOT_ID: "LD",
     DIVERSITY_ALONG_GENOME_PLOT_ID: "Diversity along the genome",
+    "dists": "Dest dists. between pops.",
 }
 
 PLOT_STRS = []
@@ -321,30 +322,33 @@ def run_simulation_ui():
         plot = ui.output_plot(f"{plot_id}_plot")
 
         accordions = []
-        if len(shiny_module_sim_demography.POP_NAMES) > 1:
-            pop_switches = [
-                ui.input_switch(f"{plot_id}_plot_swicth_pop_{pop}", pop, value=True)
-                for pop in shiny_module_sim_demography.POP_NAMES
-            ]
-            pops_accordion = ui.accordion(
-                ui.accordion_panel("Pops", pop_switches),
-                id=f"{plot_id}_pop_switches_accordion",
+        if plot_id == "dists":
+            nav_panels.append(ui.nav_panel(plot_str, plot))
+        else:
+            if len(shiny_module_sim_demography.POP_NAMES) > 1:
+                pop_switches = [
+                    ui.input_switch(f"{plot_id}_plot_swicth_pop_{pop}", pop, value=True)
+                    for pop in shiny_module_sim_demography.POP_NAMES
+                ]
+                pops_accordion = ui.accordion(
+                    ui.accordion_panel("Pops", pop_switches),
+                    id=f"{plot_id}_pop_switches_accordion",
+                )
+                accordions.append(pops_accordion)
+            times_accordion = ui.accordion(
+                ui.accordion_panel("Times"),
+                id=f"{plot_id}_time_switches_accordion",
             )
-            accordions.append(pops_accordion)
-        times_accordion = ui.accordion(
-            ui.accordion_panel("Times"),
-            id=f"{plot_id}_time_switches_accordion",
-        )
-        accordions.append(times_accordion)
-        sidebar = ui.sidebar(
-            accordions,
-            id=f"{plot_id}_sidebar",
-        )
-        sidebar_layout = ui.layout_sidebar(
-            sidebar, plot, position="right", bg="#f8f8f8"
-        )
-        card = ui.card(sidebar_layout)
-        nav_panels.append(ui.nav_panel(plot_str, card))
+            accordions.append(times_accordion)
+            sidebar = ui.sidebar(
+                accordions,
+                id=f"{plot_id}_sidebar",
+            )
+            sidebar_layout = ui.layout_sidebar(
+                sidebar, plot, position="right", bg="#f8f8f8"
+            )
+            card = ui.card(sidebar_layout)
+            nav_panels.append(ui.nav_panel(plot_str, card))
 
     output_card = ui.navset_card_tab(*nav_panels)
 
@@ -821,4 +825,38 @@ def run_simulation_server(
         axes.set_ylim((0, axes.get_ylim()[1]))
         axes.set_xlabel("Genomic position (bp)")
         axes.set_ylabel("Mean unbiased exp. het.")
+        return fig
+
+    @render.plot(alt="Dest dists. between populations")
+    def dists_plot():
+        sim_res = do_simulation()
+
+        res = sim_res.get_vars_and_pop_samples()
+        vars = res["vars"]
+        indis_by_pop_sample = res["indis_by_pop_sample"]
+
+        dists = pynei.calc_jost_dest_pop_dists(
+            vars,
+            pops=indis_by_pop_sample,
+        )
+
+        fig, axes = plt.subplots()
+        square_dists = dists.square_dists
+
+        pop_names = dists.names
+
+        im = axes.imshow(square_dists, cmap="coolwarm")
+
+        # Add colorbar
+        fig.colorbar(im, ax=axes)
+
+        # pop_names = list(reversed(pop_names))
+        tick_positions = numpy.arange(0, len(pop_names))
+        axes.set_xticks(tick_positions)
+        axes.set_yticks(tick_positions)
+
+        axes.set_xticklabels(pop_names)
+        axes.set_yticklabels(pop_names)
+
+        axes.tick_params(axis="x", rotation=90)
         return fig
