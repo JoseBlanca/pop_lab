@@ -44,14 +44,6 @@ class Table:
         return pandas.DataFrame(self._cols)
 
 
-MIN_SEQ_LENGTH = 5e5
-MAX_SEQ_LENGTH = 10e6
-DEF_SEQ_LENGTH = 2e6
-
-MIN_RECOMB_RATE = -9
-DEF_RECOMB_RATE = -7
-MAX_RECOMB_RATE = -7
-
 MIN_MUT_RATE = -8
 DEF_MUT_RATE = -7
 MAX_MUT_RATE = -6
@@ -97,9 +89,9 @@ def msprime_params_ui():
                 ui.input_slider(
                     "recomb_rate_slider",
                     label="Log. scale",
-                    min=MIN_RECOMB_RATE,
-                    max=MAX_RECOMB_RATE,
-                    value=DEF_RECOMB_RATE,
+                    min=shiny_module_sim_demography.MIN_RECOMB_RATE,
+                    max=shiny_module_sim_demography.MAX_RECOMB_RATE,
+                    value=shiny_module_sim_demography.DEF_RECOMB_RATE,
                     width="100%",
                 ),
             ),
@@ -128,9 +120,9 @@ def msprime_params_ui():
             ui.input_slider(
                 "seq_len_slider",
                 label="",
-                min=MIN_SEQ_LENGTH,
-                max=MAX_SEQ_LENGTH,
-                value=DEF_SEQ_LENGTH,
+                min=shiny_module_sim_demography.MIN_SEQ_LENGTH,
+                max=shiny_module_sim_demography.MAX_SEQ_LENGTH,
+                value=shiny_module_sim_demography.DEF_SEQ_LENGTH,
                 width="100%",
             ),
         ),
@@ -684,6 +676,7 @@ def run_simulation_server(
         )
 
         indi_names = projections.index.to_numpy()
+        print(projections)
         x_values = projections.iloc[:, 0].values
         y_values = projections.iloc[:, 1].values
         for pop_sample_name in pop_sample_names:
