@@ -135,15 +135,22 @@ def demography_server(input, output, session, get_msprime_params):
 
         num_indis_to_sample = get_msprime_params()["sample_size"]
         sample_sets = []
+        for pop in ["pop_a", "pop_b"]:
+            sample_set = msprime_sim_utils.create_msprime_sample_set(
+                num_samples=num_indis_to_sample,
+                ploidy=2,
+                pop_name=pop,
+                time=admix_generation - 1,
+            )
+            sample_sets.append(sample_set)
         for time in sampling_times:
-            for pop in ["pop_a", "pop_b", "admix"]:
-                sample_set = msprime_sim_utils.create_msprime_sample_set(
-                    num_samples=num_indis_to_sample,
-                    ploidy=2,
-                    pop_name=pop,
-                    time=time,
-                )
-                sample_sets.append(sample_set)
+            sample_set = msprime_sim_utils.create_msprime_sample_set(
+                num_samples=num_indis_to_sample,
+                ploidy=2,
+                pop_name="admix",
+                time=time,
+            )
+            sample_sets.append(sample_set)
         return sample_sets
 
     return get_demography, get_sample_sets
