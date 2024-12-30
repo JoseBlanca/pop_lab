@@ -835,6 +835,8 @@ def run_simulation_server(
         vars = res["vars"]
         indis_by_pop_sample = res["indis_by_pop_sample"]
 
+        vars = pynei.filter_by_maf(vars, max_allowed_maf=0.95)
+
         dists = pynei.calc_jost_dest_pop_dists(
             vars,
             pops=indis_by_pop_sample,
