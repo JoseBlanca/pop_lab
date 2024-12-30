@@ -177,7 +177,7 @@ class SimulationResult:
         return {"counts": res["hist_counts"], "bin_edges": res["hist_bin_edges"]}
 
     def calc_exp_het_along_genome(self):
-        n_bins = 15
+        n_bins = 60
         res = self.get_vars_and_pop_samples()
         vars = res["vars"]
         chunk = next(vars.iter_vars_chunks())

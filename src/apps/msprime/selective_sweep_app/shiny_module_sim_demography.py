@@ -7,25 +7,17 @@ MIN_POP_SIZE = 10
 MAX_POP_SIZE = 10000
 DEF_POP_SIZE = 500
 
-MAX_ANCESTRAL_SPLIT_GENERATION = 3000
-MIN_ANCESTRAL_SPLIT_GENERATION = 200
-DEF_ANCESTRAL_SPLIT_GENERATION = 2500
-
-MAX_ADMIX_GENERATION = MIN_ANCESTRAL_SPLIT_GENERATION - 50
-MIN_ADMIX_GENERATION = 10
-DEF_ADMIX_GENERATION = 10
-
 MIN_POP_A_PROPORTION = 0
 MAX_POP_A_PROPORTION = 1
 DEF_POP_A_PROPORTION = 0.5
 
 MIN_SEQ_LENGTH = 5e5
 MAX_SEQ_LENGTH = 10e6
-DEF_SEQ_LENGTH = 2e6
+DEF_SEQ_LENGTH = 4e6
 
 MIN_RECOMB_RATE = -9
-DEF_RECOMB_RATE = -7
-MAX_RECOMB_RATE = -7
+DEF_RECOMB_RATE = -6
+MAX_RECOMB_RATE = -6
 
 NUM_POPS = 3
 POP_NAMES = ["pop"]
@@ -74,7 +66,7 @@ def demography_server(input, output, session, get_msprime_params):
     @reactive.calc
     def get_demography():
         pop_size = input.pop_size_slider()
-        sweep_mod_time = 200
+        sweep_mod_time = 100
         seq_length = get_msprime_params()["seq_length_in_bp"]
 
         demography = msprime.Demography()
@@ -82,7 +74,10 @@ def demography_server(input, output, session, get_msprime_params):
 
         start_frequency = 1.0 / (2 * pop_size)
         end_frequency = 1.0 - (1.0 / (2 * pop_size))
+        start_frequency = 0.0001
+        end_frequency = 0.9
         s = input.selection_coef_slider()
+        s = 0.9
         # dt is the small increment of time for stepping through the sweep phase of the model.
         # a good rule of thumb is for this to be approximately or smaller
         dt = 1e-6
@@ -98,11 +93,16 @@ def demography_server(input, output, session, get_msprime_params):
                 s=s,
                 dt=dt,
             )
-            mod_list = [mod, msprime.StandardCoalescent(duration=sweep_mod_time)]
+            mod_list = [
+                msprime.StandardCoalescent(duration=80),
+                mod,
+                msprime.StandardCoalescent(),
+            ]
         else:
-            mod_list = []
+            mod_list = ["hudson"]
+        print(mod_list)
         # append final model
-        mod_list.append("hudson")
+        # mod_list.append("hudson")
 
         params = {
             "Pop. size": pop_size,
@@ -113,7 +113,7 @@ def demography_server(input, output, session, get_msprime_params):
 
     @reactive.calc
     def get_sample_sets():
-        sampling_times = [0]
+        sampling_times = [200, 0]
 
         num_indis_to_sample = get_msprime_params()["sample_size"]
         sample_sets = []

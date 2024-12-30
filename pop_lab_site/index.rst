@@ -47,9 +47,6 @@ The following set of applications simulate the evolution of a genomic region, wi
    .. grid-item-card:: Admixture
       :link: admixture
 
-   .. grid-item-card:: Selective sweep
-      :link: selective_sweep
-
 
 Population genetic practices
 ============================
@@ -100,11 +97,6 @@ One genomic region
 
       Population creating by merging two populations.
 
-   .. grid-item-card:: Selective sweep
-      :link: practices/coalescence/selective_sweep.html
-
-      Diversity sweep due to selection
-
 
 
 .. toctree::
@@ -119,5 +111,4 @@ One genomic region
    practices/coalescence/founder
    practices/coalescence/drifting_pops
    practices/coalescence/admixture
-   practices/coalescence/selective_sweep
 
