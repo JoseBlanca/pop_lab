@@ -32,6 +32,7 @@ Coalescence
 -----------
 
 The following set of applications simulate the evolution of a genomic region, with mutation, drift, recombination and selection, in different demographic scenarios using a coalescence approach.
+For more details read the :doc:`coalescence simulation documentation <practices/coalescence/coalescence>`
 
 .. grid:: 2
 
