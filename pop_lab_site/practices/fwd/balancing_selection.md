@@ -9,7 +9,7 @@ We will be able to control the fitnesses in both populations independently, so, 
 There will be also, migration between both populations, so genotypes from one can go to the other.
 We will have control of the immigration rate, the proportion of individuals in each generation that come from the other population.
 
-[Balancing selection simulation application](<http:../../balancing_selection/>)
+[Balancing selection simulation application](<https:bioinf.comav.upv.es/pop_lab/balancing_selection/>)
 
 ## Same selection preasure
 

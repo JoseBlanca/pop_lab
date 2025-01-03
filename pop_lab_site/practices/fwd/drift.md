@@ -9,7 +9,7 @@ We will assume that genotypic frequencies follow Hardy-Weinberg equilibrium.
 In this simulations, there are no mutation or selection—just a population of a given size evolving generation after generation through random mating.
 Finally, you can choose to run one or multiple simulations simultaneously.
 
-[Drift simulation application](<http:../../simple_drift/>)
+[Drift simulation application](<https:bioinf.comav.upv.es/pop_lab/simple_drift/>)
 
 ## Randomness
 

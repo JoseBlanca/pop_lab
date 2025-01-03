@@ -7,7 +7,7 @@ Then, more recently, a new population is created by mixing these differentiated 
 
 Let's simmulate this process and explore the effect of on the genetic diversity of this admixture.
 
-[Admixture simulation application](<http:../../admixture/>)
+[Admixture simulation application](<https:bioinf.comav.upv.es/pop_lab/admixture/>)
 
 ## Diversity in the admixtured population
 

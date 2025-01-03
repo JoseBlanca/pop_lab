@@ -1,2 +1,0 @@
-# Selective sweep
-

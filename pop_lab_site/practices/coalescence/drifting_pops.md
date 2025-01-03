@@ -3,7 +3,7 @@
 Imagine that we have three populations that, originally, are created from the same ancestral population and that, once created, they evolve independently with time.
 Let's think about what genetic drift would do to those populations.
 
-[Drifting populations simulation application](<http:../../drifting_pops/>)
+[Drifting populations simulation application](<https:bioinf.comav.upv.es/pop_lab/drifting_pops/>)
 
 ## Genetic distances
 
