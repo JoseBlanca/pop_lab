@@ -4,7 +4,7 @@ The one locus foward in time applications simulate one locus with two alleles (A
 
 Several parameters can be set to configure each simulation, and then, by clicking the "Run simulation" button, the simulation will be carried out and the results plotted.
 
-[One locus forward in time simulation application](<https:bioinf.comav.upv.es/pop_lab/one_locus/>)
+[One locus forward in time simulation application](<https://bioinf.comav.upv.es/pop_lab/one_locus/>)
 
 ## Initial genotypic frequencies
 

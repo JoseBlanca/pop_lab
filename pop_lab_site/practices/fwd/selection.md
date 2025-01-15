@@ -6,7 +6,7 @@ In this practice we are going to simulate one locus with two alleles (A and a).
 You will be able to set either the initial allelic frequencies (assuming Hardy-Weinberg) or each genotypic frequency independently.
 Besides the population size and the number of generations you can also change the fitness for each genotype as well the mutation rates from allele A to allele a and vice-versa.
 
-[Selection simulation application](<https:bioinf.comav.upv.es/pop_lab/simple_selection/>)
+[Selection simulation application](<https://bioinf.comav.upv.es/pop_lab/simple_selection/>)
 
 ## Selection in favour of a minor allele
 

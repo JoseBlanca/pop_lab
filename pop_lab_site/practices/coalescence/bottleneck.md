@@ -5,7 +5,7 @@ It could be caused, for instance, by an environmental factor, like a drought or 
 
 In this practice we are going to analyze the bottleneck effect in genetic diversity.
 
-[Bottleneck simulation application](<https:bioinf.comav.upv.es/pop_lab/bottleneck/>)
+[Bottleneck simulation application](<https://bioinf.comav.upv.es/pop_lab/bottleneck/>)
 
 ## Bottlenecks and diversity
 

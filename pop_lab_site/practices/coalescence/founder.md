@@ -5,7 +5,7 @@ This causes a bottleneck that has an impact in the diversity of the new populati
 
 This is a common phenomenon that happens, for instance, when few individuals colonize a new island or territory or are used to create a new breed.
 
-[Founder effect simulation application](<https:bioinf.comav.upv.es/pop_lab/founder/>)
+[Founder effect simulation application](<https://bioinf.comav.upv.es/pop_lab/founder/>)
 
 ## Effect on diversity
 
