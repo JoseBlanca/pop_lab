@@ -249,7 +249,7 @@ def create_mutation_panel(pop_config):
     mutation = pop_config["mutation"]
     A2a_slider = ui.input_slider(
         id="A2a_slider",
-        label="A2a rate",
+        label="A to a rate",
         min=0,
         max=MAX_MUTATION_RATE,
         value=mutation["A2a"],
@@ -257,7 +257,7 @@ def create_mutation_panel(pop_config):
     )
     a2A_slider = ui.input_slider(
         id="a2A_slider",
-        label="a2A rate",
+        label="a to A rate",
         min=0,
         max=MAX_MUTATION_RATE,
         value=mutation["a2A"],
