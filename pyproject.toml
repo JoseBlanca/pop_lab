@@ -1,7 +1,7 @@
 [project]
 name = "pop-lab"
 version = "0.1.0"
-description = "Add your description here"
+description = "Simulations practices for a population genetics course."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
