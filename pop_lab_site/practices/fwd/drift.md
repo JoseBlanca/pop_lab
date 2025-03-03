@@ -61,7 +61,7 @@ What would happen if we assume a very big population or , as in Hardy-Weinberg e
 
 ## Drift and Diversity
 
-Expected heterozygosity (He) is a measure of genetic variation in a population. It is defined as the heterozygosity that we would expect in a population in which the genotypic frequencies follow Hardy-Weinberg. So, in a population with two alleles with frequencies p and q the expected heterozygosity would be H = 2pq or H = 1 - p² - q*².
+Expected heterozygosity (He) is a measure of genetic variation in a population. It is defined as the heterozygosity that we would expect in a population in which the genotypic frequencies follow Hardy-Weinberg. So, in a population with two alleles with frequencies p and q the expected heterozygosity would be H = 2pq or H = 1 - p² - q².
 
 Now that you have explored the allelic frequency behavior, could you predict how expected heterozygosity changes over time?
 
