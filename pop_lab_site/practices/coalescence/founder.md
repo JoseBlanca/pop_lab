@@ -36,7 +36,7 @@ After running the simulation, you will have access to several genetic diversity 
 - Principal Component Analysis (PCA).
 - Genetic distance matrix (quantifying differentiation between populations).
 
-[Founder effect simulation application](<https://bioinf.comav.upv.es/pop_lab/founder/>)
+[Founder effect simulation application](<https://plantgenomics.es/pop_lab/founder/>)
 
 ## Effect on diversity
 

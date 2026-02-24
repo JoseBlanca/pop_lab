@@ -15,7 +15,7 @@ In these simulations, there will be no mutation or selection, just a population 
 
 Before running the simulations, think about how each parameter might influence the outcome. 
 
-[Drift simulation application](<https://bioinf.comav.upv.es/pop_lab/simple_drift/>)
+[Drift simulation application](<https://plantgenomics.es/pop_lab/simple_drift/>)
 
 ## Learning objectives
 

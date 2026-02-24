@@ -28,7 +28,7 @@ After running the simulation, you will have access to several genetic diversity 
 - Number and proportion of polymorphic variants.
 - Allele Frequency Spectrum (AFS) (distribution of allele frequencies).
 
-[Bottleneck simulation application](<https://bioinf.comav.upv.es/pop_lab/bottleneck/>)
+[Bottleneck simulation application](<https://plantgenomics.es/pop_lab/bottleneck/>)
 
 ## Bottlenecks and diversity
 

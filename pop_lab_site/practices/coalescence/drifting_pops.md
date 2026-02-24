@@ -27,7 +27,7 @@ To quantify how genetic drift influences the populations, we will analyze severa
 
 The PCA will provide a visual representation of genetic relationships, while the distance matrix will quantify differences between populations. Together, they allow us to track genetic divergence over time.
 
-[Drifting populations simulation application](<https://bioinf.comav.upv.es/pop_lab/drifting_pops/>)
+[Drifting populations simulation application](<https://plantgenomics.es/pop_lab/drifting_pops/>)
 
 ## Genetic distances
 
