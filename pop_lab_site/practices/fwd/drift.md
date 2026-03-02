@@ -30,7 +30,7 @@ What do you think will happen if a population with an initial allele frequency o
 
 Do you expect all simulations to follow the same trajectory? Why or why not?
 
-Run 20 simulations and compare the final allele frequency of A and the expected heterozygosity.
+Run 20 simulations and compare the final allele frequency of A.
 Calculate also the average allele frequency over all the simulations.
 
 ## Fixation
@@ -39,16 +39,16 @@ Fixation occurs when one allele reaches a frequency of 1 in the population, mean
 
 Evolve a population of 100 individuals over 100 generations.
 Run the simulation 20 times and count how many times each allele becomes fixed.
-Plot an histogram with the number of times that A or a become fixed and the number of times in which there is no fixation.
+Plot an histogram with the number of times that the allele A or a become fixed and the number of times in which there is no fixation.
 Calculate the frequency of simulations that reach fixation.
 
 What happens if, instead of 100 generations, the population evolves for 300 generations?
 What do you think would eventually happen if we ran the simulation for thousands of generations?
 
 When fixation occurs, is one allele more likely to become fixed than the other?
-In a simulation with for 100 individuals and 300 generations, compare the number of times A vs. a becomes fixed when the initial frequency of A is 0.5, and also for the initial frequencies of 0.1 and 0.9.
+In a simulation with 100 individuals and 300 generations, compare the number of times A vs. a becomes fixed when the initial frequency of A is 0.5, and also for the initial frequencies of 0.1 and 0.9.
 Plot an histrogram with the number of times that each allele gets fixated for all three initial allele frequencies.
-Calculate the fixation probability of A for both initial frequencies.
+Calculate the fixation probability of A for the different initial frequencies.
 How does the starting frequency affect fixation probability?
 
 What will usually happen to alleles at very low frequencies in the population?
@@ -64,7 +64,7 @@ How does population size influence the likelihood of fixation?
 
 Does the variation in allele frequencies from one population to the next increase or decrease when we increase or decrease population size?
 
-What would happen if we assumed a very large population—or, as in Hardy–Weinberg equilibrium, an infinite population?
+What would happen if we assume a very large population or, as in Hardy–Weinberg equilibrium, an infinite population?
 Make the population infinite, run the simulation and check the result.
 
 ## Drift and Diversity
@@ -73,9 +73,9 @@ Expected heterozygosity (He) is a measure of genetic variation in a population. 
 
 H = 2pq = 1 - p² - q²
 
-Now that you have explored allele frequency dynamics, can you predict how expected heterozygosity changes over time?
+Now that you have explored allele frequency dynamics, can you predict how expected will heterozygosity change over time?
 
-Starting with an A allele frequency of 0.5, is it possible for expected heterozygosity to increase over time? Why or why not?
+Starting with an A allele frequency of 0.5, is it possible for the expected heterozygosity to increase over time? Why or why not?
 
 Could there be a case in which genetic drift increases diversity at a particular locus?
 

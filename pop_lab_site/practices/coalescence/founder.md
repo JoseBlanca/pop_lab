@@ -42,16 +42,12 @@ After running the simulation, you will have access to several genetic diversity 
 
 When a small group of individuals establishes a new population, they typically carry only a fraction of the genetic variation present in the original population.
 
-### Predictions
-
 Before running the simulation, think about the following:
 
 - How will the expected heterozygosity of the new population compare to the original one?
 - Will the total number of genetic markers change?
 - How many polymorphic markers will remain?
 - If the new population grows in size, will these diversity parameters recover over time?
-
-### Simulation & Analysis
 
 Run the simulation and compare the genetic diversity of the founder population with the original population.
 
@@ -64,13 +60,11 @@ Compare your expectations with the observed results.
 
 Even though the founder population originates from the original population, the process of founding itself creates genetic divergence.
 
-### Predictions
+Before running the simulation, think about the following:
 
 - When will the bulk of the genetic distance between populations emerge—immediately after founding or later?
 - Once the populations are differentiated, do you expect them to become genetically similar again over time if no further migration occurs?
 - How will increasing the founder population size influence genetic distance?
-
-### Simulation & Analysis
 
 Run the simulation and check the genetic distance matrix between the original and founder populations.
 
@@ -81,12 +75,10 @@ Run the simulation and check the genetic distance matrix between the original an
 
 Not all founder events are equal, some populations start with more individuals or experience a longer bottleneck period before growing.
 
-### Predictions
+Before running the simulation, think about the following:
 
 - How do you think the number of founder individuals affects diversity loss and genetic distances?
 - If the population stays small for a longer period before expanding, how will that influence its genetic composition?
-
-### Simulation & Analysis
 
 Run simulations with different numbers of founder individuals and different bottleneck durations.
 

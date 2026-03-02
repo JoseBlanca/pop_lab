@@ -46,7 +46,7 @@ Before running the simulation, take a moment to predict the outcome:
 - Observe genetic distances between populations at different time points.
 - Examine the PCA plot: What patterns do you observe? How do populations cluster over time?
 - Compare your predictions with the results.
-- How does this align with what you learned in the single-locus drift exercise?
+- How does this align with what you learned in the single-locus drift practice?
 
 
 ## Population size influence
@@ -70,7 +70,7 @@ Set two populations to 2000 individuals and one population to 100 individuals.
 
 Predict what will happen:
 
-- Will the smaller population behave differently from the larger ones?
+- Will the smaller population behave differently than the larger ones?
 - How will its genetic distance change relative to the larger populations?
 - What do you expect to see in the PCA and distance matrix?
 
@@ -80,7 +80,7 @@ Run the simulation and analyze the results.
 
 ## Time Scale of Divergence
 
-Keep population size constant at 500 for all three populations, but vary generations (e.g. 50, 200, 1000).
+Keep population size constant at 500 for all three populations, but vary the number of generations (e.g. 50, 200, 1000).
 
 Questions:
 - How does the genetic distances between population 1 and 2 scale with time?

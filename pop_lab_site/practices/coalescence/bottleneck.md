@@ -61,23 +61,6 @@ Are all variations lost at the same rate? Compare hihgly variable ones with the 
 
 Can you explain the effect of the bottleneck on the proportion of polymorphic (95%) loci?
 
-After a bottleneck, a population can recover in size—but does this also restore its genetic diversity?  
-Do expected heterozygosity, number of variants, and proportion of polymorphic loci return to their initial values after the bottleneck? Why or why not?
-
-## Effect of the population size and time after the bottleneck
-
-### Scenario 1: Increasing Population Size After the Bottleneck
-
-- Increase the population size after the bottleneck and observe the effect.
-- Does a larger post-bottleneck population help restore genetic diversity? Why or why not?
-- Which evolutionary force would drive this recovery over time?
-
-### Scenario 2: Time Elapsed Since the Bottleneck
-
-- Run simulations with different numbers of generations after the bottleneck.
-- Does increasing the time since the bottleneck help recover lost diversity?
-- Which genetic parameters recover, and which remain altered?
-
 ## Effect of the bottleneck strength
 
 Not all bottlenecks have the same severity. Let’s explore how different bottleneck conditions affect genetic diversity.
@@ -111,6 +94,23 @@ Imagine an endangered species that has gone through a severe bottleneck but late
 ### Breeding Populations
 
 Some domesticated populations—for example, cultivated tomato or the “piel de sapo” melon variety—originate from only a few individuals. How might this affect their genetic diversity and long-term adaptability?
+
+## Effect of the population size and time after the bottleneck
+
+After a bottleneck, a population can recover in size—but does this also restore its genetic diversity?  
+Do expected heterozygosity, number of variants, and proportion of polymorphic loci return to their initial values after the bottleneck? Why or why not?
+
+### Scenario 1: Increasing Population Size After the Bottleneck
+
+- Increase the population size after the bottleneck and observe the effect.
+- Does a larger post-bottleneck population help restore genetic diversity? Why or why not?
+- Which evolutionary force would drive this recovery over time?
+
+### Scenario 2: Time Elapsed Since the Bottleneck
+
+- Run simulations with different numbers of generations after the bottleneck.
+- Does increasing the time since the bottleneck help recover lost diversity?
+- Which genetic parameters recover, and which remain altered?
 
 ### How can we restore genetic diversity?
 
