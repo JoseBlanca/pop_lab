@@ -8,7 +8,8 @@ CONFIG = {
     },
     "loggers": (
         "allelic_freqs_logger",
+        "genotypic_freqs_logger",
         "exp_het_logger",
     ),
-    "num_simulations": {"value": 3},
+    "num_simulations": {"value": 1},
 }
