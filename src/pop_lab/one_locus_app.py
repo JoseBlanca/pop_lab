@@ -209,7 +209,9 @@ def create_pop_size_panel(pop_config):
             size_slider,
         ),
     )
-    panel = ui.accordion_panel("Size", inf_size_checkbox, conditional_panel)
+    panel = ui.accordion_panel(
+        "Pop. size (number of individuals)", inf_size_checkbox, conditional_panel
+    )
     return panel
 
 
