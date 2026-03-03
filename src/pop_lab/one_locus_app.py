@@ -320,7 +320,6 @@ def create_pop_accordion(pop_config):
     pop_accordion = ui.accordion(
         *panels,
         id="pop_accordion",
-        title="hola",
     )
     return pop_accordion
 
