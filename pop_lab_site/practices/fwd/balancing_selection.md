@@ -13,7 +13,7 @@ We will have control of the immigration rate, the proportion of individuals in e
 
 ## Same selection preasure
 
-Let's start by running a simulation with setting the same fitness in both populations.
+Let's start by running a simulation setting the same fitness in both populations.
 For instance, let's select for a dominat A allele (fitness AA: 1, Aa: 1, aa: 0.5) starting with an allelic frequency of 0.01 for A in both populations.
 This is a standard situation in which a beneficial allele appears in a population. For instance, one allele that confers resistance to a disease, so it is selected for.
 
@@ -40,7 +40,7 @@ Run the simulation and explain the result.
 ### Migration
 
 Now let's assume that 10% of the alleles of both population in each generation are due to genetic flow, migration, from one population to the other.
-How that migration will alter the allelic frequencies? Will the allele selected against in each population disapear?
+How migration will alter the allelic frequencies? Will the allele selected against in each population disappear?
 What would happen to the expected heterozygosity?
 Run the simulations and explain the result.
 

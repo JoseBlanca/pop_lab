@@ -19,12 +19,12 @@ You might try to remove the genetic drift to only take into account the effect o
 
 Take a look at the genotypic frequencies and explain what happens with them, especially with the ones for the heterozygote. 
 
-### What is the influence of the selection strength  
+### Influence of the selection strength  
 
 How would you increase or decrease the strength of the selection?
 Think about what would happen if you increase or decrease the aa and Aa genotypes fitnesses to make them more or less similar to the AA fitness, that should always be 1.
 Run the simulation and find out what happens.
-Which is the relation between the selection strength and the number of generations require to reach an equilibrium?
+Which is the relation between the selection strength and the number of generations required to reach an equilibrium?
 
 ### Recessive and dominant alleles
 
@@ -46,7 +46,7 @@ Compare the result of the simulation when the population size is 100 and the cas
 
 ### Drift and deletereous alleles
 
-Now the AA genotype is lethal, so it's fitness is 0, but recessive, so Aa and aa have a fitness of 1. Let's set it's initial frequency to 0.01 and remove the mutation. What do you think that will happen to the allele?
+Now the AA genotype is lethal, so it's fitness is 0, but recessive, so Aa and aa have a fitness of 1. Let's set it's initial frequency to 0.01 and check if the mutation is removed. What do you think that will happen to the allele?
 Run the simulation with a population of 100 individuals and an infinite one and explain the result.
 Does the deleterous allele dissapears when there is no drift?
 
